@@ -8,30 +8,30 @@
 @section('form-title', 'Create admin account')
 
 @section('content')
-    <form class="auth-form" method="POST" action="{{ route('register.store') }}">
+    <form class="auth-form" method="POST" action="{{ route('register.store') }}" novalidate>
         @csrf
 
         <label class="form-field">
             <span>Full Name</span>
-            <input type="text" name="name" value="{{ old('name') }}" autocomplete="name" required autofocus placeholder="Admin User">
+            <input type="text" name="name" value="{{ old('name') }}" autocomplete="name" autofocus placeholder="Admin User">
             @error('name') <small>{{ $message }}</small> @enderror
         </label>
 
         <label class="form-field">
             <span>Email Address</span>
-            <input type="email" name="email" value="{{ old('email') }}" autocomplete="email" required placeholder="admin@example.com">
+            <input type="email" name="email" value="{{ old('email') }}" autocomplete="email" placeholder="admin@example.com">
             @error('email') <small>{{ $message }}</small> @enderror
         </label>
 
         <label class="form-field">
             <span>Password</span>
-            <input type="password" name="password" autocomplete="new-password" required placeholder="Create a secure password">
+            <input type="password" name="password" autocomplete="new-password" placeholder="Create a secure password">
             @error('password') <small>{{ $message }}</small> @enderror
         </label>
 
         <label class="form-field">
             <span>Confirm Password</span>
-            <input type="password" name="password_confirmation" autocomplete="new-password" required placeholder="Repeat password">
+            <input type="password" name="password_confirmation" autocomplete="new-password" placeholder="Repeat password">
         </label>
 
         <div class="auth-row">

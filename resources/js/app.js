@@ -3,6 +3,41 @@ const toasts = document.querySelectorAll('[data-toast]');
 const clientTable = document.querySelector('[data-client-table]');
 const profileImageInput = document.querySelector('[data-profile-image-input]');
 const profileImagePreview = document.querySelector('[data-profile-image-preview]');
+const forms = document.querySelectorAll('form');
+
+forms.forEach((form) => {
+    form.addEventListener('submit', () => {
+        if (form.dataset.submitting === 'true') {
+            return;
+        }
+
+        const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
+
+        form.dataset.submitting = 'true';
+
+        if (!submitButton) {
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.classList.add('is-loading');
+        submitButton.setAttribute('aria-busy', 'true');
+
+        if (submitButton.tagName !== 'BUTTON') {
+            return;
+        }
+
+        const label = submitButton.textContent.trim() || 'Please wait';
+        const loader = document.createElement('span');
+        const text = document.createElement('span');
+
+        loader.className = 'submit-loader';
+        loader.setAttribute('aria-hidden', 'true');
+        text.textContent = label;
+
+        submitButton.replaceChildren(loader, text);
+    });
+});
 
 if (shell) {
     const sidebarToggle = document.querySelector('[data-sidebar-toggle]');

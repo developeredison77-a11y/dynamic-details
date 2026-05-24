@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        <form class="settings-form" method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+        <form class="settings-form" method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" novalidate>
             @csrf
             @method('PUT')
 
@@ -39,13 +39,13 @@
             <div class="form-grid">
                 <label class="form-field">
                     <span>Full Name</span>
-                    <input type="text" name="name" value="{{ old('name', $user?->name) }}" required autocomplete="name">
+                    <input type="text" name="name" value="{{ old('name', $user?->name) }}" autocomplete="name">
                     @error('name') <small>{{ $message }}</small> @enderror
                 </label>
 
                 <label class="form-field">
                     <span>Email Address</span>
-                    <input type="email" name="email" value="{{ old('email', $user?->email) }}" required autocomplete="email">
+                    <input type="email" name="email" value="{{ old('email', $user?->email) }}" autocomplete="email">
                     @error('email') <small>{{ $message }}</small> @enderror
                 </label>
 

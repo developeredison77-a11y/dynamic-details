@@ -27,6 +27,12 @@
     --shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
 }
 
+@property --button-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+
 :root[data-theme='dark'] {
     --bg: #0f172a;
     --surface: #172033;
@@ -668,13 +674,54 @@
 .icon-button,
 .theme-switch,
 .user-button {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 999px;
     background: color-mix(in srgb, var(--surface) 92%, var(--surface-soft));
     color: var(--text);
     cursor: pointer;
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
     transition: border-color 180ms ease, transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.icon-button::before,
+.theme-switch::before,
+.user-button::before {
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background:
+        conic-gradient(
+            from var(--button-angle),
+            color-mix(in srgb, var(--primary) 18%, #ffffff),
+            var(--primary),
+            color-mix(in srgb, var(--primary) 72%, #ffffff),
+            color-mix(in srgb, var(--primary) 18%, #ffffff)
+        );
+    content: '';
+    opacity: 0;
+    transition: opacity 180ms ease;
+}
+
+.icon-button::after,
+.theme-switch::after,
+.user-button::after {
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: color-mix(in srgb, var(--surface) 94%, var(--surface-soft));
+    content: '';
+}
+
+.icon-button > *,
+.theme-switch > *,
+.user-button > * {
+    position: relative;
+    z-index: 1;
 }
 
 .icon-button,
@@ -688,9 +735,19 @@
 .icon-button:hover,
 .theme-switch:hover,
 .user-button:hover {
-    border-color: var(--primary);
+    border-color: transparent;
     transform: translateY(-1px);
     box-shadow: 0 12px 28px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.icon-button:hover::before,
+.theme-switch:hover::before,
+.user-button:hover::before,
+.icon-button:focus-visible::before,
+.theme-switch:focus-visible::before,
+.user-button:focus-visible::before {
+    animation: button-outline-spin 2.6s linear infinite;
+    opacity: 1;
 }
 
 .theme-switch .theme-moon,
@@ -966,24 +1023,151 @@
 }
 
 .primary-button {
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 42px;
+    gap: 9px;
+    min-height: 46px;
     border: 0;
-    border-radius: 8px;
-    background: var(--primary);
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.4), transparent 24%),
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--primary) 58%, #ffffff),
+            var(--primary) 48%,
+            color-mix(in srgb, var(--primary) 82%, #000000)
+        );
     color: #fff;
-    font-weight: 700;
-    padding: 0 16px;
+    font-weight: 900;
+    letter-spacing: 0;
+    overflow: visible;
+    padding: 0 22px;
     text-decoration: none;
+    text-shadow: 0 1px 14px rgba(15, 23, 42, 0.2);
     cursor: pointer;
-    transition: filter 180ms ease, transform 180ms ease;
+    box-shadow:
+        0 14px 34px color-mix(in srgb, var(--primary) 26%, transparent),
+        0 16px 34px color-mix(in srgb, var(--primary) 16%, transparent);
+    transition: transform 180ms ease, filter 180ms ease, box-shadow 180ms ease;
+}
+
+.primary-button::before {
+    position: absolute;
+    inset: -3px;
+    z-index: -1;
+    border-radius: inherit;
+    background:
+        conic-gradient(
+            from var(--button-angle),
+            color-mix(in srgb, var(--primary) 10%, #ffffff),
+            color-mix(in srgb, var(--primary) 72%, #ffffff),
+            var(--primary),
+            color-mix(in srgb, var(--primary) 78%, #000000),
+            color-mix(in srgb, var(--primary) 10%, #ffffff)
+        );
+    content: '';
+    filter: saturate(1.2);
+    animation: button-outline-spin 3.6s linear infinite;
+}
+
+.primary-button::after {
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background:
+        linear-gradient(115deg, transparent 6%, rgba(255, 255, 255, 0.38) 18%, transparent 32%),
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--primary) 52%, #ffffff),
+            var(--primary) 48%,
+            color-mix(in srgb, var(--primary) 84%, #000000)
+        );
+    background-size: 230% 100%, 100% 100%;
+    content: '';
+    opacity: 0.9;
+    z-index: -1;
+    animation: button-shine 4.4s ease-in-out infinite;
 }
 
 .primary-button:hover {
     filter: brightness(0.95);
-    transform: translateY(-1px);
+    transform: translateY(-2px) scale(1.015);
+    box-shadow:
+        0 18px 42px color-mix(in srgb, var(--primary) 32%, transparent),
+        0 20px 42px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.primary-button:active {
+    transform: translateY(0) scale(0.99);
+}
+
+.primary-button:disabled,
+.primary-button.is-loading {
+    cursor: wait;
+    filter: saturate(0.88);
+    opacity: 0.82;
+    transform: none;
+}
+
+.primary-button:disabled:hover,
+.primary-button.is-loading:hover {
+    transform: none;
+}
+
+.submit-loader {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    border: 2px solid color-mix(in srgb, currentColor 28%, transparent);
+    border-top-color: currentColor;
+    border-radius: 999px;
+    animation: submit-loader-spin 720ms linear infinite;
+}
+
+.dropdown-panel button.is-loading {
+    cursor: wait;
+    opacity: 0.72;
+}
+
+.primary-button:focus-visible,
+.ghost-button:focus-visible,
+.icon-button:focus-visible,
+.theme-switch:focus-visible,
+.user-button:focus-visible,
+.pagination-controls button:focus-visible,
+.toast-close:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 34%, transparent);
+    outline-offset: 4px;
+}
+
+@keyframes button-outline-spin {
+    to {
+        --button-angle: 360deg;
+    }
+}
+
+@keyframes button-shine {
+    0%,
+    46% {
+        background-position: 160% 0, 0 0;
+    }
+
+    68% {
+        background-position: -70% 0, 0 0;
+    }
+
+    100% {
+        background-position: -70% 0, 0 0;
+    }
+}
+
+@keyframes submit-loader-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .form-grid {
@@ -1144,22 +1328,26 @@
 }
 
 .toast-close {
+    position: relative;
     display: grid;
     width: 32px;
     height: 32px;
     place-items: center;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 999px;
     background: var(--surface);
     color: var(--muted);
     cursor: pointer;
     font: inherit;
     line-height: 1;
+    transition: border-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
 
 .toast-close:hover {
     border-color: var(--primary);
     color: var(--text);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 .toast-error {
@@ -1468,23 +1656,55 @@
 }
 
 .ghost-button {
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
+    min-height: 42px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
     color: var(--text);
     font-size: 14px;
     font-weight: 800;
-    padding: 0 14px;
+    overflow: hidden;
+    padding: 0 18px;
     text-decoration: none;
+    transition: color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.ghost-button::before {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
+    background:
+        conic-gradient(
+            from var(--button-angle),
+            color-mix(in srgb, var(--primary) 16%, #ffffff),
+            var(--primary),
+            color-mix(in srgb, var(--primary) 74%, #ffffff),
+            color-mix(in srgb, var(--primary) 16%, #ffffff)
+        );
+    content: '';
+    opacity: 0.72;
+    animation: button-outline-spin 4.2s linear infinite;
+}
+
+.ghost-button::after {
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: color-mix(in srgb, var(--surface) 92%, var(--surface-soft));
+    content: '';
 }
 
 .ghost-button:hover {
-    border-color: var(--primary);
     color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px color-mix(in srgb, var(--primary) 14%, transparent);
 }
 
 .responsive-table {
@@ -1870,20 +2090,54 @@
 }
 
 .pagination-controls button {
+    position: relative;
+    isolation: isolate;
     display: grid;
     width: 36px;
     height: 36px;
     place-items: center;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
     color: var(--text);
     cursor: pointer;
+    overflow: hidden;
+    transition: color 180ms ease, transform 180ms ease, opacity 180ms ease;
+}
+
+.pagination-controls button::before {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
+    background:
+        conic-gradient(
+            from var(--button-angle),
+            color-mix(in srgb, var(--primary) 16%, #ffffff),
+            var(--primary),
+            color-mix(in srgb, var(--primary) 74%, #ffffff),
+            color-mix(in srgb, var(--primary) 16%, #ffffff)
+        );
+    content: '';
+    opacity: 0.58;
+}
+
+.pagination-controls button::after {
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--surface);
+    content: '';
 }
 
 .pagination-controls button:hover:not(:disabled) {
-    border-color: var(--primary);
     color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.pagination-controls button:hover:not(:disabled)::before {
+    animation: button-outline-spin 2.8s linear infinite;
 }
 
 .pagination-controls button:disabled {
@@ -2117,5 +2371,21 @@
     .table-pagination {
         align-items: flex-start;
         flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .primary-button::before,
+    .primary-button::after,
+    .ghost-button::before,
+    .icon-button:hover::before,
+    .theme-switch:hover::before,
+    .user-button:hover::before,
+    .pagination-controls button:hover:not(:disabled)::before {
+        animation: none;
+    }
+
+    .submit-loader {
+        animation: none;
     }
 }

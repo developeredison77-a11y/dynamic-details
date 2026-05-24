@@ -13,14 +13,14 @@
             </div>
         </div>
 
-        <form class="settings-form" method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data">
+        <form class="settings-form" method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data" novalidate>
             @csrf
             @method('PUT')
 
             <div class="form-grid">
                 <label class="form-field">
                     <span>Site Name</span>
-                    <input type="text" name="site_name" value="{{ old('site_name', $settings['site_name'] ?? '') }}" required>
+                    <input type="text" name="site_name" value="{{ old('site_name', $settings['site_name'] ?? '') }}">
                     @error('site_name') <small>{{ $message }}</small> @enderror
                 </label>
 
