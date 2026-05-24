@@ -7,6 +7,29 @@
     $user = auth()->user();
     $avatarPath = $user ? data_get($user, 'profile_photo_path') ?? data_get($user, 'profile_image') ?? data_get($user, 'avatar') : null;
     $avatar = $avatarPath ? (str_starts_with($avatarPath, 'http') ? $avatarPath : asset('storage/'.$avatarPath)) : null;
+    $breadcrumbs ??= match (true) {
+        request()->routeIs('dashboard') => [
+            ['label' => 'Dashboard'],
+        ],
+        request()->routeIs('clients.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Clients'],
+            ['label' => 'All Clients'],
+        ],
+        request()->routeIs('profile.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Account'],
+            ['label' => 'Profile'],
+        ],
+        request()->routeIs('settings.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Settings'],
+        ],
+        default => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => trim($__env->yieldContent('page-title', 'Page'))],
+        ],
+    };
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -141,6 +164,10 @@
                     </div>
                 </div>
             </header>
+
+            <div class="dashboard-breadcrumb-bar">
+                <x-dashboard.breadcrumbs :items="$breadcrumbs" />
+            </div>
 
             <main class="dashboard-content">
                 @yield('content')

@@ -165,7 +165,11 @@ if (shell) {
         });
     });
 
-    document.addEventListener('click', () => {
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('[data-sidebar-group], [data-sidebar-leaf]')) {
+            closeSidebarSubmenus();
+        }
+
         dropdowns.forEach((dropdown) => {
             dropdown.classList.remove('is-open');
             dropdown.querySelector('[data-dropdown-toggle]')?.setAttribute('aria-expanded', 'false');
