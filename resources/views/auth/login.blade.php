@@ -1,9 +1,9 @@
 @extends('layouts.auth')
 
 @section('title', 'Login')
-@section('eyebrow', 'Welcome back')
-@section('headline', 'Control your backend with clarity.')
-@section('description', 'Sign in to manage dashboard settings, branding, content, and the rest of your admin workflow from a refined responsive interface.')
+@section('form-eyebrow', 'Welcome back')
+@section('form-title', 'Sign in to your account')
+@section('form-description', 'Enter your admin credentials to continue.')
 
 @section('content')
     <form class="auth-form" method="POST" action="{{ route('login.store') }}" novalidate>
@@ -11,13 +11,13 @@
 
         <label class="form-field">
             <span>Email Address</span>
-            <input type="email" name="email" value="{{ old('email') }}" autocomplete="email" autofocus placeholder="admin@example.com">
+            <input type="email" name="email" value="{{ old('email') }}" autocomplete="email" autofocus placeholder="admin@example.com" required>
             @error('email') <small>{{ $message }}</small> @enderror
         </label>
 
         <label class="form-field">
             <span>Password</span>
-            <input type="password" name="password" autocomplete="current-password" placeholder="Enter your password">
+            <input type="password" name="password" autocomplete="current-password" placeholder="Enter your password" required>
             @error('password') <small>{{ $message }}</small> @enderror
         </label>
 
@@ -29,6 +29,6 @@
             <a href="{{ route('register') }}">Create account</a>
         </div>
 
-        <button type="submit" class="primary-button auth-submit">Sign In</button>
+        <button type="submit" class="primary-button auth-submit">Sign in</button>
     </form>
 @endsection

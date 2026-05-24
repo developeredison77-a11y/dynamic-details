@@ -65,142 +65,75 @@
     margin: 0;
     min-height: 100vh;
     background:
-        radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 34%),
-        linear-gradient(135deg, var(--bg), color-mix(in srgb, var(--surface-soft) 70%, var(--bg)));
+        linear-gradient(135deg, color-mix(in srgb, var(--surface-soft) 76%, var(--bg)), var(--bg) 52%),
+        linear-gradient(180deg, color-mix(in srgb, var(--primary) 9%, transparent), transparent 44%);
     color: var(--text);
     font-family: var(--font-sans);
 }
 
 .auth-shell {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(500px, 620px);
+    place-items: center;
     min-height: 100vh;
-}
-
-.auth-visual {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    padding: clamp(28px, 5vw, 64px);
-    background:
-        linear-gradient(140deg, rgba(9, 17, 31, 0.94), rgba(17, 24, 39, 0.86)),
-        linear-gradient(45deg, var(--primary), #0ea5e9);
-    color: #fff;
-}
-
-.auth-visual::after {
-    position: absolute;
-    right: -90px;
-    bottom: -90px;
-    width: 360px;
-    height: 360px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 50%;
-    content: '';
-}
-
-.auth-brand {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.auth-brand div {
-    display: grid;
-    gap: 4px;
-}
-
-.auth-brand strong {
-    font-size: 18px;
-}
-
-.auth-brand span,
-.auth-copy p,
-.auth-proof span {
-    color: rgba(255, 255, 255, 0.72);
-}
-
-.auth-copy {
-    position: relative;
-    z-index: 1;
-    max-width: 680px;
-    padding: 70px 0;
-}
-
-.auth-copy > span {
-    display: inline-flex;
-    margin-bottom: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.24);
-    border-radius: 999px;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.08);
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.auth-copy h1 {
-    margin: 0;
-    max-width: 720px;
-    font-size: clamp(38px, 6vw, 72px);
-    line-height: 0.98;
-}
-
-.auth-copy p {
-    max-width: 600px;
-    margin: 24px 0 0;
-    font-size: 17px;
-    line-height: 1.7;
-}
-
-.auth-proof {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-}
-
-.auth-proof div {
-    display: grid;
-    gap: 7px;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    padding: 16px;
-    backdrop-filter: blur(12px);
+    padding: clamp(18px, 4vw, 44px);
 }
 
 .auth-panel {
     display: grid;
-    align-items: center;
     justify-items: center;
-    padding: clamp(24px, 5vw, 64px);
+    width: min(100%, 500px);
+}
+
+.auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 30px;
+}
+
+.auth-brand div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.auth-brand strong {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.auth-brand span {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .auth-card {
     width: 100%;
-    max-width: 540px;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background: color-mix(in srgb, var(--surface) 96%, transparent);
-    box-shadow: var(--shadow);
-    padding: clamp(28px, 5vw, 44px);
+    background: color-mix(in srgb, var(--surface) 97%, transparent);
+    box-shadow:
+        0 22px 60px rgba(15, 23, 42, 0.1),
+        0 1px 0 color-mix(in srgb, #ffffff 74%, transparent) inset;
+    padding: clamp(26px, 5vw, 42px);
 }
 
 .auth-card-heading {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 32px;
+    display: grid;
+    gap: 8px;
+    margin-bottom: 28px;
 }
 
 .auth-card-heading p,
-.auth-card-heading h2 {
+.auth-card-heading h2,
+.auth-card-heading span {
     margin: 0;
 }
 
@@ -213,13 +146,21 @@
 
 .auth-card-heading h2 {
     margin-top: 6px;
-    font-size: clamp(30px, 4vw, 38px);
+    font-size: clamp(28px, 4vw, 36px);
     line-height: 1.1;
+}
+
+.auth-card-heading span {
+    display: block;
+    max-width: 34rem;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.55;
 }
 
 .auth-form {
     display: grid;
-    gap: 20px;
+    gap: 18px;
 }
 
 .auth-row {
@@ -235,6 +176,7 @@
     color: var(--primary);
     font-weight: 800;
     text-decoration: none;
+    text-underline-offset: 4px;
 }
 
 .auth-row a:hover {
@@ -256,8 +198,8 @@
 
 .auth-submit {
     width: 100%;
-    min-height: 50px;
-    margin-top: 4px;
+    min-height: 52px;
+    margin-top: 6px;
     font-size: 15px;
 }
 
@@ -1299,6 +1241,26 @@
     background: var(--surface);
     color: var(--text);
     padding: 0 12px;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.form-field input::placeholder {
+    color: color-mix(in srgb, var(--muted) 72%, transparent);
+}
+
+.form-field input:focus {
+    border-color: color-mix(in srgb, var(--primary) 64%, var(--border));
+    outline: 0;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.auth-form .form-field input {
+    min-height: 50px;
+    background: color-mix(in srgb, var(--surface) 92%, var(--surface-soft));
+}
+
+.auth-form .form-field small {
+    font-weight: 700;
 }
 
 .color-field input {
@@ -2296,26 +2258,6 @@
 }
 
 @media (max-width: 900px) {
-    .auth-shell {
-        grid-template-columns: 1fr;
-    }
-
-    .auth-visual {
-        min-height: auto;
-    }
-
-    .auth-panel {
-        padding: 28px;
-    }
-
-    .auth-card {
-        max-width: 680px;
-    }
-
-    .auth-copy {
-        padding: 48px 0;
-    }
-
     .dashboard-shell,
     .dashboard-shell.sidebar-collapsed {
         display: block;
@@ -2382,12 +2324,9 @@
 }
 
 @media (max-width: 640px) {
-    .auth-proof {
-        grid-template-columns: 1fr;
-    }
-
-    .auth-copy h1 {
-        font-size: 38px;
+    .auth-shell {
+        align-items: start;
+        padding: 14px;
     }
 
     .auth-row {
@@ -2395,12 +2334,16 @@
         flex-direction: column;
     }
 
-    .auth-panel {
-        padding: 18px;
+    .auth-card {
+        padding: 24px 18px 22px;
     }
 
-    .auth-card {
-        padding: 24px 18px;
+    .auth-brand {
+        margin-bottom: 24px;
+    }
+
+    .auth-card-heading {
+        margin-bottom: 24px;
     }
 
     .primary-button,
