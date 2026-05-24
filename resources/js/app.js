@@ -46,12 +46,20 @@ if (shell) {
     const colorInput = document.querySelector('[data-theme-color-input]');
     const dropdowns = document.querySelectorAll('[data-dropdown]');
     const groups = document.querySelectorAll('[data-sidebar-group]');
+    const leafLinks = document.querySelectorAll('[data-sidebar-leaf]');
     const subLinks = document.querySelectorAll('[data-sidebar-sub-link]');
 
     const isMobile = () => window.matchMedia('(max-width: 900px)').matches;
 
     const closeMobileSidebar = () => {
         shell.classList.remove('sidebar-mobile-open');
+    };
+
+    const closeSidebarSubmenus = () => {
+        groups.forEach((group) => {
+            group.classList.remove('is-open');
+            group.querySelector('[data-submenu-toggle]')?.setAttribute('aria-expanded', 'false');
+        });
     };
 
     sidebarToggle?.addEventListener('click', () => {
@@ -79,6 +87,22 @@ if (shell) {
     groups.forEach((group) => {
         const toggle = group.querySelector('[data-submenu-toggle]');
 
+        group.addEventListener('mouseenter', () => {
+            if (!shell.classList.contains('sidebar-collapsed') || isMobile()) {
+                return;
+            }
+
+            groups.forEach((item) => {
+                if (item !== group) {
+                    item.classList.remove('is-open');
+                    item.querySelector('[data-submenu-toggle]')?.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            group.classList.add('is-open');
+            toggle?.setAttribute('aria-expanded', 'true');
+        });
+
         toggle?.addEventListener('click', () => {
             groups.forEach((item) => {
                 if (item !== group) {
@@ -90,6 +114,18 @@ if (shell) {
             const isOpen = group.classList.toggle('is-open');
             toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         });
+    });
+
+    leafLinks.forEach((link) => {
+        link.addEventListener('mouseenter', () => {
+            if (!shell.classList.contains('sidebar-collapsed') || isMobile()) {
+                return;
+            }
+
+            closeSidebarSubmenus();
+        });
+
+        link.addEventListener('click', closeSidebarSubmenus);
     });
 
     subLinks.forEach((link) => {
