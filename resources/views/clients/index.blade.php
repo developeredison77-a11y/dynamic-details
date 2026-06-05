@@ -28,7 +28,7 @@
                 <p>Client management</p>
                 <h2>All Clients</h2>
             </div>
-            <button type="button" class="primary-button">Add Client</button>
+            <button type="button" class="btn btn-primary btn-lg">Add Client</button>
         </div>
 
         <div class="client-toolbar">

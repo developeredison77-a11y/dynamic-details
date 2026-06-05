@@ -99,7 +99,7 @@
         <div class="dashboard-main">
             <header class="dashboard-topbar">
                 <div class="topbar-left">
-                    <button type="button" class="icon-button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <button type="button" class="btn btn-icon icon-button" data-sidebar-toggle aria-label="Toggle sidebar">
                         <x-dashboard.icon name="menu" />
                     </button>
                     <div class="topbar-title">
@@ -109,19 +109,14 @@
                 </div>
 
                 <div class="topbar-actions">
-                    <div class="topbar-context">
-                        <span>Admin Workspace</span>
-                        <strong>{{ now('Asia/Kolkata')->format('M d, Y') }}</strong>
-                    </div>
-
                     <div class="topbar-user-cluster">
-                        <button type="button" class="theme-switch" data-theme-toggle aria-label="Toggle color theme">
+                        <button type="button" class="btn btn-icon theme-switch" data-theme-toggle aria-label="Toggle color theme">
                             <x-dashboard.icon name="sun" class="theme-sun" />
                             <x-dashboard.icon name="moon" class="theme-moon" />
                         </button>
 
                         <div class="user-menu" data-dropdown>
-                            <button type="button" class="user-button" data-dropdown-toggle aria-expanded="false">
+                            <button type="button" class="btn user-button" data-dropdown-toggle aria-expanded="false">
                                 @if ($avatar)
                                     <img class="user-avatar" src="{{ $avatar }}" alt="{{ $user?->name ?? 'User' }}">
                                 @else
@@ -153,7 +148,7 @@
                                 </a>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit">
+                                    <button type="submit" class="btn btn-danger">
                                         <x-dashboard.icon name="logout" />
                                         Logout
                                         <x-dashboard.icon name="chevron-right" class="dropdown-arrow" />

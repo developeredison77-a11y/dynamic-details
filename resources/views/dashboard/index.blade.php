@@ -260,7 +260,7 @@
                 <p>Operations</p>
                 <h2>Recent Transactions</h2>
             </div>
-            <a href="{{ route('settings.edit') }}" class="ghost-button">Settings</a>
+            <a href="{{ route('settings.edit') }}" class="btn btn-secondary btn-lg ghost-button">Settings</a>
         </div>
 
         <div class="responsive-table">

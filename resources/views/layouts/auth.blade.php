@@ -38,7 +38,6 @@
                     </a>
                     <div>
                         <strong>{{ $siteName }}</strong>
-                        <span>Admin workspace</span>
                     </div>
                 </div>
 

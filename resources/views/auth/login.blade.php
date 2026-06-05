@@ -1,9 +1,8 @@
 @extends('layouts.auth')
 
 @section('title', 'Login')
-@section('form-eyebrow', 'Welcome back')
-@section('form-title', 'Sign in to your account')
-@section('form-description', 'Enter your admin credentials to continue.')
+@section('form-title', 'Sign in')
+@section('form-description', 'Enter your credentials to continue.')
 
 @section('content')
     <form class="auth-form" method="POST" action="{{ route('login.store') }}" novalidate>
@@ -29,6 +28,6 @@
             <a href="{{ route('register') }}">Create account</a>
         </div>
 
-        <button type="submit" class="primary-button auth-submit">Sign in</button>
+        <button type="submit" class="btn btn-primary btn-lg auth-submit">Sign in</button>
     </form>
 @endsection

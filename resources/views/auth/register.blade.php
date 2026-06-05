@@ -37,6 +37,6 @@
             <a href="{{ route('login') }}">Sign in</a>
         </div>
 
-        <button type="submit" class="primary-button auth-submit">Create Account</button>
+        <button type="submit" class="btn btn-primary btn-lg auth-submit">Create Account</button>
     </form>
 @endsection
