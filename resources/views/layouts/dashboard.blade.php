@@ -16,6 +16,34 @@
             ['label' => 'Clients'],
             ['label' => 'All Clients'],
         ],
+        request()->routeIs('employees.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Employee Master'],
+        ],
+        request()->routeIs('assets.*', 'asset-brands.*', 'asset-categories.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Asset Master'],
+        ],
+        request()->routeIs('asset-handovers.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Asset Handover'],
+        ],
+        request()->routeIs('asset-returns.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Asset Return'],
+        ],
+        request()->routeIs('declarations.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Declaration Forms'],
+        ],
+        request()->routeIs('imports.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Imports'],
+        ],
+        request()->routeIs('reports.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Reports'],
+        ],
         request()->routeIs('profile.*') => [
             ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Account'],
@@ -74,18 +102,28 @@
                     Dashboard
                 </x-dashboard.nav-link>
 
-                <x-dashboard.nav-group icon="pages" label="Content" :active="request()->routeIs('profile.*')">
-                    <x-dashboard.sub-link :href="route('profile.show')" :active="request()->routeIs('profile.*')">Profile</x-dashboard.sub-link>
-                    <x-dashboard.sub-link href="#">Sample Page</x-dashboard.sub-link>
+                <x-dashboard.nav-group icon="users" label="Employee Master" :active="request()->routeIs('employees.*')">
+                    <x-dashboard.sub-link :href="route('employees.index')" :active="request()->routeIs('employees.index')">All Employees</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('employees.create')" :active="request()->routeIs('employees.create')">Add Employee</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('imports.index')" :active="request()->routeIs('imports.*')">Import Employees</x-dashboard.sub-link>
                 </x-dashboard.nav-group>
 
-                <x-dashboard.nav-group icon="users" label="Management">
-                    <x-dashboard.sub-link href="#">Users</x-dashboard.sub-link>
-                    <x-dashboard.sub-link href="#">Roles</x-dashboard.sub-link>
+                <x-dashboard.nav-group icon="pages" label="Asset Master" :active="request()->routeIs('assets.*', 'asset-brands.*', 'asset-categories.*')">
+                    <x-dashboard.sub-link :href="route('assets.index')" :active="request()->routeIs('assets.index')">All Assets</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('assets.create')" :active="request()->routeIs('assets.create')">Add Asset</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('asset-brands.index')" :active="request()->routeIs('asset-brands.*')">Brands</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('asset-categories.index')" :active="request()->routeIs('asset-categories.*')">Categories</x-dashboard.sub-link>
                 </x-dashboard.nav-group>
 
-                <x-dashboard.nav-group icon="users" label="Clients" :active="request()->routeIs('clients.*')">
-                    <x-dashboard.sub-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">All Clients</x-dashboard.sub-link>
+                <x-dashboard.nav-group icon="dashboard" label="Asset Operations" :active="request()->routeIs('asset-handovers.*', 'asset-returns.*', 'declarations.*')">
+                    <x-dashboard.sub-link :href="route('asset-handovers.index')" :active="request()->routeIs('asset-handovers.*')">Handovers</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('asset-returns.index')" :active="request()->routeIs('asset-returns.*')">Returns</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('declarations.index')" :active="request()->routeIs('declarations.*')">Declarations</x-dashboard.sub-link>
+                </x-dashboard.nav-group>
+
+                <x-dashboard.nav-group icon="pages" label="Data & Reports" :active="request()->routeIs('imports.*', 'reports.*')">
+                    <x-dashboard.sub-link :href="route('imports.index')" :active="request()->routeIs('imports.*')">Imports</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">Reports</x-dashboard.sub-link>
                 </x-dashboard.nav-group>
 
                 <x-dashboard.nav-link :href="route('settings.edit')" icon="settings" :active="request()->routeIs('settings.*')">
