@@ -9,8 +9,8 @@
         <div class="panel-heading">
             <div><p>Saved handover</p><h2>{{ $assignment->asset?->asset_tag }} to {{ $assignment->employee?->name_en }}</h2></div>
             <div class="button-row">
-                <form method="POST" action="{{ route('declarations.store', $assignment) }}">@csrf<button class="btn btn-secondary" type="submit">Generate Declaration</button></form>
-                <a class="btn btn-primary" href="{{ route('asset-handovers.print', $assignment) }}" target="_blank">Print PDF</a>
+                <form method="POST" action="{{ route('declarations.store', $assignment) }}">@csrf<button class="btn btn-secondary action-icon-btn action-icon-neutral" type="submit" aria-label="Generate Declaration" data-tooltip="Generate Declaration"><x-dashboard.icon name="file-plus" /></button></form>
+                <a class="btn btn-primary action-icon-btn action-icon-neutral" href="{{ route('asset-handovers.print', $assignment) }}" target="_blank" aria-label="Print PDF" data-tooltip="Print PDF"><x-dashboard.icon name="printer" /></a>
             </div>
         </div>
         <div class="detail-grid">

@@ -20,7 +20,7 @@
         <article class="dashboard-panel">
             <div class="panel-heading"><div><p>Brands</p><h2>Existing Brands</h2></div></div>
             <div class="responsive-table"><table class="advanced-table"><thead><tr><th>Name</th><th>Assets</th><th>Status</th></tr></thead><tbody>
-                @foreach($brands as $brand)<tr><td>{{ $brand->name }}</td><td>{{ $brand->assets_count }}</td><td><span class="status-badge status-{{ $brand->is_active ? 'active' : 'inactive' }}">{{ $brand->is_active ? 'Active' : 'Inactive' }}</span></td></tr>@endforeach
+                @forelse($brands as $brand)<tr><td>{{ $brand->name }}</td><td>{{ $brand->assets_count }}</td><td><span class="status-badge status-{{ $brand->is_active ? 'active' : 'inactive' }}">{{ $brand->is_active ? 'Active' : 'Inactive' }}</span></td></tr>@empty<tr><td class="table-empty" colspan="3">No brands found.</td></tr>@endforelse
             </tbody></table></div>
         </article>
     </section>

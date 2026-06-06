@@ -26,7 +26,7 @@
     <section class="dashboard-panel">
         <div class="panel-heading"><div><p>Validation and duplicate checking</p><h2>Import History</h2></div></div>
         <div class="responsive-table"><table class="advanced-table"><thead><tr><th>File</th><th>Type</th><th>Total</th><th>Success</th><th>Failed</th><th>Errors</th></tr></thead><tbody>
-            @foreach($batches as $batch)<tr><td>{{ $batch->file_name }}</td><td>{{ $batch->type?->label() }}</td><td>{{ $batch->total_rows }}</td><td>{{ $batch->successful_rows }}</td><td>{{ $batch->failed_rows }}</td><td><small>{{ collect($batch->errors)->pluck('messages')->flatten()->take(2)->implode(' | ') ?: '-' }}</small></td></tr>@endforeach
+            @forelse($batches as $batch)<tr><td>{{ $batch->file_name }}</td><td>{{ $batch->type?->label() }}</td><td>{{ $batch->total_rows }}</td><td>{{ $batch->successful_rows }}</td><td>{{ $batch->failed_rows }}</td><td><small>{{ collect($batch->errors)->pluck('messages')->flatten()->take(2)->implode(' | ') ?: '-' }}</small></td></tr>@empty<tr><td class="table-empty" colspan="6">No import history found.</td></tr>@endforelse
         </tbody></table></div><div class="table-footer">{{ $batches->links() }}</div>
     </section>
 @endsection

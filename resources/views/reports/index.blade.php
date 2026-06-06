@@ -14,7 +14,7 @@
     <section class="dashboard-panel">
         <div class="panel-heading"><div><p>Asset report</p><h2>Current Allocation</h2></div></div>
         <div class="responsive-table"><table class="advanced-table"><thead><tr><th>Asset</th><th>Category</th><th>Brand</th><th>Status</th><th>Employee</th></tr></thead><tbody>
-            @foreach($assets as $asset)<tr><td>{{ $asset->asset_tag }} - {{ $asset->name }}</td><td>{{ $asset->category?->name }}</td><td>{{ $asset->brand?->name ?? '-' }}</td><td>{{ $asset->status?->label() }}</td><td>{{ $asset->activeAssignment?->employee?->name_en ?? '-' }}</td></tr>@endforeach
+            @forelse($assets as $asset)<tr><td>{{ $asset->asset_tag }} - {{ $asset->name }}</td><td>{{ $asset->category?->name }}</td><td>{{ $asset->brand?->name ?? '-' }}</td><td>{{ $asset->status?->label() }}</td><td>{{ $asset->activeAssignment?->employee?->name_en ?? '-' }}</td></tr>@empty<tr><td class="table-empty" colspan="5">No data found.</td></tr>@endforelse
         </tbody></table></div>
     </section>
 @endsection

@@ -19,7 +19,7 @@
                     <strong>{{ ucfirst($toast['type']) }}</strong>
                     <p>{{ $toast['message'] }}</p>
                 </div>
-                <button type="button" class="toast-close" data-toast-close aria-label="Close notification">x</button>
+                <button type="button" class="toast-close action-icon-btn action-icon-neutral" data-toast-close aria-label="Close notification" data-tooltip="Close"><x-dashboard.icon name="x" /></button>
             </div>
         @endforeach
     </div>

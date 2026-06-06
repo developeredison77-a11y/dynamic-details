@@ -137,7 +137,7 @@
         <div class="dashboard-main">
             <header class="dashboard-topbar">
                 <div class="topbar-left">
-                    <button type="button" class="btn btn-icon icon-button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <button type="button" class="btn btn-icon icon-button action-icon-btn action-icon-neutral" data-sidebar-toggle aria-label="Toggle sidebar" data-tooltip="Toggle sidebar">
                         <x-dashboard.icon name="menu" />
                     </button>
                     <div class="topbar-title">
@@ -148,7 +148,7 @@
 
                 <div class="topbar-actions">
                     <div class="topbar-user-cluster">
-                        <button type="button" class="btn btn-icon theme-switch" data-theme-toggle aria-label="Toggle color theme">
+                        <button type="button" class="btn btn-icon theme-switch action-icon-btn action-icon-neutral" data-theme-toggle aria-label="Toggle color theme" data-tooltip="Toggle theme">
                             <x-dashboard.icon name="sun" class="theme-sun" />
                             <x-dashboard.icon name="moon" class="theme-moon" />
                         </button>

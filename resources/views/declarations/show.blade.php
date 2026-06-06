@@ -8,7 +8,7 @@
     <section class="dashboard-panel">
         <div class="panel-heading">
             <div><p>Printable document</p><h2>{{ $declaration->declaration_number }}</h2></div>
-            <a class="btn btn-primary" href="{{ route('declarations.print', $declaration) }}" target="_blank">Print PDF</a>
+            <a class="btn btn-primary action-icon-btn action-icon-neutral" href="{{ route('declarations.print', $declaration) }}" target="_blank" aria-label="Print PDF" data-tooltip="Print PDF"><x-dashboard.icon name="printer" /></a>
         </div>
         <div class="detail-grid">
             <div><span>Employee</span><strong>{{ $declaration->assignment?->employee?->name_en }}</strong><small dir="rtl">{{ $declaration->assignment?->employee?->name_ar }}</small></div>

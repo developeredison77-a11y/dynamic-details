@@ -5,21 +5,25 @@
 @section('eyebrow', 'Assets')
 
 @section('content')
-    <section class="dashboard-panel client-listing-panel">
+    <section class="dashboard-panel client-listing-panel {{ request()->hasAny(['search', 'status', 'category']) ? 'is-open' : '' }}" data-listing-filter>
         <div class="panel-heading">
             <div><p>Asset management</p><h2>All Assets</h2></div>
             <div class="button-row">
-                <a href="{{ route('asset-brands.index') }}" class="btn btn-secondary">Brands</a>
-                <a href="{{ route('asset-categories.index') }}" class="btn btn-secondary">Categories</a>
-                <a href="{{ route('imports.index') }}" class="btn btn-secondary">Import Assets</a>
-                <a href="{{ route('assets.create') }}" class="btn btn-primary btn-lg">Add Asset</a>
+                <a href="{{ route('asset-brands.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Brands" data-tooltip="Brands"><x-dashboard.icon name="tag" /></a>
+                <a href="{{ route('asset-categories.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Categories" data-tooltip="Categories"><x-dashboard.icon name="folder" /></a>
+                <button class="btn btn-secondary action-icon-btn action-icon-neutral" type="button" aria-label="Show filters" data-tooltip="Filters" data-filter-toggle aria-expanded="{{ request()->hasAny(['search', 'status', 'category']) ? 'true' : 'false' }}"><x-dashboard.icon name="funnel" /></button>
+                <a href="{{ route('imports.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Import Assets" data-tooltip="Import Assets"><x-dashboard.icon name="upload" /></a>
+                <a href="{{ route('assets.create') }}" class="btn btn-primary btn-lg action-icon-btn action-icon-edit" aria-label="Add Asset" data-tooltip="Add Asset"><x-dashboard.icon name="plus" /></a>
             </div>
         </div>
-        <form class="client-toolbar" method="GET">
-            <label class="client-search"><x-dashboard.icon name="search" /><input name="search" value="{{ request('search') }}" placeholder="Search assets, tag, serial"></label>
-            <select name="status"><option value="">All Status</option>@foreach($statuses as $status)<option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>@endforeach</select>
-            <select name="category"><option value="">All Categories</option>@foreach($categories as $category)<option value="{{ $category->id }}" @selected((string) request('category') === (string) $category->id)>{{ $category->name }}</option>@endforeach</select>
-            <button class="btn btn-secondary" type="submit">Filter</button>
+        <form class="client-toolbar listing-filter-fields" method="GET" data-filter-panel {{ request()->hasAny(['search', 'status', 'category']) ? '' : 'hidden' }}>
+                <label class="client-search"><x-dashboard.icon name="search" /><input name="search" value="{{ request('search') }}" placeholder="Search assets, tag, serial"></label>
+                <select name="status" aria-label="Filter by status"><option value="">All Status</option>@foreach($statuses as $status)<option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>@endforeach</select>
+                <select name="category" aria-label="Filter by category"><option value="">All Categories</option>@foreach($categories as $category)<option value="{{ $category->id }}" @selected((string) request('category') === (string) $category->id)>{{ $category->name }}</option>@endforeach</select>
+                <div class="listing-filter-actions">
+                    <button class="btn btn-primary" type="submit">Apply</button>
+                    <a class="btn btn-secondary" href="{{ route('assets.index') }}">Reset</a>
+                </div>
         </form>
         <div class="responsive-table">
             <table class="advanced-table">
@@ -34,14 +38,22 @@
                             <td><span class="status-badge status-{{ $asset->status->value }}">{{ $asset->status->label() }}</span></td>
                             <td>{{ $asset->activeAssignment?->employee?->name_en ?? '-' }}</td>
                             <td>
-                                <div class="button-row">
-                                    <a class="btn btn-sm btn-outline" href="{{ route('assets.edit', $asset) }}">Edit</a>
-                                    <form method="POST" action="{{ route('assets.destroy', $asset) }}">@csrf @method('DELETE')<button class="btn btn-sm btn-danger" type="submit">Delete</button></form>
+                                <div class="table-action-row">
+                                    <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-edit" href="{{ route('assets.edit', $asset) }}" aria-label="Edit {{ $asset->name }}" data-tooltip="Edit">
+                                        <x-dashboard.icon name="edit" />
+                                    </a>
+                                    <form method="POST" action="{{ route('assets.destroy', $asset) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-danger table-action-btn action-icon-btn action-icon-delete" type="submit" aria-label="Delete {{ $asset->name }}" data-tooltip="Delete">
+                                            <x-dashboard.icon name="trash" />
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7">No assets found.</td></tr>
+                        <tr><td class="table-empty" colspan="7">No assets found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

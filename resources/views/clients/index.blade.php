@@ -22,34 +22,41 @@
 @endphp
 
 @section('content')
-    <section class="dashboard-panel client-listing-panel" data-client-table>
+    <section class="dashboard-panel client-listing-panel" data-client-table data-listing-filter>
         <div class="panel-heading">
             <div>
                 <p>Client management</p>
                 <h2>All Clients</h2>
             </div>
-            <button type="button" class="btn btn-primary btn-lg">Add Client</button>
+            <div class="button-row">
+                <button type="button" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Show filters" data-tooltip="Filters" data-filter-toggle aria-expanded="false"><x-dashboard.icon name="funnel" /></button>
+                <button type="button" class="btn btn-primary btn-lg action-icon-btn action-icon-edit" aria-label="Add Client" data-tooltip="Add Client"><x-dashboard.icon name="plus" /></button>
+            </div>
         </div>
 
-        <div class="client-toolbar">
-            <label class="client-search">
-                <x-dashboard.icon name="search" />
-                <input type="search" data-client-search placeholder="Search clients, company, email">
-            </label>
+        <div class="client-toolbar listing-filter-fields" data-filter-panel hidden>
+                <label class="client-search">
+                    <x-dashboard.icon name="search" />
+                    <input type="search" data-client-search placeholder="Search clients, company, email">
+                </label>
+                <select data-client-status aria-label="Filter by status">
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
 
-            <select data-client-status aria-label="Filter by status">
-                <option value="">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Pending">Pending</option>
-                <option value="Inactive">Inactive</option>
-            </select>
+                <select data-client-plan aria-label="Filter by plan">
+                    <option value="">All Plans</option>
+                    <option value="Enterprise">Enterprise</option>
+                    <option value="Pro">Pro</option>
+                    <option value="Starter">Starter</option>
+                </select>
 
-            <select data-client-plan aria-label="Filter by plan">
-                <option value="">All Plans</option>
-                <option value="Enterprise">Enterprise</option>
-                <option value="Pro">Pro</option>
-                <option value="Starter">Starter</option>
-            </select>
+                <div class="listing-filter-actions">
+                    <button type="button" class="btn btn-primary" data-client-apply>Apply</button>
+                    <button type="button" class="btn btn-secondary" data-client-reset>Reset</button>
+                </div>
         </div>
 
         <div class="responsive-table">
@@ -93,6 +100,9 @@
                             <td>{{ \Carbon\Carbon::parse($client['joined'])->format('M d, Y') }}</td>
                         </tr>
                     @endforeach
+                    <tr data-client-empty hidden>
+                        <td class="table-empty" colspan="7">No clients found.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -106,11 +116,11 @@
                     <option value="25">25 / page</option>
                 </select>
                 <div class="pagination-controls">
-                    <button type="button" data-page-first aria-label="First page"><x-dashboard.icon name="chevrons-left" /></button>
-                    <button type="button" data-page-prev aria-label="Previous page"><x-dashboard.icon name="chevron-left" /></button>
+                    <button type="button" class="action-icon-btn action-icon-neutral" data-page-first aria-label="First page" data-tooltip="First page"><x-dashboard.icon name="chevrons-left" /></button>
+                    <button type="button" class="action-icon-btn action-icon-neutral" data-page-prev aria-label="Previous page" data-tooltip="Previous page"><x-dashboard.icon name="chevron-left" /></button>
                     <span data-page-current>1</span>
-                    <button type="button" data-page-next aria-label="Next page"><x-dashboard.icon name="chevron-right" /></button>
-                    <button type="button" data-page-last aria-label="Last page"><x-dashboard.icon name="chevrons-right" /></button>
+                    <button type="button" class="action-icon-btn action-icon-neutral" data-page-next aria-label="Next page" data-tooltip="Next page"><x-dashboard.icon name="chevron-right" /></button>
+                    <button type="button" class="action-icon-btn action-icon-neutral" data-page-last aria-label="Last page" data-tooltip="Last page"><x-dashboard.icon name="chevrons-right" /></button>
                 </div>
             </div>
         </div>

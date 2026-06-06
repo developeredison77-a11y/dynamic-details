@@ -22,7 +22,7 @@
         <article class="dashboard-panel">
             <div class="panel-heading"><div><p>Categories</p><h2>Existing Categories</h2></div></div>
             <div class="responsive-table"><table class="advanced-table"><thead><tr><th>Name</th><th>Code</th><th>Assets</th><th>Serial</th></tr></thead><tbody>
-                @foreach($categories as $category)<tr><td>{{ $category->name }}</td><td>{{ $category->code ?: '-' }}</td><td>{{ $category->assets_count }}</td><td>{{ $category->requires_serial ? 'Required' : 'Optional' }}</td></tr>@endforeach
+                @forelse($categories as $category)<tr><td>{{ $category->name }}</td><td>{{ $category->code ?: '-' }}</td><td>{{ $category->assets_count }}</td><td>{{ $category->requires_serial ? 'Required' : 'Optional' }}</td></tr>@empty<tr><td class="table-empty" colspan="4">No categories found.</td></tr>@endforelse
             </tbody></table></div>
         </article>
     </section>

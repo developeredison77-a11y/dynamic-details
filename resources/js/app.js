@@ -4,6 +4,8 @@ const clientTable = document.querySelector('[data-client-table]');
 const profileImageInput = document.querySelector('[data-profile-image-input]');
 const profileImagePreview = document.querySelector('[data-profile-image-preview]');
 const forms = document.querySelectorAll('form');
+const listingFilters = document.querySelectorAll('[data-listing-filter]');
+const tooltipTargets = document.querySelectorAll('[data-tooltip]');
 const formControls = document.querySelectorAll(
     '.form-field input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), .form-field select, .form-field textarea'
 );
@@ -324,6 +326,105 @@ document.addEventListener('click', (event) => {
     });
 });
 
+if (tooltipTargets.length) {
+    const tooltip = document.createElement('div');
+    let activeTooltipTarget = null;
+
+    tooltip.className = 'dashboard-tooltip';
+    tooltip.setAttribute('role', 'tooltip');
+    tooltip.hidden = true;
+    document.body.appendChild(tooltip);
+
+    const positionTooltip = () => {
+        if (!activeTooltipTarget || tooltip.hidden) {
+            return;
+        }
+
+        const targetRect = activeTooltipTarget.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const gap = 10;
+        const viewportPadding = 12;
+        const preferredTop = targetRect.top - tooltipRect.height - gap;
+        const fallbackTop = targetRect.bottom + gap;
+        const left = Math.min(
+            Math.max(targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2), viewportPadding),
+            window.innerWidth - tooltipRect.width - viewportPadding
+        );
+        const top = preferredTop >= viewportPadding
+            ? preferredTop
+            : Math.min(fallbackTop, window.innerHeight - tooltipRect.height - viewportPadding);
+
+        tooltip.style.setProperty('--tooltip-x', `${Math.round(left)}px`);
+        tooltip.style.setProperty('--tooltip-y', `${Math.round(Math.max(top, viewportPadding))}px`);
+    };
+
+    const showTooltip = (target) => {
+        const label = target.dataset.tooltip?.trim();
+
+        if (!label || target.disabled) {
+            return;
+        }
+
+        activeTooltipTarget = target;
+        tooltip.textContent = label;
+        tooltip.hidden = false;
+        tooltip.classList.remove('is-visible');
+        positionTooltip();
+        requestAnimationFrame(() => {
+            if (activeTooltipTarget === target) {
+                tooltip.classList.add('is-visible');
+            }
+        });
+    };
+
+    const hideTooltip = (target = activeTooltipTarget) => {
+        if (target !== activeTooltipTarget) {
+            return;
+        }
+
+        activeTooltipTarget = null;
+        tooltip.classList.remove('is-visible');
+        window.setTimeout(() => {
+            if (!activeTooltipTarget) {
+                tooltip.hidden = true;
+            }
+        }, 140);
+    };
+
+    tooltipTargets.forEach((target) => {
+        target.addEventListener('mouseenter', () => showTooltip(target));
+        target.addEventListener('mouseleave', () => hideTooltip(target));
+        target.addEventListener('focus', () => showTooltip(target));
+        target.addEventListener('blur', () => hideTooltip(target));
+        target.addEventListener('click', () => hideTooltip(target));
+    });
+
+    window.addEventListener('scroll', positionTooltip, true);
+    window.addEventListener('resize', () => hideTooltip());
+}
+
+listingFilters.forEach((filter) => {
+    const toggle = filter.querySelector('[data-filter-toggle]');
+    const panel = filter.querySelector('[data-filter-panel]');
+
+    if (!toggle || !panel) {
+        return;
+    }
+
+    const setOpen = (isOpen) => {
+        filter.classList.toggle('is-open', isOpen);
+        panel.hidden = !isOpen;
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        toggle.setAttribute('aria-label', isOpen ? 'Hide filters' : 'Show filters');
+    };
+
+    setOpen(filter.classList.contains('is-open') || !panel.hidden);
+
+    toggle.addEventListener('click', () => {
+        setOpen(!filter.classList.contains('is-open'));
+    });
+});
+
 forms.forEach((form) => {
     form.addEventListener('submit', () => {
         if (form.dataset.submitting === 'true') {
@@ -348,10 +449,17 @@ forms.forEach((form) => {
 
         const label = submitButton.textContent.trim() || 'Please wait';
         const loader = document.createElement('span');
-        const text = document.createElement('span');
 
         loader.className = 'submit-loader';
         loader.setAttribute('aria-hidden', 'true');
+
+        if (submitButton.classList.contains('action-icon-btn')) {
+            submitButton.replaceChildren(loader);
+            submitButton.setAttribute('aria-label', submitButton.getAttribute('aria-label') || label);
+            return;
+        }
+
+        const text = document.createElement('span');
         text.textContent = label;
 
         submitButton.replaceChildren(loader, text);
@@ -379,8 +487,15 @@ if (shell) {
         group.querySelector('[data-submenu-toggle]')?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     };
 
-    const closeSidebarSubmenus = () => {
+    const closeSidebarSubmenus = (preserveActive = false) => {
+        const isCollapsedDesktop = shell.classList.contains('sidebar-collapsed') && ! isMobile();
+
         groups.forEach((group) => {
+            if (preserveActive && group.classList.contains('is-active') && ! isCollapsedDesktop) {
+                setSidebarGroupOpen(group, true);
+                return;
+            }
+
             setSidebarGroupOpen(group, false);
         });
     };
@@ -499,7 +614,7 @@ if (shell) {
 
     document.addEventListener('click', (event) => {
         if (!event.target.closest('[data-sidebar-group], [data-sidebar-leaf]')) {
-            closeSidebarSubmenus();
+            closeSidebarSubmenus(true);
         }
 
         dropdowns.forEach((dropdown) => {
@@ -531,10 +646,13 @@ toasts.forEach((toast) => {
 });
 
 if (clientTable) {
-    const rows = Array.from(clientTable.querySelectorAll('[data-client-body] tr'));
+    const rows = Array.from(clientTable.querySelectorAll('[data-client-body] tr:not([data-client-empty])'));
     const search = clientTable.querySelector('[data-client-search]');
     const status = clientTable.querySelector('[data-client-status]');
     const plan = clientTable.querySelector('[data-client-plan]');
+    const apply = clientTable.querySelector('[data-client-apply]');
+    const reset = clientTable.querySelector('[data-client-reset]');
+    const empty = clientTable.querySelector('[data-client-empty]');
     const perPage = clientTable.querySelector('[data-client-per-page]');
     const summary = clientTable.querySelector('[data-client-summary]');
     const current = clientTable.querySelector('[data-page-current]');
@@ -546,15 +664,20 @@ if (clientTable) {
     let page = 1;
     let sortKey = 'joined';
     let sortDirection = 'desc';
+    let appliedFilters = {
+        search: '',
+        status: '',
+        plan: '',
+    };
 
     const getFilteredRows = () => {
-        const query = search.value.trim().toLowerCase();
+        const query = appliedFilters.search.trim().toLowerCase();
 
         return rows.filter((row) => {
             const rowText = `${row.dataset.name} ${row.dataset.company} ${row.dataset.email}`.toLowerCase();
             const matchesSearch = !query || rowText.includes(query);
-            const matchesStatus = !status.value || row.dataset.status === status.value;
-            const matchesPlan = !plan.value || row.dataset.plan === plan.value;
+            const matchesStatus = !appliedFilters.status || row.dataset.status === appliedFilters.status;
+            const matchesPlan = !appliedFilters.plan || row.dataset.plan === appliedFilters.plan;
 
             return matchesSearch && matchesStatus && matchesPlan;
         }).sort((a, b) => {
@@ -577,6 +700,9 @@ if (clientTable) {
 
         rows.forEach((row) => row.hidden = true);
         visible.forEach((row) => row.hidden = false);
+        if (empty) {
+            empty.hidden = filtered.length > 0;
+        }
 
         summary.textContent = filtered.length
             ? `Showing ${start + 1}-${start + visible.length} of ${filtered.length} clients`
@@ -589,11 +715,43 @@ if (clientTable) {
         last.disabled = page === totalPages;
     };
 
-    [search, status, plan, perPage].forEach((input) => {
-        input.addEventListener('input', () => {
-            page = 1;
-            render();
-        });
+    const applyClientFilters = () => {
+        appliedFilters = {
+            search: search.value,
+            status: status.value,
+            plan: plan.value,
+        };
+        page = 1;
+        render();
+    };
+
+    apply?.addEventListener('click', applyClientFilters);
+
+    search?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            applyClientFilters();
+        }
+    });
+
+    reset?.addEventListener('click', () => {
+        search.value = '';
+        status.value = '';
+        plan.value = '';
+        status.dispatchEvent(new Event('change', { bubbles: true }));
+        plan.dispatchEvent(new Event('change', { bubbles: true }));
+        appliedFilters = {
+            search: '',
+            status: '',
+            plan: '',
+        };
+        page = 1;
+        render();
+    });
+
+    perPage.addEventListener('input', () => {
+        page = 1;
+        render();
     });
 
     sortButtons.forEach((button) => {

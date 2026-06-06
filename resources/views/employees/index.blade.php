@@ -5,18 +5,22 @@
 @section('eyebrow', 'Employees')
 
 @section('content')
-    <section class="dashboard-panel client-listing-panel">
+    <section class="dashboard-panel client-listing-panel {{ request()->hasAny(['search', 'status']) ? 'is-open' : '' }}" data-listing-filter>
         <div class="panel-heading">
             <div><p>Employee management</p><h2>All Employees</h2></div>
             <div class="button-row">
-                <a href="{{ route('imports.index') }}" class="btn btn-secondary">Import Employees</a>
-                <a href="{{ route('employees.create') }}" class="btn btn-primary btn-lg">Add Employee</a>
+                <button class="btn btn-secondary action-icon-btn action-icon-neutral" type="button" aria-label="Show filters" data-tooltip="Filters" data-filter-toggle aria-expanded="{{ request()->hasAny(['search', 'status']) ? 'true' : 'false' }}"><x-dashboard.icon name="funnel" /></button>
+                <a href="{{ route('imports.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Import Employees" data-tooltip="Import Employees"><x-dashboard.icon name="upload" /></a>
+                <a href="{{ route('employees.create') }}" class="btn btn-primary btn-lg action-icon-btn action-icon-edit" aria-label="Add Employee" data-tooltip="Add Employee"><x-dashboard.icon name="plus" /></a>
             </div>
         </div>
-        <form class="client-toolbar" method="GET">
-            <label class="client-search"><x-dashboard.icon name="search" /><input name="search" value="{{ request('search') }}" placeholder="Search employees, email, department"></label>
-            <select name="status"><option value="">All Status</option>@foreach ($statuses as $status)<option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>@endforeach</select>
-            <button class="btn btn-secondary" type="submit">Filter</button>
+        <form class="client-toolbar listing-filter-fields" method="GET" data-filter-panel {{ request()->hasAny(['search', 'status']) ? '' : 'hidden' }}>
+                <label class="client-search"><x-dashboard.icon name="search" /><input name="search" value="{{ request('search') }}" placeholder="Search employees, email, department"></label>
+                <select name="status" aria-label="Filter by status"><option value="">All Status</option>@foreach ($statuses as $status)<option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>@endforeach</select>
+                <div class="listing-filter-actions">
+                    <button class="btn btn-primary" type="submit">Apply</button>
+                    <a class="btn btn-secondary" href="{{ route('employees.index') }}">Reset</a>
+                </div>
         </form>
         <div class="responsive-table">
             <table class="advanced-table">
@@ -31,14 +35,22 @@
                             <td><span class="status-badge status-{{ $employee->status->value }}">{{ $employee->status->label() }}</span></td>
                             <td>{{ $employee->active_assignments_count }}</td>
                             <td>
-                                <div class="button-row">
-                                    <a class="btn btn-sm btn-outline" href="{{ route('employees.edit', $employee) }}">Edit</a>
-                                    <form method="POST" action="{{ route('employees.destroy', $employee) }}">@csrf @method('DELETE')<button class="btn btn-sm btn-danger" type="submit">Delete</button></form>
+                                <div class="table-action-row">
+                                    <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-edit" href="{{ route('employees.edit', $employee) }}" aria-label="Edit {{ $employee->name_en }}" data-tooltip="Edit">
+                                        <x-dashboard.icon name="edit" />
+                                    </a>
+                                    <form method="POST" action="{{ route('employees.destroy', $employee) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-danger table-action-btn action-icon-btn action-icon-delete" type="submit" aria-label="Delete {{ $employee->name_en }}" data-tooltip="Delete">
+                                            <x-dashboard.icon name="trash" />
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7">No employees found.</td></tr>
+                        <tr><td class="table-empty" colspan="7">No employees found.</td></tr>
                     @endforelse
                 </tbody>
             </table>
