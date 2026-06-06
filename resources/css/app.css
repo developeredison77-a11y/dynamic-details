@@ -1174,12 +1174,12 @@ footer,
 }
 
 :root {
-    --button-radius-sm: 12px;
-    --button-radius-md: 14px;
-    --button-radius-lg: 16px;
+    --button-radius-sm: 8px;
+    --button-radius-md: 8px;
+    --button-radius-lg: 10px;
     --button-height-sm: 38px;
     --button-height-md: 44px;
-    --button-height-lg: 52px;
+    --button-height-lg: 48px;
     --button-primary: var(--primary);
     --button-primary-dark: color-mix(in srgb, var(--primary) 72%, #0f172a);
     --button-secondary: #334155;
@@ -1192,9 +1192,9 @@ footer,
     --button-info: #0284c7;
     --button-info-dark: #0369a1;
     --button-shadow: 0 2px 5px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    --button-shadow-hover: 0 12px 26px rgba(15, 23, 42, 0.18);
+    --button-shadow-hover: 0 9px 18px rgba(15, 23, 42, 0.14);
     --button-shadow-active: 0 5px 14px rgba(15, 23, 42, 0.14);
-    --button-focus-ring: 0 0 0 4px color-mix(in srgb, var(--primary) 24%, transparent);
+    --button-focus-ring: 0 0 0 2px color-mix(in srgb, var(--primary) 22%, transparent);
 }
 
 .btn,
@@ -1249,7 +1249,7 @@ footer,
 .pagination-controls button:hover:not(:disabled),
 .dropdown-panel button:hover:not(:disabled),
 .toast-close:hover:not(:disabled) {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow:
         var(--button-shadow-hover),
         inset 0 1px 0 rgba(255, 255, 255, 0.24);
@@ -1333,8 +1333,8 @@ footer,
 .pagination-controls button:focus-visible,
 .dropdown-panel button:focus-visible,
 .toast-close:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--primary) 28%, transparent);
-    outline-offset: 3px;
+    outline: 2px solid color-mix(in srgb, var(--primary) 34%, transparent);
+    outline-offset: 2px;
 }
 
 .btn:disabled,
@@ -1500,7 +1500,7 @@ footer,
 
 .btn-lg {
     min-height: var(--button-height-lg);
-    padding-inline: 22px;
+    padding-inline: 20px;
     border-radius: var(--button-radius-lg);
     font-size: 15px;
 }
@@ -1535,7 +1535,7 @@ footer,
 .btn-danger.btn-lg,
 .btn-warning.btn-lg,
 .btn-info.btn-lg {
-    min-height: 52px;
+    min-height: var(--button-height-lg);
 }
 
 .btn-icon,
@@ -1647,7 +1647,7 @@ footer,
 .btn-danger.btn-lg,
 .btn-warning.btn-lg,
 .btn-info.btn-lg {
-    padding-inline: 22px;
+    padding-inline: 20px;
 }
 
 .dashboard-topbar .icon-button,
@@ -1683,7 +1683,7 @@ footer,
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
+    gap: 18px 20px;
 }
 
 .form-field {
@@ -1701,7 +1701,7 @@ footer,
 .form-field select,
 .form-field textarea {
     width: 100%;
-    min-height: 46px;
+    min-height: 44px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--surface);
@@ -1728,7 +1728,7 @@ footer,
 .form-field textarea:focus {
     border-color: color-mix(in srgb, var(--primary) 64%, var(--border));
     outline: 0;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 16%, transparent);
 }
 
 .auth-form .form-field input {
@@ -1750,6 +1750,9 @@ footer,
 
 .form-field small {
     color: #dc2626;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
 }
 
 .form-field-wide {
@@ -1810,8 +1813,254 @@ footer,
 
 .form-actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
     justify-content: flex-end;
     margin-top: 22px;
+}
+
+.form-field.has-error input,
+.form-field.has-error select,
+.form-field.has-error textarea,
+.form-field.has-error .searchable-select-trigger,
+.form-field.has-error .date-picker-trigger {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 1px color-mix(in srgb, #dc2626 12%, transparent);
+}
+
+.form-field.has-error input:focus,
+.form-field.has-error select:focus,
+.form-field.has-error textarea:focus,
+.form-field.has-error .searchable-select-trigger:focus-visible,
+.form-field.has-error .date-picker-trigger:focus-visible {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 2px color-mix(in srgb, #dc2626 14%, transparent);
+}
+
+.native-select,
+.native-date-input {
+    position: absolute;
+    width: 1px !important;
+    height: 1px !important;
+    min-height: 0 !important;
+    margin: 0;
+    padding: 0 !important;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.searchable-select,
+.date-picker {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.searchable-select-trigger,
+.date-picker-trigger,
+.searchable-select-search {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+.searchable-select-trigger,
+.date-picker-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 38px 0 12px;
+    position: relative;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.searchable-select-trigger::after,
+.date-picker-trigger::after {
+    position: absolute;
+    right: 13px;
+    color: var(--muted);
+    content: 'v';
+    font-size: 12px;
+    line-height: 1;
+}
+
+.date-picker-trigger::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid currentColor;
+    border-top-width: 4px;
+    border-radius: 3px;
+}
+
+.searchable-select-trigger:hover,
+.date-picker-trigger:hover {
+    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+    background: color-mix(in srgb, var(--surface) 92%, var(--surface-soft));
+}
+
+.searchable-select-trigger:focus-visible,
+.date-picker-trigger:focus-visible,
+.searchable-select-search:focus {
+    border-color: color-mix(in srgb, var(--primary) 64%, var(--border));
+    outline: 0;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.searchable-select-trigger.is-placeholder,
+.date-picker-trigger.is-placeholder {
+    color: var(--muted);
+}
+
+.searchable-select-panel,
+.date-picker-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 7px);
+    z-index: 80;
+    display: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: 0 18px 38px rgba(15, 23, 42, 0.16);
+    padding: 10px;
+}
+
+.searchable-select.is-open .searchable-select-panel,
+.date-picker.is-open .date-picker-panel {
+    display: grid;
+}
+
+.searchable-select-panel {
+    gap: 9px;
+}
+
+.searchable-select-search {
+    min-height: 40px;
+    padding: 0 11px;
+}
+
+.searchable-select-list {
+    display: grid;
+    gap: 4px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.searchable-select-option {
+    min-height: 36px;
+    width: 100%;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    padding: 0 10px;
+    text-align: left;
+}
+
+.searchable-select-option:hover,
+.searchable-select-option[aria-selected='true'] {
+    background: color-mix(in srgb, var(--primary) 10%, var(--surface-soft));
+    color: color-mix(in srgb, var(--primary) 72%, var(--text));
+}
+
+.searchable-select-empty {
+    color: var(--muted);
+    font-size: 13px;
+    padding: 9px 10px;
+}
+
+.date-picker-panel {
+    gap: 10px;
+    width: min(320px, calc(100vw - 32px));
+    right: auto;
+}
+
+.date-picker-heading {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 34px;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-picker-heading strong {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.date-picker-nav,
+.date-picker-day {
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+}
+
+.date-picker-nav {
+    width: 34px;
+    height: 34px;
+    color: var(--muted);
+}
+
+.date-picker-nav:hover,
+.date-picker-day:hover {
+    background: color-mix(in srgb, var(--primary) 10%, var(--surface-soft));
+    color: var(--primary);
+}
+
+.date-picker-weekdays,
+.date-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.date-picker-weekdays span {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.date-picker-day {
+    aspect-ratio: 1;
+    min-width: 0;
+    font-size: 13px;
+}
+
+.date-picker-day.is-muted {
+    color: color-mix(in srgb, var(--muted) 56%, transparent);
+}
+
+.date-picker-day.is-selected {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+}
+
+.client-toolbar .searchable-select {
+    min-width: 0;
 }
 
 .alert-success {
@@ -2523,6 +2772,235 @@ footer,
     color: #15803d;
 }
 
+.reports-panel {
+    position: relative;
+    isolation: isolate;
+    border-color: color-mix(in srgb, var(--primary) 14%, var(--border));
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, transparent), transparent 42%),
+        linear-gradient(180deg, color-mix(in srgb, var(--surface) 98%, #ffffff), color-mix(in srgb, var(--surface-soft) 58%, var(--surface))),
+        var(--surface);
+    box-shadow:
+        0 20px 44px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 color-mix(in srgb, #ffffff 74%, transparent);
+}
+
+.reports-panel::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(90deg, color-mix(in srgb, var(--primary) 16%, transparent), transparent 54%),
+        radial-gradient(circle at 92% 16%, color-mix(in srgb, #22c55e 12%, transparent), transparent 34%);
+    content: '';
+    opacity: 0.72;
+    pointer-events: none;
+}
+
+.reports-heading {
+    align-items: flex-start;
+    border-bottom-color: color-mix(in srgb, var(--primary) 13%, var(--border));
+    padding: clamp(20px, 2.4vw, 26px);
+}
+
+.reports-title {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+}
+
+.reports-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--surface) 82%, var(--primary) 8%);
+    color: color-mix(in srgb, var(--primary) 76%, var(--text));
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 7px 10px;
+}
+
+.reports-kicker svg {
+    width: 15px;
+    height: 15px;
+}
+
+.reports-title h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(24px, 2vw, 30px);
+    font-weight: 700;
+    line-height: 1.08;
+}
+
+.reports-title p {
+    max-width: 24rem;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.reports-open-button {
+    min-height: 46px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    padding-inline: 18px 20px;
+    box-shadow:
+        0 14px 28px color-mix(in srgb, var(--primary) 28%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.reports-open-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.reports-open-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.reports-export-list {
+    display: grid;
+    gap: 12px;
+    padding: clamp(16px, 2.2vw, 22px);
+}
+
+.report-export-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 13px;
+    min-height: 72px;
+    border: 1px solid color-mix(in srgb, var(--border) 86%, var(--primary) 8%);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, #ffffff), color-mix(in srgb, var(--surface-soft) 36%, var(--surface))),
+        var(--surface);
+    color: inherit;
+    overflow: hidden;
+    padding: 13px 14px;
+    text-decoration: none;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.045);
+    transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        transform 180ms ease,
+        background 180ms ease;
+}
+
+.report-export-card::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 10%, transparent), transparent 48%);
+    content: '';
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+}
+
+.report-export-card:hover {
+    border-color: color-mix(in srgb, var(--primary) 34%, var(--border));
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.1);
+    transform: translateY(-2px);
+}
+
+.report-export-card:hover::after {
+    opacity: 1;
+}
+
+.report-export-icon,
+.report-export-card strong,
+.report-export-copy {
+    position: relative;
+    z-index: 1;
+}
+
+.report-export-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+    color: var(--primary);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 60%, transparent);
+}
+
+.report-export-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.report-export-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.report-export-copy span {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.report-export-copy small {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.report-export-card strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    min-height: 30px;
+    border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 11%, var(--surface));
+    color: color-mix(in srgb, var(--primary) 78%, var(--text));
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0;
+    padding: 0 12px;
+}
+
+:root[data-theme='dark'] .reports-panel {
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--primary) 15%, transparent), transparent 48%),
+        linear-gradient(180deg, color-mix(in srgb, var(--surface) 95%, #ffffff 3%), color-mix(in srgb, var(--surface-soft) 78%, var(--surface))),
+        var(--surface);
+    box-shadow:
+        0 20px 46px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme='dark'] .reports-kicker,
+:root[data-theme='dark'] .report-export-icon,
+:root[data-theme='dark'] .report-export-card strong {
+    background: color-mix(in srgb, var(--primary) 15%, var(--surface));
+}
+
+:root[data-theme='dark'] .report-export-card {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, #ffffff 4%), color-mix(in srgb, var(--surface-soft) 52%, var(--surface))),
+        var(--surface);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
 .client-toolbar {
     display: grid;
     grid-template-columns: minmax(260px, 1fr) 160px 150px auto;
@@ -2902,6 +3380,10 @@ footer,
     .analytics-heading {
         align-items: flex-start;
     }
+
+    .reports-heading {
+        align-items: stretch;
+    }
 }
 
 @media (max-width: 640px) {
@@ -2928,8 +3410,20 @@ footer,
     }
 
     .primary-button,
-    .ghost-button {
+    .ghost-button,
+    .form-actions .btn {
         width: 100%;
+    }
+
+    .form-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .searchable-select-panel,
+    .date-picker-panel {
+        width: min(100%, calc(100vw - 28px));
+        max-width: calc(100vw - 28px);
     }
 
     .dashboard-topbar {
@@ -2976,6 +3470,26 @@ footer,
     .panel-heading {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .reports-open-button {
+        width: 100%;
+    }
+
+    .report-export-card {
+        grid-template-columns: 40px minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .report-export-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .report-export-card strong {
+        grid-column: 2;
+        justify-self: start;
+        min-height: 28px;
     }
 
     .analytics-card strong {

@@ -25,7 +25,6 @@
                 <input type="checkbox" name="remember" value="1">
                 <span>Remember me</span>
             </label>
-            <a href="{{ route('register') }}">Create account</a>
         </div>
 
         <button type="submit" class="btn btn-primary btn-lg auth-submit">Sign in</button>

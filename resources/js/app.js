@@ -4,6 +4,325 @@ const clientTable = document.querySelector('[data-client-table]');
 const profileImageInput = document.querySelector('[data-profile-image-input]');
 const profileImagePreview = document.querySelector('[data-profile-image-preview]');
 const forms = document.querySelectorAll('form');
+const formControls = document.querySelectorAll(
+    '.form-field input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), .form-field select, .form-field textarea'
+);
+const nativeDateInputs = document.querySelectorAll('input[type="date"]');
+const nativeSelects = document.querySelectorAll('select:not([multiple])');
+
+const formatDateValue = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
+
+const parseDateValue = (value) => {
+    if (!value) {
+        return null;
+    }
+
+    const [year, month, day] = value.split('-').map(Number);
+
+    if (!year || !month || !day) {
+        return null;
+    }
+
+    return new Date(year, month - 1, day);
+};
+
+const formatDisplayDate = (value) => {
+    const date = parseDateValue(value);
+
+    if (!date) {
+        return 'Select date';
+    }
+
+    return date.toLocaleDateString(undefined, {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    });
+};
+
+const clearFieldValidation = (control) => {
+    const field = control.closest('.form-field');
+
+    if (!field || !field.classList.contains('has-error')) {
+        return;
+    }
+
+    field.classList.remove('has-error');
+    control.removeAttribute('aria-invalid');
+
+    field.querySelectorAll('[data-validation-message]').forEach((message) => {
+        message.hidden = true;
+    });
+};
+
+formControls.forEach((control) => {
+    const field = control.closest('.form-field');
+    const messages = field ? field.querySelectorAll(':scope > small') : [];
+
+    if (messages.length) {
+        field.classList.add('has-error');
+        control.setAttribute('aria-invalid', 'true');
+        messages.forEach((message) => {
+            message.dataset.validationMessage = 'true';
+        });
+    }
+
+    ['input', 'change'].forEach((eventName) => {
+        control.addEventListener(eventName, () => clearFieldValidation(control));
+    });
+});
+
+nativeSelects.forEach((select) => {
+    if (select.dataset.searchableSelect === 'ready') {
+        return;
+    }
+
+    const wrapper = document.createElement('div');
+    const trigger = document.createElement('button');
+    const panel = document.createElement('div');
+    const search = document.createElement('input');
+    const list = document.createElement('div');
+    const empty = document.createElement('div');
+
+    const getSelectedOption = () => select.selectedOptions[0] || select.options[0];
+    const syncLabel = () => {
+        const selected = getSelectedOption();
+        trigger.textContent = selected ? selected.textContent.trim() : 'Select option';
+        trigger.classList.toggle('is-placeholder', !select.value);
+    };
+
+    const close = () => {
+        wrapper.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+    };
+
+    const renderOptions = () => {
+        const query = search.value.trim().toLowerCase();
+        const options = Array.from(select.options).filter((option) => {
+            return !query || option.textContent.toLowerCase().includes(query);
+        });
+
+        list.replaceChildren();
+
+        options.forEach((option) => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'searchable-select-option';
+            item.textContent = option.textContent.trim();
+            item.dataset.value = option.value;
+            item.setAttribute('role', 'option');
+            item.setAttribute('aria-selected', option.selected ? 'true' : 'false');
+
+            item.addEventListener('click', () => {
+                select.value = option.value;
+                select.dispatchEvent(new Event('input', { bubbles: true }));
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                syncLabel();
+                close();
+            });
+
+            list.appendChild(item);
+        });
+
+        empty.hidden = options.length > 0;
+    };
+
+    wrapper.className = 'searchable-select';
+    trigger.type = 'button';
+    trigger.className = 'searchable-select-trigger';
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    panel.className = 'searchable-select-panel';
+    search.className = 'searchable-select-search';
+    search.type = 'search';
+    search.placeholder = 'Search options';
+    list.className = 'searchable-select-list';
+    list.setAttribute('role', 'listbox');
+    empty.className = 'searchable-select-empty';
+    empty.textContent = 'No options found';
+    empty.hidden = true;
+
+    select.dataset.searchableSelect = 'ready';
+    select.classList.add('native-select');
+    select.parentNode.insertBefore(wrapper, select);
+    wrapper.appendChild(select);
+    panel.append(search, list, empty);
+    wrapper.append(trigger, panel);
+
+    trigger.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.querySelectorAll('.searchable-select.is-open').forEach((item) => {
+            if (item !== wrapper) {
+                item.classList.remove('is-open');
+                item.querySelector('.searchable-select-trigger')?.setAttribute('aria-expanded', 'false');
+            }
+        });
+        wrapper.classList.toggle('is-open');
+        trigger.setAttribute('aria-expanded', wrapper.classList.contains('is-open') ? 'true' : 'false');
+        search.value = '';
+        renderOptions();
+
+        if (wrapper.classList.contains('is-open')) {
+            window.setTimeout(() => search.focus(), 0);
+        }
+    });
+
+    search.addEventListener('input', renderOptions);
+    search.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            close();
+            trigger.focus();
+        }
+    });
+
+    select.addEventListener('change', syncLabel);
+    syncLabel();
+    renderOptions();
+});
+
+nativeDateInputs.forEach((input) => {
+    if (input.dataset.datePicker === 'ready') {
+        return;
+    }
+
+    const wrapper = document.createElement('div');
+    const trigger = document.createElement('button');
+    const panel = document.createElement('div');
+    const heading = document.createElement('div');
+    const prev = document.createElement('button');
+    const title = document.createElement('strong');
+    const next = document.createElement('button');
+    const weekdays = document.createElement('div');
+    const grid = document.createElement('div');
+    let visibleDate = parseDateValue(input.value) || new Date();
+
+    const close = () => {
+        wrapper.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+    };
+
+    const syncLabel = () => {
+        trigger.textContent = formatDisplayDate(input.value);
+        trigger.classList.toggle('is-placeholder', !input.value);
+    };
+
+    const renderCalendar = () => {
+        const year = visibleDate.getFullYear();
+        const month = visibleDate.getMonth();
+        const selectedValue = input.value;
+        const firstDay = new Date(year, month, 1);
+        const start = new Date(year, month, 1 - firstDay.getDay());
+
+        title.textContent = visibleDate.toLocaleDateString(undefined, {
+            month: 'long',
+            year: 'numeric',
+        });
+        grid.replaceChildren();
+
+        Array.from({ length: 42 }).forEach((_, index) => {
+            const date = new Date(start);
+            date.setDate(start.getDate() + index);
+
+            const value = formatDateValue(date);
+            const day = document.createElement('button');
+            day.type = 'button';
+            day.className = 'date-picker-day';
+            day.textContent = date.getDate();
+            day.classList.toggle('is-muted', date.getMonth() !== month);
+            day.classList.toggle('is-selected', value === selectedValue);
+
+            day.addEventListener('click', () => {
+                input.value = value;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                visibleDate = date;
+                syncLabel();
+                renderCalendar();
+                close();
+            });
+
+            grid.appendChild(day);
+        });
+    };
+
+    wrapper.className = 'date-picker';
+    trigger.type = 'button';
+    trigger.className = 'date-picker-trigger';
+    trigger.setAttribute('aria-haspopup', 'dialog');
+    trigger.setAttribute('aria-expanded', 'false');
+    panel.className = 'date-picker-panel';
+    heading.className = 'date-picker-heading';
+    prev.type = 'button';
+    prev.className = 'date-picker-nav';
+    prev.textContent = '<';
+    next.type = 'button';
+    next.className = 'date-picker-nav';
+    next.textContent = '>';
+    weekdays.className = 'date-picker-weekdays';
+    grid.className = 'date-picker-grid';
+
+    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((day) => {
+        const item = document.createElement('span');
+        item.textContent = day;
+        weekdays.appendChild(item);
+    });
+
+    input.dataset.datePicker = 'ready';
+    input.classList.add('native-date-input');
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+    heading.append(prev, title, next);
+    panel.append(heading, weekdays, grid);
+    wrapper.append(trigger, panel);
+
+    trigger.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.querySelectorAll('.date-picker.is-open').forEach((item) => {
+            if (item !== wrapper) {
+                item.classList.remove('is-open');
+                item.querySelector('.date-picker-trigger')?.setAttribute('aria-expanded', 'false');
+            }
+        });
+        wrapper.classList.toggle('is-open');
+        trigger.setAttribute('aria-expanded', wrapper.classList.contains('is-open') ? 'true' : 'false');
+        visibleDate = parseDateValue(input.value) || visibleDate || new Date();
+        renderCalendar();
+    });
+
+    prev.addEventListener('click', () => {
+        visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth() - 1, 1);
+        renderCalendar();
+    });
+
+    next.addEventListener('click', () => {
+        visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth() + 1, 1);
+        renderCalendar();
+    });
+
+    input.addEventListener('change', () => {
+        visibleDate = parseDateValue(input.value) || visibleDate;
+        syncLabel();
+        renderCalendar();
+    });
+
+    syncLabel();
+    renderCalendar();
+});
+
+document.addEventListener('click', (event) => {
+    document.querySelectorAll('.searchable-select.is-open, .date-picker.is-open').forEach((item) => {
+        if (!item.contains(event.target)) {
+            item.classList.remove('is-open');
+            item.querySelector('[aria-expanded="true"]')?.setAttribute('aria-expanded', 'false');
+        }
+    });
+});
 
 forms.forEach((form) => {
     form.addEventListener('submit', () => {
@@ -55,10 +374,22 @@ if (shell) {
         shell.classList.remove('sidebar-mobile-open');
     };
 
+    const setSidebarGroupOpen = (group, isOpen) => {
+        group.classList.toggle('is-open', isOpen);
+        group.querySelector('[data-submenu-toggle]')?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    };
+
     const closeSidebarSubmenus = () => {
         groups.forEach((group) => {
-            group.classList.remove('is-open');
-            group.querySelector('[data-submenu-toggle]')?.setAttribute('aria-expanded', 'false');
+            setSidebarGroupOpen(group, false);
+        });
+    };
+
+    const syncActiveSidebarGroup = () => {
+        const isCollapsedDesktop = shell.classList.contains('sidebar-collapsed') && ! isMobile();
+
+        groups.forEach((group) => {
+            setSidebarGroupOpen(group, group.classList.contains('is-active') && ! isCollapsedDesktop);
         });
     };
 
@@ -70,11 +401,14 @@ if (shell) {
 
         shell.classList.toggle('sidebar-collapsed');
         localStorage.setItem('dashboard-sidebar-collapsed', shell.classList.contains('sidebar-collapsed') ? '1' : '0');
+        syncActiveSidebarGroup();
     });
 
     if (localStorage.getItem('dashboard-sidebar-collapsed') === '1' && ! isMobile()) {
         shell.classList.add('sidebar-collapsed');
     }
+
+    syncActiveSidebarGroup();
 
     backdrop?.addEventListener('click', closeMobileSidebar);
 
@@ -82,6 +416,8 @@ if (shell) {
         if (! isMobile()) {
             closeMobileSidebar();
         }
+
+        syncActiveSidebarGroup();
     });
 
     groups.forEach((group) => {
@@ -94,20 +430,17 @@ if (shell) {
 
             groups.forEach((item) => {
                 if (item !== group) {
-                    item.classList.remove('is-open');
-                    item.querySelector('[data-submenu-toggle]')?.setAttribute('aria-expanded', 'false');
+                    setSidebarGroupOpen(item, false);
                 }
             });
 
-            group.classList.add('is-open');
-            toggle?.setAttribute('aria-expanded', 'true');
+            setSidebarGroupOpen(group, true);
         });
 
         toggle?.addEventListener('click', () => {
             groups.forEach((item) => {
                 if (item !== group) {
-                    item.classList.remove('is-open');
-                    item.querySelector('[data-submenu-toggle]')?.setAttribute('aria-expanded', 'false');
+                    setSidebarGroupOpen(item, false);
                 }
             });
 
@@ -142,8 +475,7 @@ if (shell) {
             groups.forEach((group) => {
                 const isCurrentGroup = group.contains(link);
                 group.classList.toggle('is-active', isCurrentGroup);
-                group.classList.toggle('is-open', isCurrentGroup);
-                group.querySelector('[data-submenu-toggle]')?.setAttribute('aria-expanded', isCurrentGroup ? 'true' : 'false');
+                setSidebarGroupOpen(group, isCurrentGroup);
             });
         });
     });

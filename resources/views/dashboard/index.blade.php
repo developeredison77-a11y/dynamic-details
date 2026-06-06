@@ -49,18 +49,46 @@
             </div>
         </article>
 
-        <article class="dashboard-panel chart-panel">
-            <div class="panel-heading analytics-heading">
-                <div>
-                    <p>Exports</p>
+        <article class="dashboard-panel chart-panel reports-panel">
+            <div class="panel-heading analytics-heading reports-heading">
+                <div class="reports-title">
+                    <span class="reports-kicker">
+                        <x-dashboard.icon name="pages" />
+                        Exports
+                    </span>
                     <h2>Reports</h2>
+                    <p>Download and manage export reports</p>
                 </div>
-                <a href="{{ route('reports.index') }}" class="btn btn-primary">Open Reports</a>
+                <a href="{{ route('reports.index') }}" class="btn btn-primary reports-open-button">
+                    <x-dashboard.icon name="download" />
+                    <span>Open Reports</span>
+                </a>
             </div>
-            <div class="queue-list">
-                <a class="queue-item report-link" href="{{ route('reports.export', 'assets') }}"><span>Asset Report CSV</span><strong>CSV</strong></a>
-                <a class="queue-item report-link" href="{{ route('reports.export', 'employees') }}"><span>Employee Report CSV</span><strong>CSV</strong></a>
-                <a class="queue-item report-link" href="{{ route('reports.export', 'handovers') }}"><span>Handover Report CSV</span><strong>CSV</strong></a>
+            <div class="reports-export-list">
+                <a class="report-export-card" href="{{ route('reports.export', 'assets') }}">
+                    <span class="report-export-icon"><x-dashboard.icon name="file-csv" /></span>
+                    <span class="report-export-copy">
+                        <span>Asset Report CSV</span>
+                        <small>Asset inventory export</small>
+                    </span>
+                    <strong>CSV</strong>
+                </a>
+                <a class="report-export-card" href="{{ route('reports.export', 'employees') }}">
+                    <span class="report-export-icon"><x-dashboard.icon name="file-csv" /></span>
+                    <span class="report-export-copy">
+                        <span>Employee Report CSV</span>
+                        <small>Employee records export</small>
+                    </span>
+                    <strong>CSV</strong>
+                </a>
+                <a class="report-export-card" href="{{ route('reports.export', 'handovers') }}">
+                    <span class="report-export-icon"><x-dashboard.icon name="file-csv" /></span>
+                    <span class="report-export-copy">
+                        <span>Handover Report CSV</span>
+                        <small>Asset handover export</small>
+                    </span>
+                    <strong>CSV</strong>
+                </a>
             </div>
         </article>
     </section>
