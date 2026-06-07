@@ -55,9 +55,6 @@
                             <td><span class="status-badge status-{{ $brand->is_active ? 'active' : 'inactive' }}">{{ $brand->is_active ? 'Active' : 'Inactive' }}</span></td>
                             <td>
                                 <div class="table-action-row">
-                                    <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-edit" href="{{ route('asset-brands.edit', $brand) }}" aria-label="Edit {{ $brand->name }}" data-tooltip="Edit">
-                                        <x-dashboard.icon name="edit" />
-                                    </a>
                                     <form method="POST" action="{{ route('asset-brands.status', $brand) }}">
                                         @csrf
                                         @method('PATCH')
@@ -65,6 +62,9 @@
                                             <span></span>
                                         </button>
                                     </form>
+                                    <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-edit" href="{{ route('asset-brands.edit', $brand) }}" aria-label="Edit {{ $brand->name }}" data-tooltip="Edit">
+                                        <x-dashboard.icon name="edit" />
+                                    </a>
                                     <form method="POST" action="{{ route('asset-brands.destroy', $brand) }}" data-confirm-delete>
                                         @csrf
                                         @method('DELETE')

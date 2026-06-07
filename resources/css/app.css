@@ -5285,6 +5285,44 @@ footer,
     flex-basis: 40px;
 }
 
+.advanced-table .table-action-row {
+    gap: 10px;
+}
+
+.advanced-table .status-toggle {
+    width: 38px;
+    height: 22px;
+    vertical-align: middle;
+}
+
+.advanced-table .status-toggle span {
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+}
+
+.advanced-table .status-toggle.is-active span {
+    transform: translateX(16px);
+}
+
+.advanced-table .table-action-btn.action-icon-btn,
+.advanced-table .btn-sm.action-icon-btn.table-action-btn {
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
+    min-height: 26px;
+    flex: 0 0 26px;
+    padding: 0;
+}
+
+.advanced-table .table-action-btn.action-icon-btn > svg,
+.advanced-table .btn-sm.action-icon-btn.table-action-btn > svg {
+    width: 16px;
+    height: 16px;
+    flex-basis: 16px;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .employee-stat-card {
         transition: none;
@@ -5570,6 +5608,45 @@ h6 {
 .pagination-controls a.is-disabled {
     cursor: not-allowed;
     opacity: 0.48;
+}
+
+.advanced-table .table-action-row {
+    gap: 10px;
+}
+
+.advanced-table .status-toggle {
+    width: 38px;
+    height: 22px;
+    min-height: 22px;
+    vertical-align: middle;
+}
+
+.advanced-table .status-toggle span {
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+}
+
+.advanced-table .status-toggle.is-active span {
+    transform: translateX(16px);
+}
+
+.advanced-table .table-action-btn.action-icon-btn,
+.advanced-table .btn-sm.action-icon-btn.table-action-btn {
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
+    min-height: 26px;
+    flex: 0 0 26px;
+    padding: 0;
+}
+
+.advanced-table .table-action-btn.action-icon-btn > svg,
+.advanced-table .btn-sm.action-icon-btn.table-action-btn > svg {
+    width: 16px;
+    height: 16px;
+    flex-basis: 16px;
 }
 
 .dashboard-topbar {
