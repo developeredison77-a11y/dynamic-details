@@ -21,7 +21,7 @@
                         @endforeach
                     </div>
                 @endif
-                <div class="import-help"><span>Required: employee_code, name_en, email. CSV/XLSX only, up to 5 MB. Emails must be unique.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'employees') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
+                <div class="import-help"><span>Required: name_en, email. Employee codes are generated automatically. CSV/XLSX only, up to 5 MB. Emails must be unique.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'employees') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
                 <div class="form-actions"><button class="btn btn-primary" type="submit">Import Employees</button></div>
             </form>
         </article>
@@ -38,15 +38,17 @@
                         @endforeach
                     </div>
                 @endif
-                <div class="import-help"><span>Required: asset_tag, name, category. CSV/XLSX only, up to 5 MB. Tags and serial numbers must be unique.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'assets') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
+                <div class="import-help"><span>Required: asset_tag, name, asset_category_id. Optional: asset_brand_id, serial_number, model, condition. Use IDs from the reference list below.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'assets') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
                 <div class="form-actions"><button class="btn btn-primary" type="submit">Import Assets</button></div>
             </form>
+            @include('imports.partials.asset-reference')
         </article>
     </section>
     <section class="dashboard-panel">
         <div class="panel-heading"><div><p>Validation and duplicate checking</p><h2>Import History</h2></div></div>
         <div class="responsive-table"><table class="advanced-table"><thead><tr><th>File</th><th>Type</th><th>Total</th><th>Success</th><th>Failed</th><th>Errors</th></tr></thead><tbody>
             @forelse($batches as $batch)<tr><td>{{ $batch->file_name }}</td><td>{{ $batch->type?->label() }}</td><td>{{ $batch->total_rows }}</td><td>{{ $batch->successful_rows }}</td><td>{{ $batch->failed_rows }}</td><td><small>{{ collect($batch->errors)->pluck('messages')->flatten()->take(2)->implode(' | ') ?: '-' }}</small></td></tr>@empty<tr><td class="table-empty" colspan="6">No import history found.</td></tr>@endforelse
-        </tbody></table></div><div class="table-footer">{{ $batches->links() }}</div>
+        </tbody></table></div>
+        <x-dashboard.pagination :paginator="$batches" form-id="import-history-pagination" label="item(s)" />
     </section>
 @endsection

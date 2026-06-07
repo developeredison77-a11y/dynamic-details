@@ -3,6 +3,12 @@
 @section('title', 'All Clients')
 @section('page-title', 'All Clients')
 @section('eyebrow', 'Clients')
+@section('page-actions')
+    <button type="button" class="btn btn-primary listing-create-btn">
+        <x-dashboard.icon name="plus" />
+        <span>Create</span>
+    </button>
+@endsection
 
 @php
     $clients = [
@@ -24,20 +30,20 @@
 @section('content')
     <section class="dashboard-panel client-listing-panel" data-client-table data-listing-filter>
         <div class="panel-heading">
-            <div>
-                <p>Client management</p>
-                <h2>All Clients</h2>
-            </div>
+            <label class="client-search listing-global-search">
+                <x-dashboard.icon name="search" />
+                <input type="search" data-client-search placeholder="Search all columns...">
+            </label>
             <div class="button-row">
-                <button type="button" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Show filters" data-tooltip="Filters" data-filter-toggle aria-expanded="false"><x-dashboard.icon name="funnel" /></button>
-                <button type="button" class="btn btn-primary btn-lg action-icon-btn action-icon-edit" aria-label="Add Client" data-tooltip="Add Client"><x-dashboard.icon name="plus" /></button>
+                <button type="button" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Filters" data-tooltip="Filters" data-filter-toggle aria-expanded="false"><x-dashboard.icon name="funnel" /></button>
+                <button type="button" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Reset Filter" data-tooltip="Reset Filter" data-client-reset hidden><x-dashboard.icon name="x" /></button>
             </div>
         </div>
 
         <div class="client-toolbar listing-filter-fields" data-filter-panel hidden>
+                <span class="filter-label">Filter by:</span>
                 <label class="client-search">
-                    <x-dashboard.icon name="search" />
-                    <input type="search" data-client-search placeholder="Search clients, company, email">
+                    <input type="search" data-client-search placeholder="Client name">
                 </label>
                 <select data-client-status aria-label="Filter by status">
                     <option value="">All Status</option>
@@ -52,11 +58,6 @@
                     <option value="Pro">Pro</option>
                     <option value="Starter">Starter</option>
                 </select>
-
-                <div class="listing-filter-actions">
-                    <button type="button" class="btn btn-primary" data-client-apply>Apply</button>
-                    <button type="button" class="btn btn-secondary" data-client-reset>Reset</button>
-                </div>
         </div>
 
         <div class="responsive-table">
@@ -110,15 +111,18 @@
         <div class="table-footer">
             <span data-client-summary>Showing clients</span>
             <div class="table-pagination">
-                <select data-client-per-page aria-label="Items per page">
-                    <option value="5">5 / page</option>
-                    <option value="10" selected>10 / page</option>
-                    <option value="25">25 / page</option>
-                </select>
+                <label class="pagination-size">
+                    <span>Items per page</span>
+                    <select data-client-per-page aria-label="Items per page" data-native-select>
+                        @foreach ([10, 20, 30, 40, 50] as $size)
+                            <option value="{{ $size }}" @selected($size === 10)>{{ $size }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <span class="pagination-page" data-page-current>1</span>
                 <div class="pagination-controls">
                     <button type="button" class="action-icon-btn action-icon-neutral" data-page-first aria-label="First page" data-tooltip="First page"><x-dashboard.icon name="chevrons-left" /></button>
                     <button type="button" class="action-icon-btn action-icon-neutral" data-page-prev aria-label="Previous page" data-tooltip="Previous page"><x-dashboard.icon name="chevron-left" /></button>
-                    <span data-page-current>1</span>
                     <button type="button" class="action-icon-btn action-icon-neutral" data-page-next aria-label="Next page" data-tooltip="Next page"><x-dashboard.icon name="chevron-right" /></button>
                     <button type="button" class="action-icon-btn action-icon-neutral" data-page-last aria-label="Last page" data-tooltip="Last page"><x-dashboard.icon name="chevrons-right" /></button>
                 </div>

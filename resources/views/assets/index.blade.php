@@ -3,28 +3,34 @@
 @section('title', 'Assets')
 @section('page-title', 'Asset Master')
 @section('eyebrow', 'Assets')
+@section('page-actions')
+    <a href="{{ route('assets.create') }}" class="btn btn-primary listing-create-btn">
+        <x-dashboard.icon name="plus" />
+        <span>Create</span>
+    </a>
+@endsection
 
 @section('content')
-    @php($assetImportErrors = $errors->getBag('assetImport'))
-    <section class="dashboard-panel client-listing-panel {{ request()->hasAny(['search', 'status', 'category']) ? 'is-open' : '' }}" data-listing-filter>
+    @php($hasFilters = request()->filled('search') || request()->filled('status') || request()->filled('category') || request()->filled('brand'))
+    <section class="dashboard-panel client-listing-panel {{ $hasFilters ? 'is-open' : '' }}" data-listing-filter>
         <div class="panel-heading">
-            <div><p>Asset management</p><h2>All Assets</h2></div>
+            <label class="client-search listing-global-search"><x-dashboard.icon name="search" /><input form="asset-filter-form" value="{{ request('search') }}" placeholder="Search all columns..." data-auto-filter-control data-filter-proxy="search"></label>
             <div class="button-row">
+                <button class="btn btn-secondary action-icon-btn action-icon-neutral" type="button" aria-label="Filters" data-tooltip="Filters" data-filter-toggle aria-expanded="{{ $hasFilters ? 'true' : 'false' }}"><x-dashboard.icon name="funnel" /></button>
+                @if ($hasFilters)
+                    <a class="btn btn-secondary action-icon-btn action-icon-neutral" href="{{ route('assets.index') }}" aria-label="Reset Filter" data-tooltip="Reset Filter"><x-dashboard.icon name="x" /></a>
+                @endif
                 <a href="{{ route('asset-brands.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Brands" data-tooltip="Brands"><x-dashboard.icon name="tag" /></a>
                 <a href="{{ route('asset-categories.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Categories" data-tooltip="Categories"><x-dashboard.icon name="folder" /></a>
-                <button class="btn btn-secondary action-icon-btn action-icon-neutral" type="button" aria-label="Show filters" data-tooltip="Filters" data-filter-toggle aria-expanded="{{ request()->hasAny(['search', 'status', 'category']) ? 'true' : 'false' }}"><x-dashboard.icon name="funnel" /></button>
-                <button type="button" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Import Assets" data-tooltip="Import Assets" data-import-open="assets"><x-dashboard.icon name="upload" /></button>
-                <a href="{{ route('assets.create') }}" class="btn btn-primary btn-lg action-icon-btn action-icon-edit" aria-label="Add Asset" data-tooltip="Add Asset"><x-dashboard.icon name="plus" /></a>
+                <a href="{{ route('imports.assets.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Import Assets" data-tooltip="Import Assets"><x-dashboard.icon name="upload" /></a>
             </div>
         </div>
-        <form class="client-toolbar listing-filter-fields" method="GET" data-filter-panel {{ request()->hasAny(['search', 'status', 'category']) ? '' : 'hidden' }}>
-                <label class="client-search"><x-dashboard.icon name="search" /><input name="search" value="{{ request('search') }}" placeholder="Search assets, tag, serial"></label>
+        <form id="asset-filter-form" class="client-toolbar listing-filter-fields" method="GET" data-filter-panel data-auto-filter-form @unless($hasFilters) hidden @endunless>
+                <span class="filter-label">Filter by:</span>
+                <label class="client-search"><input name="search" value="{{ request('search') }}" placeholder="Asset name"></label>
                 <select name="status" aria-label="Filter by status"><option value="">All Status</option>@foreach($statuses as $status)<option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>@endforeach</select>
                 <select name="category" aria-label="Filter by category"><option value="">All Categories</option>@foreach($categories as $category)<option value="{{ $category->id }}" @selected((string) request('category') === (string) $category->id)>{{ $category->name }}</option>@endforeach</select>
-                <div class="listing-filter-actions">
-                    <button class="btn btn-primary" type="submit">Apply</button>
-                    <a class="btn btn-secondary" href="{{ route('assets.index') }}">Reset</a>
-                </div>
+                <select name="brand" aria-label="Filter by brand"><option value="">All Brands</option>@foreach($brands as $brand)<option value="{{ $brand->id }}" @selected((string) request('brand') === (string) $brand->id)>{{ $brand->name }}</option>@endforeach</select>
         </form>
         <div class="responsive-table">
             <table class="advanced-table">
@@ -59,38 +65,26 @@
                 </tbody>
             </table>
         </div>
-        <div class="table-footer">{{ $assets->links() }}</div>
+        <div class="table-footer">
+            <span>Total {{ $assets->total() }} item(s)</span>
+            <div class="table-pagination">
+                <label class="pagination-size">
+                    <span>Items per page</span>
+                    <select name="per_page" form="asset-filter-form" aria-label="Items per page" data-auto-filter-control data-native-select>
+                        @foreach ([10, 20, 30, 40, 50] as $size)
+                            <option value="{{ $size }}" @selected($assets->perPage() === $size)>{{ $size }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <span class="pagination-page">Page {{ $assets->currentPage() }} of {{ $assets->lastPage() }}</span>
+                <div class="pagination-controls">
+                    <a class="action-icon-btn action-icon-neutral {{ $assets->onFirstPage() ? 'is-disabled' : '' }}" href="{{ $assets->url(1) }}" aria-label="First page"><x-dashboard.icon name="chevrons-left" /></a>
+                    <a class="action-icon-btn action-icon-neutral {{ $assets->onFirstPage() ? 'is-disabled' : '' }}" href="{{ $assets->previousPageUrl() ?? '#' }}" aria-label="Previous page"><x-dashboard.icon name="chevron-left" /></a>
+                    <a class="action-icon-btn action-icon-neutral {{ $assets->hasMorePages() ? '' : 'is-disabled' }}" href="{{ $assets->nextPageUrl() ?? '#' }}" aria-label="Next page"><x-dashboard.icon name="chevron-right" /></a>
+                    <a class="action-icon-btn action-icon-neutral {{ $assets->hasMorePages() ? '' : 'is-disabled' }}" href="{{ $assets->url($assets->lastPage()) }}" aria-label="Last page"><x-dashboard.icon name="chevrons-right" /></a>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <div class="modal-backdrop {{ $assetImportErrors->isNotEmpty() ? 'is-open' : '' }}" data-import-modal="assets" {{ $assetImportErrors->isNotEmpty() ? '' : 'hidden' }}>
-        <div class="modal-card import-modal" role="dialog" aria-modal="true" aria-labelledby="asset-import-title">
-            <div class="modal-heading">
-                <div>
-                    <p>Asset import</p>
-                    <h2 id="asset-import-title">Upload Assets</h2>
-                </div>
-                <button type="button" class="action-icon-btn action-icon-neutral" aria-label="Close import popup" data-modal-close><x-dashboard.icon name="x" /></button>
-            </div>
-            <form class="settings-form" method="POST" action="{{ route('imports.assets') }}" enctype="multipart/form-data">
-                @csrf
-                <label class="form-field file-field {{ $assetImportErrors->has('file') ? 'has-error' : '' }}"><span>Asset Excel / CSV</span><input type="file" name="file" accept=".xlsx,.csv,text/csv">@if ($assetImportErrors->has('file'))<small>{{ $assetImportErrors->first('file') }}</small>@endif</label>
-                @if ($assetImportErrors->has('rows'))
-                    <div class="import-validation" role="alert">
-                        <strong>Asset import validation failed</strong>
-                        @foreach ($assetImportErrors->get('rows') as $message)
-                            <p>{{ $message }}</p>
-                        @endforeach
-                    </div>
-                @endif
-                <div class="import-help">
-                    <span>Required: asset_tag, name, category. CSV/XLSX only, up to 5 MB. Tags and serial numbers must be unique.</span>
-                    <a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'assets') }}"><x-dashboard.icon name="download" /> Download Template</a>
-                </div>
-                <div class="form-actions">
-                    <button class="btn btn-outline" type="button" data-modal-close>Cancel</button>
-                    <button class="btn btn-primary" type="submit">Import Assets</button>
-                </div>
-            </form>
-        </div>
-    </div>
 @endsection

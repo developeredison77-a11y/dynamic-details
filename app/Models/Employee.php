@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'employee_code',
     'name_en',
     'name_ar',
     'department',
@@ -25,6 +24,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Employee extends Model
 {
     use SoftDeletes;
+
+    public const CODE_PREFIX = 'ADMS';
+
+    protected static function booted(): void
+    {
+        static::creating(function (Employee $employee): void {
+            if (blank($employee->employee_code)) {
+                $employee->employee_code = self::generateEmployeeCode();
+            }
+        });
+    }
+
+    public static function generateEmployeeCode(): string
+    {
+        do {
+            $code = self::CODE_PREFIX.str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        } while (self::withTrashed()->where('employee_code', $code)->exists());
+
+        return $code;
+    }
 
     protected function casts(): array
     {

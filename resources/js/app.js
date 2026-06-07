@@ -5,15 +5,17 @@ const profileImageInput = document.querySelector('[data-profile-image-input]');
 const profileImagePreview = document.querySelector('[data-profile-image-preview]');
 const forms = document.querySelectorAll('form');
 const listingFilters = document.querySelectorAll('[data-listing-filter]');
+const autoFilterForms = document.querySelectorAll('[data-auto-filter-form]');
 const tooltipTargets = document.querySelectorAll('[data-tooltip]');
 const importOpenButtons = document.querySelectorAll('[data-import-open]');
 const importModals = document.querySelectorAll('[data-import-modal]');
+const sessionModals = document.querySelectorAll('[data-session-modal]');
 const confirmModal = document.querySelector('[data-confirm-modal]');
 const formControls = document.querySelectorAll(
     '.form-field input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), .form-field select, .form-field textarea'
 );
 const nativeDateInputs = document.querySelectorAll('input[type="date"]');
-const nativeSelects = document.querySelectorAll('select:not([multiple])');
+const nativeSelects = document.querySelectorAll('select:not([multiple]):not([data-native-select])');
 
 const formatDateValue = (date) => {
     const year = date.getFullYear();
@@ -428,6 +430,53 @@ listingFilters.forEach((filter) => {
     });
 });
 
+autoFilterForms.forEach((form) => {
+    let submitTimer = null;
+    const formId = form.id;
+    const controls = [
+        ...form.querySelectorAll('input, select, textarea'),
+        ...(formId ? document.querySelectorAll(`[form="${formId}"][data-auto-filter-control]`) : []),
+    ];
+
+    const submitFilterForm = (delay = 0) => {
+        window.clearTimeout(submitTimer);
+        submitTimer = window.setTimeout(() => {
+            form.requestSubmit();
+        }, delay);
+    };
+
+    controls.forEach((control) => {
+        const syncProxyValue = () => {
+            if (!control.dataset.filterProxy) {
+                return;
+            }
+
+            const target = form.elements[control.dataset.filterProxy];
+
+            if (target) {
+                target.value = control.value;
+            }
+        };
+
+        if (control.matches('input[type="search"], input:not([type]), textarea')) {
+            control.addEventListener('input', () => {
+                syncProxyValue();
+                submitFilterForm(450);
+            });
+            control.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    syncProxyValue();
+                    submitFilterForm();
+                }
+            });
+            return;
+        }
+
+        control.addEventListener('change', () => submitFilterForm());
+    });
+});
+
 const closeModal = (modal) => {
     if (!modal) {
         return;
@@ -461,6 +510,18 @@ importOpenButtons.forEach((button) => {
 
 importModals.forEach((modal) => {
     modal.querySelectorAll('[data-modal-close]').forEach((button) => {
+        button.addEventListener('click', () => closeModal(modal));
+    });
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal(modal);
+        }
+    });
+});
+
+sessionModals.forEach((modal) => {
+    modal.querySelectorAll('[data-session-modal-close]').forEach((button) => {
         button.addEventListener('click', () => closeModal(modal));
     });
 
@@ -524,6 +585,7 @@ document.addEventListener('keydown', (event) => {
     }
 
     importModals.forEach(closeModal);
+    sessionModals.forEach(closeModal);
     closeModal(confirmModal);
 });
 
@@ -553,7 +615,7 @@ forms.forEach((form) => {
             return;
         }
 
-        const label = submitButton.textContent.trim() || 'Please wait';
+        const label = submitButton.textContent.trim() || '';
         const loader = document.createElement('span');
 
         loader.className = 'submit-loader';
@@ -753,10 +815,10 @@ toasts.forEach((toast) => {
 
 if (clientTable) {
     const rows = Array.from(clientTable.querySelectorAll('[data-client-body] tr:not([data-client-empty])'));
-    const search = clientTable.querySelector('[data-client-search]');
+    const searchControls = Array.from(clientTable.querySelectorAll('[data-client-search]'));
+    const search = searchControls[0];
     const status = clientTable.querySelector('[data-client-status]');
     const plan = clientTable.querySelector('[data-client-plan]');
-    const apply = clientTable.querySelector('[data-client-apply]');
     const reset = clientTable.querySelector('[data-client-reset]');
     const empty = clientTable.querySelector('[data-client-empty]');
     const perPage = clientTable.querySelector('[data-client-per-page]');
@@ -774,6 +836,22 @@ if (clientTable) {
         search: '',
         status: '',
         plan: '',
+    };
+
+    const setClientFilterPanelOpen = (isOpen) => {
+        const panel = clientTable.querySelector('[data-filter-panel]');
+        const toggle = clientTable.querySelector('[data-filter-toggle]');
+
+        clientTable.classList.toggle('is-open', isOpen);
+
+        if (panel) {
+            panel.hidden = !isOpen;
+        }
+
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            toggle.setAttribute('aria-label', isOpen ? 'Hide filters' : 'Show filters');
+        }
     };
 
     const getFilteredRows = () => {
@@ -813,17 +891,27 @@ if (clientTable) {
         summary.textContent = filtered.length
             ? `Showing ${start + 1}-${start + visible.length} of ${filtered.length} clients`
             : 'No clients found';
-        current.textContent = `${page} / ${totalPages}`;
+        current.textContent = `Page ${page} of ${totalPages}`;
 
         first.disabled = page === 1;
         prev.disabled = page === 1;
         next.disabled = page === totalPages;
         last.disabled = page === totalPages;
+
+        if (reset) {
+            const hasFilters = Boolean(appliedFilters.search || appliedFilters.status || appliedFilters.plan);
+
+            reset.hidden = !hasFilters;
+
+            if (hasFilters) {
+                setClientFilterPanelOpen(true);
+            }
+        }
     };
 
     const applyClientFilters = () => {
         appliedFilters = {
-            search: search.value,
+            search: search?.value ?? '',
             status: status.value,
             plan: plan.value,
         };
@@ -831,17 +919,39 @@ if (clientTable) {
         render();
     };
 
-    apply?.addEventListener('click', applyClientFilters);
+    let clientFilterTimer = null;
 
-    search?.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            applyClientFilters();
-        }
+    const scheduleClientFilters = (delay = 0) => {
+        window.clearTimeout(clientFilterTimer);
+        clientFilterTimer = window.setTimeout(applyClientFilters, delay);
+    };
+
+    searchControls.forEach((control) => {
+        control.addEventListener('input', () => {
+            searchControls.forEach((item) => {
+                if (item !== control) {
+                    item.value = control.value;
+                }
+            });
+            scheduleClientFilters(250);
+        });
+    });
+    status?.addEventListener('change', () => scheduleClientFilters());
+    plan?.addEventListener('change', () => scheduleClientFilters());
+
+    searchControls.forEach((control) => {
+        control.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                scheduleClientFilters();
+            }
+        });
     });
 
     reset?.addEventListener('click', () => {
-        search.value = '';
+        searchControls.forEach((control) => {
+            control.value = '';
+        });
         status.value = '';
         plan.value = '';
         status.dispatchEvent(new Event('change', { bubbles: true }));
@@ -852,6 +962,7 @@ if (clientTable) {
             plan: '',
         };
         page = 1;
+        setClientFilterPanelOpen(false);
         render();
     });
 

@@ -151,10 +151,12 @@
                     <button type="button" class="btn btn-icon icon-button action-icon-btn action-icon-neutral" data-sidebar-toggle aria-label="Toggle sidebar" data-tooltip="Toggle sidebar">
                         <x-dashboard.icon name="menu" />
                     </button>
-                    <div class="topbar-title">
-                        <p class="topbar-kicker">@yield('eyebrow', 'Backend')</p>
-                        <h1>@yield('page-title', 'Dashboard')</h1>
-                    </div>
+                    <span class="topbar-divider" aria-hidden="true"></span>
+                    <label class="topbar-search">
+                        <x-dashboard.icon name="search" />
+                        <input type="search" placeholder="Search..." aria-label="Search">
+                        <kbd>Ctrl K</kbd>
+                    </label>
                 </div>
 
                 <div class="topbar-actions">
@@ -163,19 +165,22 @@
                             <x-dashboard.icon name="sun" class="theme-sun" />
                             <x-dashboard.icon name="moon" class="theme-moon" />
                         </button>
+                        <a href="{{ route('settings.edit') }}" class="btn btn-icon icon-button action-icon-btn action-icon-neutral" aria-label="Settings" data-tooltip="Settings">
+                            <x-dashboard.icon name="settings" />
+                        </a>
+                        <span class="topbar-divider" aria-hidden="true"></span>
 
                         <div class="user-menu" data-dropdown>
                             <button type="button" class="btn user-button" data-dropdown-toggle aria-expanded="false">
+                                <span class="user-meta">
+                                    <strong>{{ $user?->name ?? 'Admin' }}</strong>
+                                    <small>{{ $user?->email ?? 'Super Admin' }}</small>
+                                </span>
                                 @if ($avatar)
                                     <img class="user-avatar" src="{{ $avatar }}" alt="{{ $user?->name ?? 'User' }}">
                                 @else
-                                    <span class="user-avatar user-avatar-fallback"><x-dashboard.icon name="user" /></span>
+                                    <span class="user-avatar user-avatar-fallback">{{ strtoupper(substr($user?->name ?? 'Admin', 0, 1)) }}</span>
                                 @endif
-                                <span class="user-meta">
-                                    <strong>{{ $user?->name ?? 'Admin' }}</strong>
-                                    <small>{{ $user?->email ?? 'Administrator' }}</small>
-                                </span>
-                                <x-dashboard.icon name="chevron" class="user-chevron" />
                             </button>
 
                             <div class="dropdown-panel" data-dropdown-panel>
@@ -197,7 +202,7 @@
                                 </a>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit" class="btn btn-danger">
+                                    <button type="submit">
                                         <x-dashboard.icon name="logout" />
                                         Logout
                                         <x-dashboard.icon name="chevron-right" class="dropdown-arrow" />
@@ -211,6 +216,18 @@
 
             <div class="dashboard-breadcrumb-bar">
                 <x-dashboard.breadcrumbs :items="$breadcrumbs" />
+            </div>
+
+            <div class="dashboard-page-header">
+                <div class="dashboard-page-title">
+                    <p>@yield('eyebrow', 'Backend')</p>
+                    <h1>@yield('page-title', 'Dashboard')</h1>
+                </div>
+                @hasSection('page-actions')
+                    <div class="dashboard-page-actions">
+                        @yield('page-actions')
+                    </div>
+                @endif
             </div>
 
             <main class="dashboard-content">

@@ -6,14 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetBrandRequest;
 use App\Models\AssetBrand;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AssetBrandController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $requestedPerPage = $request->integer('per_page', 10);
+        $perPage = in_array($requestedPerPage, [10, 20, 30, 40, 50], true) ? $requestedPerPage : 10;
+        $search = $request->string('search')->toString();
+        $status = $request->input('status');
+
         return view('assets.brands', [
-            'brands' => AssetBrand::query()->withCount('assets')->orderBy('name')->get(),
+            'brands' => AssetBrand::query()
+                ->withCount('assets')
+                ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
+                ->when(in_array($status, ['active', 'inactive'], true), fn ($query) => $query->where('is_active', $status === 'active'))
+                ->orderBy('name')
+                ->paginate($perPage)
+                ->withQueryString(),
             'editBrand' => new AssetBrand(),
         ]);
     }
@@ -25,10 +37,21 @@ class AssetBrandController extends Controller
         return back()->with('success', 'Brand saved successfully.');
     }
 
-    public function edit(AssetBrand $assetBrand): View
+    public function edit(Request $request, AssetBrand $assetBrand): View
     {
+        $requestedPerPage = $request->integer('per_page', 10);
+        $perPage = in_array($requestedPerPage, [10, 20, 30, 40, 50], true) ? $requestedPerPage : 10;
+        $search = $request->string('search')->toString();
+        $status = $request->input('status');
+
         return view('assets.brands', [
-            'brands' => AssetBrand::query()->withCount('assets')->orderBy('name')->get(),
+            'brands' => AssetBrand::query()
+                ->withCount('assets')
+                ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
+                ->when(in_array($status, ['active', 'inactive'], true), fn ($query) => $query->where('is_active', $status === 'active'))
+                ->orderBy('name')
+                ->paginate($perPage)
+                ->withQueryString(),
             'editBrand' => $assetBrand,
         ]);
     }

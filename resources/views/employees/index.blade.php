@@ -3,24 +3,30 @@
 @section('title', 'Employees')
 @section('page-title', 'Employee Master')
 @section('eyebrow', 'Employees')
+@section('page-actions')
+    <a href="{{ route('employees.create') }}" class="btn btn-primary listing-create-btn">
+        <x-dashboard.icon name="plus" />
+        <span>Create</span>
+    </a>
+@endsection
 
 @section('content')
-    <section class="dashboard-panel client-listing-panel {{ request()->hasAny(['search', 'status']) ? 'is-open' : '' }}" data-listing-filter>
+    @php($hasFilters = request()->filled('search') || request()->filled('status'))
+    <section class="dashboard-panel client-listing-panel {{ $hasFilters ? 'is-open' : '' }}" data-listing-filter>
         <div class="panel-heading">
-            <div><p>Employee management</p><h2>All Employees</h2></div>
+            <label class="client-search listing-global-search"><x-dashboard.icon name="search" /><input form="employee-filter-form" value="{{ request('search') }}" placeholder="Search all columns..." data-auto-filter-control data-filter-proxy="search"></label>
             <div class="button-row">
-                <button class="btn btn-secondary action-icon-btn action-icon-neutral" type="button" aria-label="Show filters" data-tooltip="Filters" data-filter-toggle aria-expanded="{{ request()->hasAny(['search', 'status']) ? 'true' : 'false' }}"><x-dashboard.icon name="funnel" /></button>
+                <button class="btn btn-secondary action-icon-btn action-icon-neutral" type="button" aria-label="Filters" data-tooltip="Filters" data-filter-toggle aria-expanded="{{ $hasFilters ? 'true' : 'false' }}"><x-dashboard.icon name="funnel" /></button>
+                @if ($hasFilters)
+                    <a class="btn btn-secondary action-icon-btn action-icon-neutral" href="{{ route('employees.index') }}" aria-label="Reset Filter" data-tooltip="Reset Filter"><x-dashboard.icon name="x" /></a>
+                @endif
                 <a href="{{ route('imports.employees.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Import Employees" data-tooltip="Import Employees"><x-dashboard.icon name="upload" /></a>
-                <a href="{{ route('employees.create') }}" class="btn btn-primary btn-lg action-icon-btn action-icon-edit" aria-label="Add Employee" data-tooltip="Add Employee"><x-dashboard.icon name="plus" /></a>
             </div>
         </div>
-        <form class="client-toolbar listing-filter-fields" method="GET" data-filter-panel {{ request()->hasAny(['search', 'status']) ? '' : 'hidden' }}>
-                <label class="client-search"><x-dashboard.icon name="search" /><input name="search" value="{{ request('search') }}" placeholder="Search employees, email, department"></label>
+        <form id="employee-filter-form" class="client-toolbar listing-filter-fields" method="GET" data-filter-panel data-auto-filter-form @unless($hasFilters) hidden @endunless>
+                <span class="filter-label">Filter by:</span>
+                <label class="client-search"><input name="search" value="{{ request('search') }}" placeholder="Full Name"></label>
                 <select name="status" aria-label="Filter by status"><option value="">All Status</option>@foreach ($statuses as $status)<option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>@endforeach</select>
-                <div class="listing-filter-actions">
-                    <button class="btn btn-primary" type="submit">Apply</button>
-                    <a class="btn btn-secondary" href="{{ route('employees.index') }}">Reset</a>
-                </div>
         </form>
         <div class="responsive-table">
             <table class="advanced-table">
@@ -55,6 +61,46 @@
                 </tbody>
             </table>
         </div>
-        <div class="table-footer">{{ $employees->links() }}</div>
+        <div class="table-footer">
+            <span>Total {{ $employees->total() }} item(s)</span>
+            <div class="table-pagination">
+                <label class="pagination-size">
+                    <span>Items per page</span>
+                    <select name="per_page" form="employee-filter-form" aria-label="Items per page" data-auto-filter-control data-native-select>
+                        @foreach ([10, 20, 30, 40, 50] as $size)
+                            <option value="{{ $size }}" @selected($employees->perPage() === $size)>{{ $size }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <span class="pagination-page">Page {{ $employees->currentPage() }} of {{ $employees->lastPage() }}</span>
+                <div class="pagination-controls">
+                    <a class="action-icon-btn action-icon-neutral {{ $employees->onFirstPage() ? 'is-disabled' : '' }}" href="{{ $employees->url(1) }}" aria-label="First page"><x-dashboard.icon name="chevrons-left" /></a>
+                    <a class="action-icon-btn action-icon-neutral {{ $employees->onFirstPage() ? 'is-disabled' : '' }}" href="{{ $employees->previousPageUrl() ?? '#' }}" aria-label="Previous page"><x-dashboard.icon name="chevron-left" /></a>
+                    <a class="action-icon-btn action-icon-neutral {{ $employees->hasMorePages() ? '' : 'is-disabled' }}" href="{{ $employees->nextPageUrl() ?? '#' }}" aria-label="Next page"><x-dashboard.icon name="chevron-right" /></a>
+                    <a class="action-icon-btn action-icon-neutral {{ $employees->hasMorePages() ? '' : 'is-disabled' }}" href="{{ $employees->url($employees->lastPage()) }}" aria-label="Last page"><x-dashboard.icon name="chevrons-right" /></a>
+                </div>
+            </div>
+        </div>
     </section>
+
+    @if (session('generated_employee_code'))
+        <div class="modal-backdrop is-open" data-session-modal>
+            <div class="modal-card generated-code-modal" role="dialog" aria-modal="true" aria-labelledby="generated-code-title">
+                <div class="modal-heading">
+                    <div>
+                        <p>Employee created</p>
+                        <h2 id="generated-code-title">Generated Employee Code</h2>
+                    </div>
+                    <button type="button" class="action-icon-btn action-icon-neutral" aria-label="Close generated code popup" data-session-modal-close><x-dashboard.icon name="x" /></button>
+                </div>
+                <div class="generated-code-summary">
+                    <span>{{ session('generated_employee_code') }}</span>
+                    <p>This code is unique and cannot be edited.</p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" data-session-modal-close>Done</button>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection

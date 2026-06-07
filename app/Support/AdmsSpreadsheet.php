@@ -92,15 +92,13 @@ class AdmsSpreadsheet
                 $values[$column] = $value;
             }
 
-            ksort($values);
-            $line = array_values($values);
-
             if ($headers === null) {
-                $headers = self::headers($line);
+                ksort($values);
+                $headers = self::headers($values);
                 continue;
             }
 
-            self::appendRow($rows, $headers, $line);
+            self::appendRow($rows, $headers, $values);
         }
 
         return $rows;
@@ -153,8 +151,15 @@ class AdmsSpreadsheet
         }
 
         $rows[] = collect($headers)
-            ->mapWithKeys(fn (string $header, int $index): array => [$header => isset($line[$index]) ? trim((string) $line[$index]) : null])
+            ->mapWithKeys(fn (string $header, int $index): array => [$header => self::cellValue($line[$index] ?? null)])
             ->all();
+    }
+
+    private static function cellValue(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        return $value === '' ? null : $value;
     }
 
     private static function columnIndex(string $reference): int

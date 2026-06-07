@@ -6,6 +6,7 @@
 
 @section('content')
     @php($isEditing = $editBrand->exists)
+    @php($hasFilters = request()->filled('search') || request()->filled('status'))
 
     <section class="dashboard-panel brand-create-panel">
         <div class="panel-heading"><div><p>Brand master</p><h2>{{ $isEditing ? 'Edit Brand' : 'Add Brand' }}</h2></div></div>
@@ -24,15 +25,32 @@
         </form>
     </section>
 
-    <section class="dashboard-panel">
-        <div class="panel-heading"><div><p>Brands</p><h2>Existing Brands</h2></div></div>
+    <section class="dashboard-panel client-listing-panel {{ $hasFilters ? 'is-open' : '' }}" data-listing-filter>
+        <div class="panel-heading">
+            <label class="client-search listing-global-search"><x-dashboard.icon name="search" /><input form="brand-filter-form" value="{{ request('search') }}" placeholder="Search all columns..." data-auto-filter-control data-filter-proxy="search"></label>
+            <div class="button-row">
+                <button class="btn btn-secondary action-icon-btn action-icon-neutral" type="button" aria-label="Filters" data-tooltip="Filters" data-filter-toggle aria-expanded="{{ $hasFilters ? 'true' : 'false' }}"><x-dashboard.icon name="funnel" /></button>
+                @if ($hasFilters)
+                    <a class="btn btn-secondary action-icon-btn action-icon-neutral" href="{{ route('asset-brands.index') }}" aria-label="Reset Filter" data-tooltip="Reset Filter"><x-dashboard.icon name="x" /></a>
+                @endif
+            </div>
+        </div>
+        <form id="brand-filter-form" class="client-toolbar listing-filter-fields" method="GET" data-filter-panel data-auto-filter-form @unless($hasFilters) hidden @endunless>
+            <span class="filter-label">Filter by:</span>
+            <label class="client-search"><input name="search" value="{{ request('search') }}" placeholder="Brand Name"></label>
+            <select name="status" aria-label="Filter by status">
+                <option value="">All Status</option>
+                <option value="active" @selected(request('status') === 'active')>Active</option>
+                <option value="inactive" @selected(request('status') === 'inactive')>Inactive</option>
+            </select>
+        </form>
         <div class="responsive-table">
             <table class="advanced-table">
-                <thead><tr><th>Name</th><th>Assets</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Brand</th><th>Assets</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody>
                     @forelse($brands as $brand)
                         <tr>
-                            <td><strong>{{ $brand->name }}</strong></td>
+                            <td><div class="client-person"><span>{{ strtoupper(substr($brand->name, 0, 2)) }}</span><div><strong>{{ $brand->name }}</strong><small>Brand master</small></div></div></td>
                             <td>{{ $brand->assets_count }}</td>
                             <td><span class="status-badge status-{{ $brand->is_active ? 'active' : 'inactive' }}">{{ $brand->is_active ? 'Active' : 'Inactive' }}</span></td>
                             <td>
@@ -62,6 +80,26 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        <div class="table-footer">
+            <span>Total {{ $brands->total() }} item(s)</span>
+            <div class="table-pagination">
+                <label class="pagination-size">
+                    <span>Items per page</span>
+                    <select name="per_page" form="brand-filter-form" aria-label="Items per page" data-auto-filter-control data-native-select>
+                        @foreach ([10, 20, 30, 40, 50] as $size)
+                            <option value="{{ $size }}" @selected($brands->perPage() === $size)>{{ $size }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <span class="pagination-page">Page {{ $brands->currentPage() }} of {{ $brands->lastPage() }}</span>
+                <div class="pagination-controls">
+                    <a class="action-icon-btn action-icon-neutral {{ $brands->onFirstPage() ? 'is-disabled' : '' }}" href="{{ $brands->url(1) }}" aria-label="First page"><x-dashboard.icon name="chevrons-left" /></a>
+                    <a class="action-icon-btn action-icon-neutral {{ $brands->onFirstPage() ? 'is-disabled' : '' }}" href="{{ $brands->previousPageUrl() ?? '#' }}" aria-label="Previous page"><x-dashboard.icon name="chevron-left" /></a>
+                    <a class="action-icon-btn action-icon-neutral {{ $brands->hasMorePages() ? '' : 'is-disabled' }}" href="{{ $brands->nextPageUrl() ?? '#' }}" aria-label="Next page"><x-dashboard.icon name="chevron-right" /></a>
+                    <a class="action-icon-btn action-icon-neutral {{ $brands->hasMorePages() ? '' : 'is-disabled' }}" href="{{ $brands->url($brands->lastPage()) }}" aria-label="Last page"><x-dashboard.icon name="chevrons-right" /></a>
+                </div>
+            </div>
         </div>
     </section>
 @endsection

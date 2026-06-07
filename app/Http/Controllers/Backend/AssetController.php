@@ -17,15 +17,20 @@ class AssetController extends Controller
 {
     public function index(Request $request): View
     {
+        $requestedPerPage = $request->integer('per_page', 10);
+        $perPage = in_array($requestedPerPage, [10, 20, 30, 40, 50], true) ? $requestedPerPage : 10;
+
         return view('assets.index', [
             'assets' => Asset::query()
                 ->with(['brand', 'category', 'activeAssignment.employee'])
                 ->search($request->string('search')->toString())
                 ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
                 ->when($request->filled('category'), fn ($query) => $query->where('asset_category_id', $request->integer('category')))
+                ->when($request->filled('brand'), fn ($query) => $query->where('asset_brand_id', $request->integer('brand')))
                 ->latest()
-                ->paginate(12)
+                ->paginate($perPage)
                 ->withQueryString(),
+            'brands' => AssetBrand::query()->where('is_active', true)->orderBy('name')->get(),
             'categories' => AssetCategory::query()->orderBy('name')->get(),
             'statuses' => AssetStatus::cases(),
         ]);

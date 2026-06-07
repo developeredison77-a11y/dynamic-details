@@ -7,8 +7,6 @@ use App\Enums\AssetStatus;
 use App\Enums\EmployeeStatus;
 use App\Enums\ImportType;
 use App\Models\Asset;
-use App\Models\AssetBrand;
-use App\Models\AssetCategory;
 use App\Models\Employee;
 use App\Models\ImportBatch;
 use App\Support\AdmsSpreadsheet;
@@ -31,7 +29,6 @@ class ImportService
 
         foreach ($rows as $index => $row) {
             $validator = Validator::make($row, [
-                'employee_code' => ['required', 'string', 'max:60', Rule::unique('employees', 'employee_code')],
                 'name_en' => ['required', 'string', 'max:255'],
                 'name_ar' => ['nullable', 'string', 'max:255'],
                 'email' => ['required', 'email', 'max:255', Rule::unique('employees', 'email')],
@@ -69,17 +66,39 @@ class ImportService
         $rows = AdmsSpreadsheet::rows($file);
         $errors = [];
         $success = 0;
+        $assetTagCounts = $this->filledValueCounts($rows, 'asset_tag');
+        $serialNumberCounts = $this->filledValueCounts($rows, 'serial_number');
 
         foreach ($rows as $index => $row) {
             $validator = Validator::make($row, [
                 'asset_tag' => ['required', 'string', 'max:120', Rule::unique('assets', 'asset_tag')],
                 'name' => ['required', 'string', 'max:255'],
-                'category' => ['required', 'string', 'max:120'],
-                'brand' => ['nullable', 'string', 'max:120'],
+                'asset_category_id' => ['required', 'integer', Rule::exists('asset_categories', 'id')->where('is_active', true)],
+                'asset_brand_id' => ['nullable', 'integer', Rule::exists('asset_brands', 'id')->where('is_active', true)->whereNull('deleted_at')],
                 'serial_number' => ['nullable', 'string', 'max:120', Rule::unique('assets', 'serial_number')],
                 'model' => ['nullable', 'string', 'max:120'],
                 'condition' => ['nullable', Rule::enum(AssetCondition::class)],
+            ], [
+                'asset_category_id.required' => 'The asset category ID is required. Use an active category ID from the import reference list.',
+                'asset_category_id.integer' => 'The asset category ID must be a number.',
+                'asset_category_id.exists' => 'The selected asset category ID does not exist or is inactive.',
+                'asset_brand_id.integer' => 'The asset brand ID must be a number.',
+                'asset_brand_id.exists' => 'The selected asset brand ID does not exist, is inactive, or has been deleted.',
+                'condition' => 'The condition must be one of: new, good, fair, damaged.',
             ]);
+
+            $validator->after(function ($validator) use ($row, $assetTagCounts, $serialNumberCounts): void {
+                $assetTag = $this->normalizedImportValue($row['asset_tag'] ?? null);
+                $serialNumber = $this->normalizedImportValue($row['serial_number'] ?? null);
+
+                if ($assetTag !== '' && ($assetTagCounts[$assetTag] ?? 0) > 1) {
+                    $validator->errors()->add('asset_tag', 'The asset tag must not be duplicated in the uploaded file.');
+                }
+
+                if ($serialNumber !== '' && ($serialNumberCounts[$serialNumber] ?? 0) > 1) {
+                    $validator->errors()->add('serial_number', 'The serial number must not be duplicated in the uploaded file.');
+                }
+            });
 
             if ($validator->fails()) {
                 $errors[] = ['row' => $index + 2, 'messages' => $validator->errors()->all()];
@@ -88,12 +107,10 @@ class ImportService
 
             $data = $validator->validated();
             $data['condition'] = ($data['condition'] ?? null) ?: AssetCondition::Good->value;
-            $category = AssetCategory::query()->firstOrCreate(['name' => $data['category']]);
-            $brand = filled($data['brand'] ?? null) ? AssetBrand::query()->firstOrCreate(['name' => $data['brand']]) : null;
 
             Asset::query()->create([
-                'asset_category_id' => $category->id,
-                'asset_brand_id' => $brand?->id,
+                'asset_category_id' => $data['asset_category_id'],
+                'asset_brand_id' => $data['asset_brand_id'] ?? null,
                 'asset_tag' => $data['asset_tag'],
                 'name' => $data['name'],
                 'serial_number' => $data['serial_number'] ?? null,
@@ -106,6 +123,23 @@ class ImportService
         }
 
         return $this->batch(ImportType::Assets, $file, $rows, $success, $errors, $userId);
+    }
+
+    /**
+     * @param array<int, array<string, string|null>> $rows
+     */
+    private function filledValueCounts(array $rows, string $key)
+    {
+        return collect($rows)
+            ->pluck($key)
+            ->map(fn ($value): string => $this->normalizedImportValue($value))
+            ->filter(fn (string $value): bool => $value !== '')
+            ->countBy();
+    }
+
+    private function normalizedImportValue(mixed $value): string
+    {
+        return strtolower(trim((string) $value));
     }
 
     /**
