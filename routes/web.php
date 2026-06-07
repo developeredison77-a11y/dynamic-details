@@ -45,6 +45,10 @@ Route::middleware('auth')->prefix('dashboard')->group(function (): void {
     Route::delete('/asset-brands/{assetBrand}', [AssetBrandController::class, 'destroy'])->name('asset-brands.destroy');
     Route::get('/asset-categories', [AssetCategoryController::class, 'index'])->name('asset-categories.index');
     Route::post('/asset-categories', [AssetCategoryController::class, 'store'])->name('asset-categories.store');
+    Route::get('/asset-categories/{assetCategory}/edit', [AssetCategoryController::class, 'edit'])->name('asset-categories.edit');
+    Route::put('/asset-categories/{assetCategory}', [AssetCategoryController::class, 'update'])->name('asset-categories.update');
+    Route::patch('/asset-categories/{assetCategory}/status', [AssetCategoryController::class, 'toggleStatus'])->name('asset-categories.status');
+    Route::delete('/asset-categories/{assetCategory}', [AssetCategoryController::class, 'destroy'])->name('asset-categories.destroy');
     Route::get('/asset-handovers', [AssetHandoverController::class, 'index'])->name('asset-handovers.index');
     Route::get('/asset-handovers/create', [AssetHandoverController::class, 'create'])->name('asset-handovers.create');
     Route::post('/asset-handovers', [AssetHandoverController::class, 'store'])->name('asset-handovers.store');
