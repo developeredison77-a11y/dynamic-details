@@ -36,6 +36,16 @@
             ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Declaration Forms'],
         ],
+        request()->routeIs('imports.employees.index') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Employee Master', 'url' => route('employees.index')],
+            ['label' => 'Import Employees'],
+        ],
+        request()->routeIs('imports.assets.index') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Asset Master', 'url' => route('assets.index')],
+            ['label' => 'Import Assets'],
+        ],
         request()->routeIs('imports.*') => [
             ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Imports'],
@@ -102,15 +112,16 @@
                     Dashboard
                 </x-dashboard.nav-link>
 
-                <x-dashboard.nav-group icon="users" label="Employee Master" :active="request()->routeIs('employees.*')">
+                <x-dashboard.nav-group icon="users" label="Employee Master" :active="request()->routeIs('employees.*', 'imports.employees.index')">
                     <x-dashboard.sub-link :href="route('employees.index')" :active="request()->routeIs('employees.index')">All Employees</x-dashboard.sub-link>
                     <x-dashboard.sub-link :href="route('employees.create')" :active="request()->routeIs('employees.create')">Add Employee</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('imports.index')" :active="request()->routeIs('imports.*')">Import Employees</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('imports.employees.index')" :active="request()->routeIs('imports.employees.index')">Import Employees</x-dashboard.sub-link>
                 </x-dashboard.nav-group>
 
-                <x-dashboard.nav-group icon="pages" label="Asset Master" :active="request()->routeIs('assets.*', 'asset-brands.*', 'asset-categories.*')">
+                <x-dashboard.nav-group icon="pages" label="Asset Master" :active="request()->routeIs('assets.*', 'asset-brands.*', 'asset-categories.*', 'imports.assets.index')">
                     <x-dashboard.sub-link :href="route('assets.index')" :active="request()->routeIs('assets.index')">All Assets</x-dashboard.sub-link>
                     <x-dashboard.sub-link :href="route('assets.create')" :active="request()->routeIs('assets.create')">Add Asset</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('imports.assets.index')" :active="request()->routeIs('imports.assets.index')">Import Assets</x-dashboard.sub-link>
                     <x-dashboard.sub-link :href="route('asset-brands.index')" :active="request()->routeIs('asset-brands.*')">Brands</x-dashboard.sub-link>
                     <x-dashboard.sub-link :href="route('asset-categories.index')" :active="request()->routeIs('asset-categories.*')">Categories</x-dashboard.sub-link>
                 </x-dashboard.nav-group>
@@ -122,7 +133,7 @@
                 </x-dashboard.nav-group>
 
                 <x-dashboard.nav-group icon="pages" label="Data & Reports" :active="request()->routeIs('imports.*', 'reports.*')">
-                    <x-dashboard.sub-link :href="route('imports.index')" :active="request()->routeIs('imports.*')">Imports</x-dashboard.sub-link>
+                    <x-dashboard.sub-link :href="route('imports.index')" :active="request()->routeIs('imports.index')">Imports</x-dashboard.sub-link>
                     <x-dashboard.sub-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">Reports</x-dashboard.sub-link>
                 </x-dashboard.nav-group>
 
@@ -205,6 +216,23 @@
             <main class="dashboard-content">
                 @yield('content')
             </main>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" data-confirm-modal hidden>
+        <div class="modal-card confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+            <div class="modal-heading">
+                <h2 id="delete-confirm-title">Confirm Deletion</h2>
+                <button type="button" class="action-icon-btn action-icon-neutral" aria-label="Close confirmation popup" data-confirm-cancel><x-dashboard.icon name="x" /></button>
+            </div>
+            <div class="confirm-message">
+                <p data-confirm-message>Are you sure you want to delete this item?</p>
+                <strong>This action cannot be undone.</strong>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" data-confirm-cancel>Cancel</button>
+                <button type="button" class="btn btn-danger" data-confirm-accept>Delete</button>
+            </div>
         </div>
     </div>
 

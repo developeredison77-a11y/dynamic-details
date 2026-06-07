@@ -39,6 +39,10 @@ Route::middleware('auth')->prefix('dashboard')->group(function (): void {
     Route::resource('assets', AssetController::class)->except(['show']);
     Route::get('/asset-brands', [AssetBrandController::class, 'index'])->name('asset-brands.index');
     Route::post('/asset-brands', [AssetBrandController::class, 'store'])->name('asset-brands.store');
+    Route::get('/asset-brands/{assetBrand}/edit', [AssetBrandController::class, 'edit'])->name('asset-brands.edit');
+    Route::put('/asset-brands/{assetBrand}', [AssetBrandController::class, 'update'])->name('asset-brands.update');
+    Route::patch('/asset-brands/{assetBrand}/status', [AssetBrandController::class, 'toggleStatus'])->name('asset-brands.status');
+    Route::delete('/asset-brands/{assetBrand}', [AssetBrandController::class, 'destroy'])->name('asset-brands.destroy');
     Route::get('/asset-categories', [AssetCategoryController::class, 'index'])->name('asset-categories.index');
     Route::post('/asset-categories', [AssetCategoryController::class, 'store'])->name('asset-categories.store');
     Route::get('/asset-handovers', [AssetHandoverController::class, 'index'])->name('asset-handovers.index');
@@ -54,6 +58,9 @@ Route::middleware('auth')->prefix('dashboard')->group(function (): void {
     Route::get('/declarations/{declaration}', [DeclarationController::class, 'show'])->name('declarations.show');
     Route::get('/declarations/{declaration}/print', [DeclarationController::class, 'print'])->name('declarations.print');
     Route::get('/imports', [ImportController::class, 'index'])->name('imports.index');
+    Route::get('/imports/employees', [ImportController::class, 'employeeIndex'])->name('imports.employees.index');
+    Route::get('/imports/assets', [ImportController::class, 'assetIndex'])->name('imports.assets.index');
+    Route::get('/imports/template/{type}', [ImportController::class, 'template'])->name('imports.template');
     Route::post('/imports/employees', [ImportController::class, 'employees'])->name('imports.employees');
     Route::post('/imports/assets', [ImportController::class, 'assets'])->name('imports.assets');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

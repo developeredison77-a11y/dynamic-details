@@ -23,18 +23,31 @@ class ImportService
         $rows = AdmsSpreadsheet::rows($file);
         $errors = [];
         $success = 0;
+        $emailCounts = collect($rows)
+            ->pluck('email')
+            ->filter(fn ($email): bool => filled($email))
+            ->map(fn ($email): string => strtolower(trim((string) $email)))
+            ->countBy();
 
         foreach ($rows as $index => $row) {
             $validator = Validator::make($row, [
                 'employee_code' => ['required', 'string', 'max:60', Rule::unique('employees', 'employee_code')],
                 'name_en' => ['required', 'string', 'max:255'],
                 'name_ar' => ['nullable', 'string', 'max:255'],
-                'email' => ['nullable', 'email', 'max:255', Rule::unique('employees', 'email')],
+                'email' => ['required', 'email', 'max:255', Rule::unique('employees', 'email')],
                 'department' => ['nullable', 'string', 'max:120'],
                 'designation' => ['nullable', 'string', 'max:120'],
                 'phone' => ['nullable', 'string', 'max:40'],
                 'status' => ['nullable', Rule::enum(EmployeeStatus::class)],
             ]);
+
+            $validator->after(function ($validator) use ($row, $emailCounts): void {
+                $email = strtolower(trim((string) ($row['email'] ?? '')));
+
+                if ($email !== '' && ($emailCounts[$email] ?? 0) > 1) {
+                    $validator->errors()->add('email', 'The email must not be duplicated in the uploaded file.');
+                }
+            });
 
             if ($validator->fails()) {
                 $errors[] = ['row' => $index + 2, 'messages' => $validator->errors()->all()];

@@ -10,7 +10,7 @@
             <div><p>Employee management</p><h2>All Employees</h2></div>
             <div class="button-row">
                 <button class="btn btn-secondary action-icon-btn action-icon-neutral" type="button" aria-label="Show filters" data-tooltip="Filters" data-filter-toggle aria-expanded="{{ request()->hasAny(['search', 'status']) ? 'true' : 'false' }}"><x-dashboard.icon name="funnel" /></button>
-                <a href="{{ route('imports.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Import Employees" data-tooltip="Import Employees"><x-dashboard.icon name="upload" /></a>
+                <a href="{{ route('imports.employees.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Import Employees" data-tooltip="Import Employees"><x-dashboard.icon name="upload" /></a>
                 <a href="{{ route('employees.create') }}" class="btn btn-primary btn-lg action-icon-btn action-icon-edit" aria-label="Add Employee" data-tooltip="Add Employee"><x-dashboard.icon name="plus" /></a>
             </div>
         </div>
@@ -39,7 +39,7 @@
                                     <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-edit" href="{{ route('employees.edit', $employee) }}" aria-label="Edit {{ $employee->name_en }}" data-tooltip="Edit">
                                         <x-dashboard.icon name="edit" />
                                     </a>
-                                    <form method="POST" action="{{ route('employees.destroy', $employee) }}">
+                                    <form method="POST" action="{{ route('employees.destroy', $employee) }}" data-confirm-delete>
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-danger table-action-btn action-icon-btn action-icon-delete" type="submit" aria-label="Delete {{ $employee->name_en }}" data-tooltip="Delete">

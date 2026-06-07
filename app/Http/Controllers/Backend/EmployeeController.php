@@ -58,10 +58,6 @@ class EmployeeController extends Controller
 
     public function destroy(Employee $employee): RedirectResponse
     {
-        if ($employee->assignments()->exists()) {
-            return back()->with('warning', 'Employees with asset history cannot be deleted. Change the status instead.');
-        }
-
         $employee->delete();
 
         return redirect()->route('employees.index')->with('success', 'Employee deleted successfully.');

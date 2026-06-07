@@ -5,6 +5,7 @@
 @section('eyebrow', 'Assets')
 
 @section('content')
+    @php($assetImportErrors = $errors->getBag('assetImport'))
     <section class="dashboard-panel client-listing-panel {{ request()->hasAny(['search', 'status', 'category']) ? 'is-open' : '' }}" data-listing-filter>
         <div class="panel-heading">
             <div><p>Asset management</p><h2>All Assets</h2></div>
@@ -12,7 +13,7 @@
                 <a href="{{ route('asset-brands.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Brands" data-tooltip="Brands"><x-dashboard.icon name="tag" /></a>
                 <a href="{{ route('asset-categories.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Categories" data-tooltip="Categories"><x-dashboard.icon name="folder" /></a>
                 <button class="btn btn-secondary action-icon-btn action-icon-neutral" type="button" aria-label="Show filters" data-tooltip="Filters" data-filter-toggle aria-expanded="{{ request()->hasAny(['search', 'status', 'category']) ? 'true' : 'false' }}"><x-dashboard.icon name="funnel" /></button>
-                <a href="{{ route('imports.index') }}" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Import Assets" data-tooltip="Import Assets"><x-dashboard.icon name="upload" /></a>
+                <button type="button" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Import Assets" data-tooltip="Import Assets" data-import-open="assets"><x-dashboard.icon name="upload" /></button>
                 <a href="{{ route('assets.create') }}" class="btn btn-primary btn-lg action-icon-btn action-icon-edit" aria-label="Add Asset" data-tooltip="Add Asset"><x-dashboard.icon name="plus" /></a>
             </div>
         </div>
@@ -42,7 +43,7 @@
                                     <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-edit" href="{{ route('assets.edit', $asset) }}" aria-label="Edit {{ $asset->name }}" data-tooltip="Edit">
                                         <x-dashboard.icon name="edit" />
                                     </a>
-                                    <form method="POST" action="{{ route('assets.destroy', $asset) }}">
+                                    <form method="POST" action="{{ route('assets.destroy', $asset) }}" data-confirm-delete>
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-danger table-action-btn action-icon-btn action-icon-delete" type="submit" aria-label="Delete {{ $asset->name }}" data-tooltip="Delete">
@@ -60,4 +61,36 @@
         </div>
         <div class="table-footer">{{ $assets->links() }}</div>
     </section>
+
+    <div class="modal-backdrop {{ $assetImportErrors->isNotEmpty() ? 'is-open' : '' }}" data-import-modal="assets" {{ $assetImportErrors->isNotEmpty() ? '' : 'hidden' }}>
+        <div class="modal-card import-modal" role="dialog" aria-modal="true" aria-labelledby="asset-import-title">
+            <div class="modal-heading">
+                <div>
+                    <p>Asset import</p>
+                    <h2 id="asset-import-title">Upload Assets</h2>
+                </div>
+                <button type="button" class="action-icon-btn action-icon-neutral" aria-label="Close import popup" data-modal-close><x-dashboard.icon name="x" /></button>
+            </div>
+            <form class="settings-form" method="POST" action="{{ route('imports.assets') }}" enctype="multipart/form-data">
+                @csrf
+                <label class="form-field file-field {{ $assetImportErrors->has('file') ? 'has-error' : '' }}"><span>Asset Excel / CSV</span><input type="file" name="file" accept=".xlsx,.csv,text/csv">@if ($assetImportErrors->has('file'))<small>{{ $assetImportErrors->first('file') }}</small>@endif</label>
+                @if ($assetImportErrors->has('rows'))
+                    <div class="import-validation" role="alert">
+                        <strong>Asset import validation failed</strong>
+                        @foreach ($assetImportErrors->get('rows') as $message)
+                            <p>{{ $message }}</p>
+                        @endforeach
+                    </div>
+                @endif
+                <div class="import-help">
+                    <span>Required: asset_tag, name, category. CSV/XLSX only, up to 5 MB. Tags and serial numbers must be unique.</span>
+                    <a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'assets') }}"><x-dashboard.icon name="download" /> Download Template</a>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" type="button" data-modal-close>Cancel</button>
+                    <button class="btn btn-primary" type="submit">Import Assets</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection

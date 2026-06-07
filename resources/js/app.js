@@ -6,6 +6,9 @@ const profileImagePreview = document.querySelector('[data-profile-image-preview]
 const forms = document.querySelectorAll('form');
 const listingFilters = document.querySelectorAll('[data-listing-filter]');
 const tooltipTargets = document.querySelectorAll('[data-tooltip]');
+const importOpenButtons = document.querySelectorAll('[data-import-open]');
+const importModals = document.querySelectorAll('[data-import-modal]');
+const confirmModal = document.querySelector('[data-confirm-modal]');
 const formControls = document.querySelectorAll(
     '.form-field input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), .form-field select, .form-field textarea'
 );
@@ -425,8 +428,111 @@ listingFilters.forEach((filter) => {
     });
 });
 
+const closeModal = (modal) => {
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove('is-open');
+    window.setTimeout(() => {
+        if (!modal.classList.contains('is-open')) {
+            modal.hidden = true;
+        }
+    }, 160);
+};
+
+const openModal = (modal) => {
+    if (!modal) {
+        return;
+    }
+
+    modal.hidden = false;
+    requestAnimationFrame(() => {
+        modal.classList.add('is-open');
+        modal.querySelector('input, select, textarea, button, a')?.focus();
+    });
+};
+
+importOpenButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        openModal(document.querySelector(`[data-import-modal="${button.dataset.importOpen}"]`));
+    });
+});
+
+importModals.forEach((modal) => {
+    modal.querySelectorAll('[data-modal-close]').forEach((button) => {
+        button.addEventListener('click', () => closeModal(modal));
+    });
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal(modal);
+        }
+    });
+});
+
+if (confirmModal) {
+    const message = confirmModal.querySelector('[data-confirm-message]');
+    const accept = confirmModal.querySelector('[data-confirm-accept]');
+    const cancelButtons = confirmModal.querySelectorAll('[data-confirm-cancel]');
+    let pendingDeleteForm = null;
+
+    document.querySelectorAll('form[data-confirm-delete]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (form.dataset.confirmed === 'true') {
+                return;
+            }
+
+            event.preventDefault();
+            pendingDeleteForm = form;
+            if (message) {
+                message.textContent = 'Are you sure you want to delete this item?';
+            }
+            openModal(confirmModal);
+        });
+    });
+
+    accept?.addEventListener('click', () => {
+        if (!pendingDeleteForm) {
+            closeModal(confirmModal);
+            return;
+        }
+
+        pendingDeleteForm.dataset.confirmed = 'true';
+        closeModal(confirmModal);
+        pendingDeleteForm.requestSubmit();
+    });
+
+    cancelButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            pendingDeleteForm = null;
+            closeModal(confirmModal);
+        });
+    });
+
+    confirmModal.addEventListener('click', (event) => {
+        if (event.target === confirmModal) {
+            pendingDeleteForm = null;
+            closeModal(confirmModal);
+        }
+    });
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') {
+        return;
+    }
+
+    importModals.forEach(closeModal);
+    closeModal(confirmModal);
+});
+
 forms.forEach((form) => {
-    form.addEventListener('submit', () => {
+    form.addEventListener('submit', (event) => {
+        if (event.defaultPrevented) {
+            return;
+        }
+
         if (form.dataset.submitting === 'true') {
             return;
         }

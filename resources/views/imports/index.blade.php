@@ -5,12 +5,23 @@
 @section('eyebrow', 'Imports')
 
 @section('content')
+    @php($employeeImportErrors = $errors->getBag('employeeImport'))
+    @php($assetImportErrors = $errors->getBag('assetImport'))
     <section class="split-panel">
         <article class="dashboard-panel">
             <div class="panel-heading"><div><p>CSV import</p><h2>Upload Employees</h2></div></div>
             <form class="settings-form" method="POST" action="{{ route('imports.employees') }}" enctype="multipart/form-data">
                 @csrf
-                <label class="form-field file-field"><span>Employee Excel / CSV</span><input type="file" name="file" accept=".xlsx,.csv,text/csv">@error('file')<small>{{ $message }}</small>@enderror</label>
+                <label class="form-field file-field {{ $employeeImportErrors->has('file') ? 'has-error' : '' }}"><span>Employee Excel / CSV</span><input type="file" name="file" accept=".xlsx,.csv,text/csv">@if ($employeeImportErrors->has('file'))<small>{{ $employeeImportErrors->first('file') }}</small>@endif</label>
+                @if ($employeeImportErrors->has('rows'))
+                    <div class="import-validation" role="alert">
+                        <strong>Employee import validation failed</strong>
+                        @foreach ($employeeImportErrors->get('rows') as $message)
+                            <p>{{ $message }}</p>
+                        @endforeach
+                    </div>
+                @endif
+                <div class="import-help"><span>Required: employee_code, name_en, email. CSV/XLSX only, up to 5 MB. Emails must be unique.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'employees') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
                 <div class="form-actions"><button class="btn btn-primary" type="submit">Import Employees</button></div>
             </form>
         </article>
@@ -18,7 +29,16 @@
             <div class="panel-heading"><div><p>CSV import</p><h2>Upload Assets</h2></div></div>
             <form class="settings-form" method="POST" action="{{ route('imports.assets') }}" enctype="multipart/form-data">
                 @csrf
-                <label class="form-field file-field"><span>Asset Excel / CSV</span><input type="file" name="file" accept=".xlsx,.csv,text/csv">@error('file')<small>{{ $message }}</small>@enderror</label>
+                <label class="form-field file-field {{ $assetImportErrors->has('file') ? 'has-error' : '' }}"><span>Asset Excel / CSV</span><input type="file" name="file" accept=".xlsx,.csv,text/csv">@if ($assetImportErrors->has('file'))<small>{{ $assetImportErrors->first('file') }}</small>@endif</label>
+                @if ($assetImportErrors->has('rows'))
+                    <div class="import-validation" role="alert">
+                        <strong>Asset import validation failed</strong>
+                        @foreach ($assetImportErrors->get('rows') as $message)
+                            <p>{{ $message }}</p>
+                        @endforeach
+                    </div>
+                @endif
+                <div class="import-help"><span>Required: asset_tag, name, category. CSV/XLSX only, up to 5 MB. Tags and serial numbers must be unique.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'assets') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
                 <div class="form-actions"><button class="btn btn-primary" type="submit">Import Assets</button></div>
             </form>
         </article>

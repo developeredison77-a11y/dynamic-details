@@ -15,8 +15,7 @@ class AssetBrandRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:120', Rule::unique('asset_brands', 'name')->ignore($this->route('brand')?->id)],
-            'is_active' => ['nullable', 'boolean'],
+            'name' => ['required', 'string', 'max:120', Rule::unique('asset_brands', 'name')->ignore($this->route('assetBrand')?->id)],
         ];
     }
 }
