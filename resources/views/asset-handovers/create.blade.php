@@ -16,7 +16,7 @@
                 <label class="form-field"><span>Expected Return Date</span><input type="date" name="expected_return_date" value="{{ old('expected_return_date') }}">@error('expected_return_date')<small>{{ $message }}</small>@enderror</label>
                 <label class="form-field form-field-wide"><span>Handover Notes</span><textarea name="handover_notes">{{ old('handover_notes') }}</textarea>@error('handover_notes')<small>{{ $message }}</small>@enderror</label>
             </div>
-            <div class="form-actions"><a class="btn btn-outline" href="{{ route('asset-handovers.index') }}">Cancel</a><button class="btn btn-primary btn-lg" type="submit">Generate Handover Form</button></div>
+            <div class="form-actions"><a class="btn btn-outline" href="{{ route('asset-handovers.index') }}">Cancel</a><button class="btn btn-primary btn-lg" type="submit">Save</button></div>
         </form>
     </section>
 @endsection

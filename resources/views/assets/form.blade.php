@@ -23,7 +23,7 @@
                 <label class="form-field"><span>Purchase Value</span><input type="number" step="0.01" name="purchase_value" value="{{ old('purchase_value', $asset->purchase_value) }}">@error('purchase_value')<small>{{ $message }}</small>@enderror</label>
                 <label class="form-field form-field-wide"><span>Notes</span><textarea name="notes">{{ old('notes', $asset->notes) }}</textarea>@error('notes')<small>{{ $message }}</small>@enderror</label>
             </div>
-            <div class="form-actions"><a class="btn btn-outline" href="{{ route('assets.index') }}">Cancel</a><button class="btn btn-primary btn-lg" type="submit">Save Asset</button></div>
+            <div class="form-actions"><a class="btn btn-outline" href="{{ route('assets.index') }}">Cancel</a><button class="btn btn-primary btn-lg" type="submit">{{ $asset->exists ? 'Update' : 'Save' }}</button></div>
         </form>
     </section>
 @endsection

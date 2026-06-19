@@ -25,7 +25,7 @@
                 <label class="form-field"><span>Status</span><select name="status">@foreach($statuses as $status)<option value="{{ $status->value }}" @selected(old('status', $employee->status?->value ?? 'active') === $status->value)>{{ $status->label() }}</option>@endforeach</select>@error('status')<small>{{ $message }}</small>@enderror</label>
                 <label class="form-field form-field-wide"><span>Notes</span><textarea name="notes">{{ old('notes', $employee->notes) }}</textarea>@error('notes')<small>{{ $message }}</small>@enderror</label>
             </div>
-            <div class="form-actions"><a class="btn btn-outline" href="{{ route('employees.index') }}">Cancel</a><button class="btn btn-primary btn-lg" type="submit">Save Employee</button></div>
+            <div class="form-actions"><a class="btn btn-outline" href="{{ route('employees.index') }}">Cancel</a><button class="btn btn-primary btn-lg" type="submit">{{ $employee->exists ? 'Update' : 'Save' }}</button></div>
         </form>
     </section>
 @endsection

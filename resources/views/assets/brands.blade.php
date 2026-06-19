@@ -20,7 +20,7 @@
                 @if($isEditing)
                     <a class="btn btn-secondary" href="{{ route('asset-brands.index') }}">Cancel</a>
                 @endif
-                <button class="btn btn-primary" type="submit">{{ $isEditing ? 'Update Brand' : 'Save Brand' }}</button>
+                <button class="btn btn-primary" type="submit">{{ $isEditing ? 'Update' : 'Save' }}</button>
             </div>
         </form>
     </section>

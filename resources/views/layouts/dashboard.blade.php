@@ -133,12 +133,6 @@
                     </x-dashboard.nav-group>
                 @endif
 
-                @if ($user?->canAccess('roles.view'))
-                    <x-dashboard.nav-group icon="settings" label="Access Control" :active="request()->routeIs('roles.*')">
-                        <x-dashboard.sub-link :href="route('roles.index')" :active="request()->routeIs('roles.*')">Roles & Permissions</x-dashboard.sub-link>
-                    </x-dashboard.nav-group>
-                @endif
-
                 @if ($user?->canAccess('assets.view') || $user?->canAccess('assets.create') || $user?->canAccess('assets.import') || $user?->canAccess('asset-brands.manage') || $user?->canAccess('asset-categories.manage'))
                     <x-dashboard.nav-group icon="pages" label="Asset Master" :active="request()->routeIs('assets.*', 'asset-brands.*', 'asset-categories.*', 'imports.assets.index')">
                         @if ($user?->canAccess('assets.view'))
@@ -181,6 +175,12 @@
                         @if ($user?->canAccess('reports.view'))
                             <x-dashboard.sub-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">Reports</x-dashboard.sub-link>
                         @endif
+                    </x-dashboard.nav-group>
+                @endif
+
+                @if ($user?->canAccess('roles.view'))
+                    <x-dashboard.nav-group icon="settings" label="Access Control" :active="request()->routeIs('roles.*')">
+                        <x-dashboard.sub-link :href="route('roles.index')" :active="request()->routeIs('roles.*')">Roles & Permissions</x-dashboard.sub-link>
                     </x-dashboard.nav-group>
                 @endif
 

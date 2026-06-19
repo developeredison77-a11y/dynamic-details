@@ -58,42 +58,50 @@
                 </div>
 
                 @if ($canAssignPermissions)
-                    <div class="permission-toolbar">
-                        <button class="btn btn-secondary btn-sm" type="button" data-permission-select="all">Select All</button>
-                        <button class="btn btn-outline btn-sm" type="button" data-permission-select="none">Clear All</button>
-                    </div>
-
-                    <div class="permission-group-grid">
-                        @foreach ($permissionGroups as $group => $permissions)
-                            @php($groupKey = \Illuminate\Support\Str::slug($group))
-                            <div class="permission-group-card">
-                                <div class="permission-group-heading">
-                                    <label class="check-field permission-group-toggle">
-                                        <input type="checkbox" data-permission-group-toggle="{{ $groupKey }}">
-                                        <span>{{ $group }}</span>
-                                    </label>
-                                    <small>{{ $permissions->count() }} permissions</small>
-                                </div>
-                                <div class="permission-checkbox-list">
-                                    @foreach ($permissions as $permission)
-                                        <label class="check-field permission-check">
-                                            <input type="checkbox" name="permissions[]" value="{{ $permission->id }}" data-permission-group="{{ $groupKey }}" @checked($selectedPermissionIds->contains((string) $permission->id))>
-                                            <span>
-                                                <strong>{{ $permission->name }}</strong>
-                                                <small>{{ $permission->key }}</small>
-                                            </span>
-                                        </label>
-                                    @endforeach
-                                </div>
+                    <div class="permission-section">
+                        <div class="permission-toolbar">
+                            <div>
+                                <span>Bulk Permissions</span>
+                                <small>Select permissions by module or apply a full role preset quickly.</small>
                             </div>
-                        @endforeach
+                            <div class="permission-bulk-actions" role="group" aria-label="Bulk permission actions">
+                                <button type="button" data-permission-select="all">Select All</button>
+                                <button type="button" data-permission-select="none">Clear All</button>
+                            </div>
+                        </div>
+
+                        <div class="permission-group-grid">
+                            @foreach ($permissionGroups as $group => $permissions)
+                                @php($groupKey = \Illuminate\Support\Str::slug($group))
+                                <div class="permission-group-card">
+                                    <div class="permission-group-heading">
+                                        <label class="check-field permission-group-toggle">
+                                            <input type="checkbox" data-permission-group-toggle="{{ $groupKey }}">
+                                            <span>{{ $group }}</span>
+                                        </label>
+                                        <small>{{ $permissions->count() }} permissions</small>
+                                    </div>
+                                    <div class="permission-checkbox-list">
+                                        @foreach ($permissions as $permission)
+                                            <label class="check-field permission-check">
+                                                <input type="checkbox" name="permissions[]" value="{{ $permission->id }}" data-permission-group="{{ $groupKey }}" @checked($selectedPermissionIds->contains((string) $permission->id))>
+                                                <span>
+                                                    <strong>{{ $permission->name }}</strong>
+                                                    <small>{{ $permission->key }}</small>
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                     @error('permissions')<small class="form-error">{{ $message }}</small>@enderror
                 @endif
 
                 <div class="form-actions">
                     <a class="btn btn-outline" href="{{ route('roles.index') }}">Cancel</a>
-                    <button class="btn btn-primary btn-lg" type="submit">{{ $isEditing ? 'Update Role' : 'Save Role' }}</button>
+                    <button class="btn btn-primary btn-lg" type="submit">{{ $isEditing ? 'Update' : 'Save' }}</button>
                 </div>
             </form>
         </section>

@@ -63,7 +63,7 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary btn-lg">Save Settings</button>
+                <button type="submit" class="btn btn-primary btn-lg">Save</button>
             </div>
         </form>
     </section>

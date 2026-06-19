@@ -33,7 +33,7 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
 });
 
-Route::middleware('auth')->prefix('dashboard')->group(function (): void {
+Route::middleware('auth')->group(function (): void {
     Route::get('/', [DashboardController::class, 'index'])->middleware('permission:dashboard.view')->name('dashboard');
     Route::get('/clients', [ClientController::class, 'index'])->middleware('permission:clients.view')->name('clients.index');
 
@@ -95,6 +95,10 @@ Route::middleware('auth')->prefix('dashboard')->group(function (): void {
     Route::get('/settings', [SettingsController::class, 'edit'])->middleware('permission:settings.view')->name('settings.edit');
     Route::put('/settings', [SettingsController::class, 'update'])->middleware('permission:settings.update')->name('settings.update');
 });
+
+Route::middleware('auth')->get('/dashboard/{path?}', function (?string $path = null) {
+    return redirect('/'.ltrim((string) $path, '/'));
+})->where('path', '.*');
 
 Route::post('/logout', function (Request $request) {
     Auth::guard('web')->logout();

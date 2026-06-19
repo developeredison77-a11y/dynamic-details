@@ -39,7 +39,7 @@
         </form>
         <div class="responsive-table">
             <table class="advanced-table">
-                <thead><tr><th>Employee</th><th>Arabic Name</th><th>Department</th><th>Role</th><th>Email</th><th>Status</th><th>Assets</th><th>Action</th></tr></thead>
+                <thead><tr><th>Employee</th><th>Arabic Name</th><th>Department</th><th>Role</th><th>Status</th><th>Assets</th><th>Action</th></tr></thead>
                 <tbody>
                     @forelse ($employees as $employee)
                         <tr>
@@ -47,7 +47,6 @@
                             <td dir="rtl">{{ $employee->name_ar ?: '-' }}</td>
                             <td>{{ $employee->department ?: '-' }}</td>
                             <td>{{ $employee->role?->name ?? $employee->designation ?? '-' }}</td>
-                            <td>{{ $employee->email ?: '-' }}</td>
                             <td><span class="status-badge status-{{ $employee->status->value }}">{{ $employee->status->label() }}</span></td>
                             <td>{{ $employee->active_assignments_count }}</td>
                             <td>
@@ -70,7 +69,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td class="table-empty" colspan="8">No employees found.</td></tr>
+                        <tr><td class="table-empty" colspan="7">No employees found.</td></tr>
                     @endforelse
                 </tbody>
             </table>
