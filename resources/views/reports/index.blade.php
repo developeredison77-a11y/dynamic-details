@@ -6,9 +6,11 @@
 
 @section('content')
     <section class="analytics-grid">
-        <a class="analytics-card report-link" href="{{ route('reports.export', 'assets') }}"><div class="analytics-card-main"><span>Export</span><strong>Assets</strong></div><div class="analytics-card-footer"><small>CSV / Excel compatible</small></div></a>
-        <a class="analytics-card report-link" href="{{ route('reports.export', 'employees') }}"><div class="analytics-card-main"><span>Export</span><strong>Employees</strong></div><div class="analytics-card-footer"><small>CSV / Excel compatible</small></div></a>
-        <a class="analytics-card report-link" href="{{ route('reports.export', 'handovers') }}"><div class="analytics-card-main"><span>Export</span><strong>Handovers</strong></div><div class="analytics-card-footer"><small>CSV / Excel compatible</small></div></a>
+        @if (auth()->user()?->canAccess('reports.export'))
+            <a class="analytics-card report-link" href="{{ route('reports.export', 'assets') }}"><div class="analytics-card-main"><span>Export</span><strong>Assets</strong></div><div class="analytics-card-footer"><small>CSV / Excel compatible</small></div></a>
+            <a class="analytics-card report-link" href="{{ route('reports.export', 'employees') }}"><div class="analytics-card-main"><span>Export</span><strong>Employees</strong></div><div class="analytics-card-footer"><small>CSV / Excel compatible</small></div></a>
+            <a class="analytics-card report-link" href="{{ route('reports.export', 'handovers') }}"><div class="analytics-card-main"><span>Export</span><strong>Handovers</strong></div><div class="analytics-card-footer"><small>CSV / Excel compatible</small></div></a>
+        @endif
         <button class="analytics-card report-link print-card" onclick="window.print()"><div class="analytics-card-main"><span>Export</span><strong>PDF</strong></div><div class="analytics-card-footer"><small>Print current report</small></div></button>
     </section>
     <section class="dashboard-panel">

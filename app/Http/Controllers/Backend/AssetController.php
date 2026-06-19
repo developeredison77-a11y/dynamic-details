@@ -22,7 +22,12 @@ class AssetController extends Controller
 
         return view('assets.index', [
             'assets' => Asset::query()
-                ->with(['brand', 'category', 'activeAssignment.employee'])
+                ->with([
+                    'brand:id,name',
+                    'category:id,name',
+                    'activeAssignment:id,asset_id,employee_id',
+                    'activeAssignment.employee:id,name_en',
+                ])
                 ->search($request->string('search')->toString())
                 ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
                 ->when($request->filled('category'), fn ($query) => $query->where('asset_category_id', $request->integer('category')))
@@ -30,8 +35,8 @@ class AssetController extends Controller
                 ->latest()
                 ->paginate($perPage)
                 ->withQueryString(),
-            'brands' => AssetBrand::query()->where('is_active', true)->orderBy('name')->get(),
-            'categories' => AssetCategory::query()->orderBy('name')->get(),
+            'brands' => AssetBrand::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'categories' => AssetCategory::query()->orderBy('name')->get(['id', 'name']),
             'statuses' => AssetStatus::cases(),
         ]);
     }
@@ -75,8 +80,8 @@ class AssetController extends Controller
     {
         return [
             'asset' => $asset,
-            'brands' => AssetBrand::query()->where('is_active', true)->orderBy('name')->get(),
-            'categories' => AssetCategory::query()->where('is_active', true)->orderBy('name')->get(),
+            'brands' => AssetBrand::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'categories' => AssetCategory::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'statuses' => AssetStatus::cases(),
             'conditions' => AssetCondition::cases(),
         ];

@@ -16,8 +16,21 @@ class AssetReturnController extends Controller
     public function index(): View
     {
         return view('asset-returns.index', [
-            'assignments' => AssetAssignment::query()->assigned()->with(['employee', 'asset'])->latest()->get(),
-            'returns' => AssetReturn::query()->with(['employee', 'asset'])->latest()->paginate(12),
+            'assignments' => AssetAssignment::query()
+                ->assigned()
+                ->with([
+                    'employee:id,employee_code,name_en',
+                    'asset:id,asset_tag,name',
+                ])
+                ->latest()
+                ->get(['id', 'employee_id', 'asset_id', 'status', 'created_at']),
+            'returns' => AssetReturn::query()
+                ->with([
+                    'employee:id,name_en',
+                    'asset:id,asset_tag',
+                ])
+                ->latest()
+                ->paginate(12),
             'conditions' => AssetCondition::cases(),
         ]);
     }
@@ -35,6 +48,11 @@ class AssetReturnController extends Controller
 
     public function print(AssetReturn $assetReturn): View
     {
-        return view('asset-returns.print', ['return' => $assetReturn->load(['employee', 'asset.brand', 'asset.category'])]);
+        return view('asset-returns.print', ['return' => $assetReturn->load([
+            'employee:id,employee_code,name_en',
+            'asset:id,asset_brand_id,asset_category_id,asset_tag,name,serial_number',
+            'asset.brand:id,name',
+            'asset.category:id,name',
+        ])]);
     }
 }

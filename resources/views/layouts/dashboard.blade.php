@@ -20,6 +20,11 @@
             ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Employee Master'],
         ],
+        request()->routeIs('roles.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Access Control'],
+            ['label' => 'Roles & Permissions'],
+        ],
         request()->routeIs('assets.*', 'asset-brands.*', 'asset-categories.*') => [
             ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Asset Master'],
@@ -108,38 +113,82 @@
             </div>
 
             <nav class="sidebar-nav" aria-label="Dashboard navigation">
-                <x-dashboard.nav-link :href="route('dashboard')" icon="dashboard" :active="request()->routeIs('dashboard')">
-                    Dashboard
-                </x-dashboard.nav-link>
+                @if ($user?->canAccess('dashboard.view'))
+                    <x-dashboard.nav-link :href="route('dashboard')" icon="dashboard" :active="request()->routeIs('dashboard')">
+                        Dashboard
+                    </x-dashboard.nav-link>
+                @endif
 
-                <x-dashboard.nav-group icon="users" label="Employee Master" :active="request()->routeIs('employees.*', 'imports.employees.index')">
-                    <x-dashboard.sub-link :href="route('employees.index')" :active="request()->routeIs('employees.index')">All Employees</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('employees.create')" :active="request()->routeIs('employees.create')">Add Employee</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('imports.employees.index')" :active="request()->routeIs('imports.employees.index')">Import Employees</x-dashboard.sub-link>
-                </x-dashboard.nav-group>
+                @if ($user?->canAccess('employees.view') || $user?->canAccess('employees.create') || $user?->canAccess('employees.import'))
+                    <x-dashboard.nav-group icon="users" label="Employee Master" :active="request()->routeIs('employees.*', 'imports.employees.index')">
+                        @if ($user?->canAccess('employees.view'))
+                            <x-dashboard.sub-link :href="route('employees.index')" :active="request()->routeIs('employees.index')">All Employees</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('employees.create'))
+                            <x-dashboard.sub-link :href="route('employees.create')" :active="request()->routeIs('employees.create')">Add Employee</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('employees.import'))
+                            <x-dashboard.sub-link :href="route('imports.employees.index')" :active="request()->routeIs('imports.employees.index')">Import Employees</x-dashboard.sub-link>
+                        @endif
+                    </x-dashboard.nav-group>
+                @endif
 
-                <x-dashboard.nav-group icon="pages" label="Asset Master" :active="request()->routeIs('assets.*', 'asset-brands.*', 'asset-categories.*', 'imports.assets.index')">
-                    <x-dashboard.sub-link :href="route('assets.index')" :active="request()->routeIs('assets.index')">All Assets</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('assets.create')" :active="request()->routeIs('assets.create')">Add Asset</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('imports.assets.index')" :active="request()->routeIs('imports.assets.index')">Import Assets</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('asset-brands.index')" :active="request()->routeIs('asset-brands.*')">Brands</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('asset-categories.index')" :active="request()->routeIs('asset-categories.*')">Categories</x-dashboard.sub-link>
-                </x-dashboard.nav-group>
+                @if ($user?->canAccess('roles.view'))
+                    <x-dashboard.nav-group icon="settings" label="Access Control" :active="request()->routeIs('roles.*')">
+                        <x-dashboard.sub-link :href="route('roles.index')" :active="request()->routeIs('roles.*')">Roles & Permissions</x-dashboard.sub-link>
+                    </x-dashboard.nav-group>
+                @endif
 
-                <x-dashboard.nav-group icon="dashboard" label="Asset Operations" :active="request()->routeIs('asset-handovers.*', 'asset-returns.*', 'declarations.*')">
-                    <x-dashboard.sub-link :href="route('asset-handovers.index')" :active="request()->routeIs('asset-handovers.*')">Handovers</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('asset-returns.index')" :active="request()->routeIs('asset-returns.*')">Returns</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('declarations.index')" :active="request()->routeIs('declarations.*')">Declarations</x-dashboard.sub-link>
-                </x-dashboard.nav-group>
+                @if ($user?->canAccess('assets.view') || $user?->canAccess('assets.create') || $user?->canAccess('assets.import') || $user?->canAccess('asset-brands.manage') || $user?->canAccess('asset-categories.manage'))
+                    <x-dashboard.nav-group icon="pages" label="Asset Master" :active="request()->routeIs('assets.*', 'asset-brands.*', 'asset-categories.*', 'imports.assets.index')">
+                        @if ($user?->canAccess('assets.view'))
+                            <x-dashboard.sub-link :href="route('assets.index')" :active="request()->routeIs('assets.index')">All Assets</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('assets.create'))
+                            <x-dashboard.sub-link :href="route('assets.create')" :active="request()->routeIs('assets.create')">Add Asset</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('assets.import'))
+                            <x-dashboard.sub-link :href="route('imports.assets.index')" :active="request()->routeIs('imports.assets.index')">Import Assets</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('asset-brands.manage'))
+                            <x-dashboard.sub-link :href="route('asset-brands.index')" :active="request()->routeIs('asset-brands.*')">Brands</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('asset-categories.manage'))
+                            <x-dashboard.sub-link :href="route('asset-categories.index')" :active="request()->routeIs('asset-categories.*')">Categories</x-dashboard.sub-link>
+                        @endif
+                    </x-dashboard.nav-group>
+                @endif
 
-                <x-dashboard.nav-group icon="pages" label="Data & Reports" :active="request()->routeIs('imports.*', 'reports.*')">
-                    <x-dashboard.sub-link :href="route('imports.index')" :active="request()->routeIs('imports.index')">Imports</x-dashboard.sub-link>
-                    <x-dashboard.sub-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">Reports</x-dashboard.sub-link>
-                </x-dashboard.nav-group>
+                @if ($user?->canAccess('asset-handovers.view') || $user?->canAccess('asset-returns.view') || $user?->canAccess('declarations.view'))
+                    <x-dashboard.nav-group icon="dashboard" label="Asset Operations" :active="request()->routeIs('asset-handovers.*', 'asset-returns.*', 'declarations.*')">
+                        @if ($user?->canAccess('asset-handovers.view'))
+                            <x-dashboard.sub-link :href="route('asset-handovers.index')" :active="request()->routeIs('asset-handovers.*')">Handovers</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('asset-returns.view'))
+                            <x-dashboard.sub-link :href="route('asset-returns.index')" :active="request()->routeIs('asset-returns.*')">Returns</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('declarations.view'))
+                            <x-dashboard.sub-link :href="route('declarations.index')" :active="request()->routeIs('declarations.*')">Declarations</x-dashboard.sub-link>
+                        @endif
+                    </x-dashboard.nav-group>
+                @endif
 
-                <x-dashboard.nav-link :href="route('settings.edit')" icon="settings" :active="request()->routeIs('settings.*')">
-                    Settings
-                </x-dashboard.nav-link>
+                @if ($user?->canAccess('imports.view') || $user?->canAccess('reports.view'))
+                    <x-dashboard.nav-group icon="pages" label="Data & Reports" :active="request()->routeIs('imports.*', 'reports.*')">
+                        @if ($user?->canAccess('imports.view'))
+                            <x-dashboard.sub-link :href="route('imports.index')" :active="request()->routeIs('imports.index')">Imports</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('reports.view'))
+                            <x-dashboard.sub-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">Reports</x-dashboard.sub-link>
+                        @endif
+                    </x-dashboard.nav-group>
+                @endif
+
+                @if ($user?->canAccess('settings.view'))
+                    <x-dashboard.nav-link :href="route('settings.edit')" icon="settings" :active="request()->routeIs('settings.*')">
+                        Settings
+                    </x-dashboard.nav-link>
+                @endif
             </nav>
         </aside>
 
@@ -165,9 +214,11 @@
                             <x-dashboard.icon name="sun" class="theme-sun" />
                             <x-dashboard.icon name="moon" class="theme-moon" />
                         </button>
-                        <a href="{{ route('settings.edit') }}" class="btn btn-icon icon-button action-icon-btn action-icon-neutral" aria-label="Settings" data-tooltip="Settings">
-                            <x-dashboard.icon name="settings" />
-                        </a>
+                        @if ($user?->canAccess('settings.view'))
+                            <a href="{{ route('settings.edit') }}" class="btn btn-icon icon-button action-icon-btn action-icon-neutral" aria-label="Settings" data-tooltip="Settings">
+                                <x-dashboard.icon name="settings" />
+                            </a>
+                        @endif
                         <span class="topbar-divider" aria-hidden="true"></span>
 
                         <div class="user-menu" data-dropdown>

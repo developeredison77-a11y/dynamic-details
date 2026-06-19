@@ -100,7 +100,7 @@ class ImportController extends Controller
                 'name_ar',
                 'email',
                 'department',
-                'designation',
+                'role',
                 'phone',
                 'status',
             ],
@@ -116,6 +116,13 @@ class ImportController extends Controller
         ];
 
         abort_unless(isset($templates[$type]), 404);
+
+        $permission = match ($type) {
+            'employees' => 'employees.import',
+            'assets' => 'assets.import',
+        };
+
+        abort_unless(request()->user()?->canAccess($permission), 403);
 
         $content = implode(',', $templates[$type]).PHP_EOL;
 

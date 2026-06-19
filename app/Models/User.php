@@ -7,10 +7,11 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'profile_image'])]
+#[Fillable(['name', 'email', 'password', 'profile_image', 'role_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -28,5 +29,34 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function canAccess(string $permission): bool
+    {
+        if (! $this->relationLoaded('role')) {
+            $this->load('role.permissions');
+        }
+
+        $role = $this->role;
+
+        if ($role?->is_active === true && $role->hasPermission($permission)) {
+            return true;
+        }
+
+        return $this->role_id === null && $this->isBootstrapAdmin();
+    }
+
+    private function isBootstrapAdmin(): bool
+    {
+        if ($this->email === env('ADMIN_EMAIL', 'admin@example.com')) {
+            return true;
+        }
+
+        return static::query()->orderBy('id')->value('id') === $this->id;
     }
 }

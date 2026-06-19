@@ -6,10 +6,10 @@
 
 @php
     $metrics = [
-        ['label' => 'Total Assets', 'value' => $assetStats['total'], 'note' => 'All registered company assets', 'tone' => 'good', 'icon' => 'pages', 'href' => route('assets.index')],
-        ['label' => 'Total Employees', 'value' => $employeeTotal, 'note' => 'All employee records', 'tone' => 'info', 'icon' => 'users', 'href' => route('employees.index')],
-        ['label' => 'Total Brands', 'value' => $brandTotal, 'note' => 'Asset brand master records', 'tone' => 'warn', 'icon' => 'tag', 'href' => route('asset-brands.index')],
-        ['label' => 'Total Categories', 'value' => $categoryTotal, 'note' => 'Asset category master records', 'tone' => 'good', 'icon' => 'folder', 'href' => route('asset-categories.index')],
+        ['label' => 'Total Assets', 'value' => $assetStats['total'], 'note' => 'All registered company assets', 'tone' => 'good', 'icon' => 'pages', 'href' => route('assets.index'), 'permission' => 'assets.view'],
+        ['label' => 'Total Employees', 'value' => $employeeTotal, 'note' => 'All employee records', 'tone' => 'info', 'icon' => 'users', 'href' => route('employees.index'), 'permission' => 'employees.view'],
+        ['label' => 'Total Brands', 'value' => $brandTotal, 'note' => 'Asset brand master records', 'tone' => 'warn', 'icon' => 'tag', 'href' => route('asset-brands.index'), 'permission' => 'asset-brands.manage'],
+        ['label' => 'Total Categories', 'value' => $categoryTotal, 'note' => 'Asset category master records', 'tone' => 'good', 'icon' => 'folder', 'href' => route('asset-categories.index'), 'permission' => 'asset-categories.manage'],
     ];
     $maxHandover = max(1, $handoverTrend->max('value') ?: 1);
     $maxReturn = max(1, $returnTrend->max('value') ?: 1);
@@ -31,19 +31,36 @@
 @section('content')
     <section class="analytics-grid">
         @foreach ($metrics as $metric)
-            <a class="analytics-card analytics-card-link" href="{{ $metric['href'] }}">
-                <div class="analytics-card-top">
-                    <span class="metric-icon"><x-dashboard.icon :name="$metric['icon']" /></span>
-                    <em class="trend-pill trend-{{ $metric['tone'] }}">{{ $metric['value'] }}</em>
+            @php($canOpenMetric = auth()->user()?->canAccess($metric['permission']))
+            @if ($canOpenMetric)
+                <a class="analytics-card analytics-card-link" href="{{ $metric['href'] }}">
+                    <div class="analytics-card-top">
+                        <span class="metric-icon"><x-dashboard.icon :name="$metric['icon']" /></span>
+                        <em class="trend-pill trend-{{ $metric['tone'] }}">{{ $metric['value'] }}</em>
+                    </div>
+                    <div class="analytics-card-main">
+                        <span>{{ $metric['label'] }}</span>
+                        <strong>{{ $metric['value'] }}</strong>
+                    </div>
+                    <div class="analytics-card-footer">
+                        <small>{{ $metric['note'] }}</small>
+                    </div>
+                </a>
+            @else
+                <div class="analytics-card">
+                    <div class="analytics-card-top">
+                        <span class="metric-icon"><x-dashboard.icon :name="$metric['icon']" /></span>
+                        <em class="trend-pill trend-{{ $metric['tone'] }}">{{ $metric['value'] }}</em>
+                    </div>
+                    <div class="analytics-card-main">
+                        <span>{{ $metric['label'] }}</span>
+                        <strong>{{ $metric['value'] }}</strong>
+                    </div>
+                    <div class="analytics-card-footer">
+                        <small>{{ $metric['note'] }}</small>
+                    </div>
                 </div>
-                <div class="analytics-card-main">
-                    <span>{{ $metric['label'] }}</span>
-                    <strong>{{ $metric['value'] }}</strong>
-                </div>
-                <div class="analytics-card-footer">
-                    <small>{{ $metric['note'] }}</small>
-                </div>
-            </a>
+            @endif
         @endforeach
     </section>
 
@@ -90,52 +107,56 @@
             @endif
         </article>
 
-        <article class="dashboard-panel chart-panel reports-panel">
-            <div class="reports-panel-content">
-                <div class="panel-heading analytics-heading reports-heading">
-                    <div class="reports-title">
-                        <span class="reports-kicker">
-                            <x-dashboard.icon name="pages" />
-                            Exports
-                        </span>
-                        <h2>Reports</h2>
-                        <p>Download and manage export reports</p>
+        @if (auth()->user()?->canAccess('reports.view'))
+            <article class="dashboard-panel chart-panel reports-panel">
+                <div class="reports-panel-content">
+                    <div class="panel-heading analytics-heading reports-heading">
+                        <div class="reports-title">
+                            <span class="reports-kicker">
+                                <x-dashboard.icon name="pages" />
+                                Exports
+                            </span>
+                            <h2>Reports</h2>
+                            <p>Download and manage export reports</p>
+                        </div>
+                        <a href="{{ route('reports.index') }}" class="btn btn-primary reports-open-button action-icon-btn action-icon-neutral" aria-label="Open Reports" data-tooltip="Open Reports">
+                            <x-dashboard.icon name="download" />
+                        </a>
                     </div>
-                    <a href="{{ route('reports.index') }}" class="btn btn-primary reports-open-button action-icon-btn action-icon-neutral" aria-label="Open Reports" data-tooltip="Open Reports">
-                        <x-dashboard.icon name="download" />
-                    </a>
+                    @if (auth()->user()?->canAccess('reports.export'))
+                        <div class="reports-export-list">
+                            <a class="report-export-card" href="{{ route('reports.export', 'assets') }}">
+                                <span class="report-export-icon"><x-dashboard.icon name="file-csv" /></span>
+                                <span class="report-export-copy">
+                                    <span>Asset Report CSV</span>
+                                    <small>Asset inventory export</small>
+                                </span>
+                                <strong>CSV</strong>
+                                <span class="report-export-arrow"><x-dashboard.icon name="chevron-right" /></span>
+                            </a>
+                            <a class="report-export-card" href="{{ route('reports.export', 'employees') }}">
+                                <span class="report-export-icon"><x-dashboard.icon name="file-csv" /></span>
+                                <span class="report-export-copy">
+                                    <span>Employee Report CSV</span>
+                                    <small>Employee records export</small>
+                                </span>
+                                <strong>CSV</strong>
+                                <span class="report-export-arrow"><x-dashboard.icon name="chevron-right" /></span>
+                            </a>
+                            <a class="report-export-card" href="{{ route('reports.export', 'handovers') }}">
+                                <span class="report-export-icon"><x-dashboard.icon name="file-csv" /></span>
+                                <span class="report-export-copy">
+                                    <span>Handover Report CSV</span>
+                                    <small>Asset handover export</small>
+                                </span>
+                                <strong>CSV</strong>
+                                <span class="report-export-arrow"><x-dashboard.icon name="chevron-right" /></span>
+                            </a>
+                        </div>
+                    @endif
                 </div>
-                <div class="reports-export-list">
-                    <a class="report-export-card" href="{{ route('reports.export', 'assets') }}">
-                        <span class="report-export-icon"><x-dashboard.icon name="file-csv" /></span>
-                        <span class="report-export-copy">
-                            <span>Asset Report CSV</span>
-                            <small>Asset inventory export</small>
-                        </span>
-                        <strong>CSV</strong>
-                        <span class="report-export-arrow"><x-dashboard.icon name="chevron-right" /></span>
-                    </a>
-                    <a class="report-export-card" href="{{ route('reports.export', 'employees') }}">
-                        <span class="report-export-icon"><x-dashboard.icon name="file-csv" /></span>
-                        <span class="report-export-copy">
-                            <span>Employee Report CSV</span>
-                            <small>Employee records export</small>
-                        </span>
-                        <strong>CSV</strong>
-                        <span class="report-export-arrow"><x-dashboard.icon name="chevron-right" /></span>
-                    </a>
-                    <a class="report-export-card" href="{{ route('reports.export', 'handovers') }}">
-                        <span class="report-export-icon"><x-dashboard.icon name="file-csv" /></span>
-                        <span class="report-export-copy">
-                            <span>Handover Report CSV</span>
-                            <small>Asset handover export</small>
-                        </span>
-                        <strong>CSV</strong>
-                        <span class="report-export-arrow"><x-dashboard.icon name="chevron-right" /></span>
-                    </a>
-                </div>
-            </div>
-        </article>
+            </article>
+        @endif
     </section>
 
     <section class="dashboard-analytics-layout">

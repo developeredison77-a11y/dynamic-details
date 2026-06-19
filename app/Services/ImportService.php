@@ -9,6 +9,7 @@ use App\Enums\ImportType;
 use App\Models\Asset;
 use App\Models\Employee;
 use App\Models\ImportBatch;
+use App\Models\Role;
 use App\Support\AdmsSpreadsheet;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
@@ -33,6 +34,8 @@ class ImportService
                 'name_ar' => ['nullable', 'string', 'max:255'],
                 'email' => ['required', 'email', 'max:255', Rule::unique('employees', 'email')],
                 'department' => ['nullable', 'string', 'max:120'],
+                'role_id' => ['nullable', 'integer', Rule::exists('roles', 'id')->where('is_active', true)],
+                'role' => ['nullable', 'string', 'max:120'],
                 'designation' => ['nullable', 'string', 'max:120'],
                 'phone' => ['nullable', 'string', 'max:40'],
                 'status' => ['nullable', Rule::enum(EmployeeStatus::class)],
@@ -40,9 +43,16 @@ class ImportService
 
             $validator->after(function ($validator) use ($row, $emailCounts): void {
                 $email = strtolower(trim((string) ($row['email'] ?? '')));
+                $roleName = trim((string) ($row['role'] ?? $row['designation'] ?? ''));
 
                 if ($email !== '' && ($emailCounts[$email] ?? 0) > 1) {
                     $validator->errors()->add('email', 'The email must not be duplicated in the uploaded file.');
+                }
+
+                if ($roleName !== '' && ! Role::query()->active()->where(function ($query) use ($roleName): void {
+                    $query->where('name', $roleName)->orWhere('slug', $roleName);
+                })->exists()) {
+                    $validator->errors()->add('role', 'The selected role does not exist or is inactive.');
                 }
             });
 
@@ -53,6 +63,14 @@ class ImportService
 
             $data = $validator->validated();
             $data['status'] = ($data['status'] ?? null) ?: EmployeeStatus::Active->value;
+            $role = $this->employeeRole($data);
+
+            if ($role) {
+                $data['role_id'] = $role->id;
+                $data['designation'] = $role->name;
+            }
+
+            unset($data['role']);
 
             Employee::query()->create($data);
             $success++;
@@ -140,6 +158,24 @@ class ImportService
     private function normalizedImportValue(mixed $value): string
     {
         return strtolower(trim((string) $value));
+    }
+
+    private function employeeRole(array $data): ?Role
+    {
+        if (filled($data['role_id'] ?? null)) {
+            return Role::query()->active()->find($data['role_id']);
+        }
+
+        $roleName = trim((string) ($data['role'] ?? $data['designation'] ?? ''));
+
+        if ($roleName === '') {
+            return null;
+        }
+
+        return Role::query()
+            ->active()
+            ->where(fn ($query) => $query->where('name', $roleName)->orWhere('slug', $roleName))
+            ->first();
     }
 
     /**

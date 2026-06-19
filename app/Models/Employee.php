@@ -6,14 +6,17 @@ use App\Enums\EmployeeStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
+    'employee_code',
     'name_en',
     'name_ar',
     'department',
     'designation',
+    'role_id',
     'email',
     'phone',
     'status',
@@ -59,6 +62,11 @@ class Employee extends Model
         return $this->hasMany(AssetAssignment::class);
     }
 
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
     public function activeAssignments(): HasMany
     {
         return $this->assignments()->assigned();
@@ -72,7 +80,9 @@ class Employee extends Model
                     ->orWhere('name_en', 'like', "%{$term}%")
                     ->orWhere('name_ar', 'like', "%{$term}%")
                     ->orWhere('email', 'like', "%{$term}%")
-                    ->orWhere('department', 'like', "%{$term}%");
+                    ->orWhere('department', 'like', "%{$term}%")
+                    ->orWhere('designation', 'like', "%{$term}%")
+                    ->orWhereHas('role', fn (Builder $query) => $query->where('name', 'like', "%{$term}%"));
             });
         });
     }

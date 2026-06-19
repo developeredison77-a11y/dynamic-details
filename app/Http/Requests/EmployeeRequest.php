@@ -19,7 +19,7 @@ class EmployeeRequest extends FormRequest
             'name_en' => ['required', 'string', 'max:255'],
             'name_ar' => ['nullable', 'string', 'max:255'],
             'department' => ['nullable', 'string', 'max:120'],
-            'designation' => ['nullable', 'string', 'max:120'],
+            'role_id' => ['nullable', 'integer', Rule::exists('roles', 'id')->where('is_active', true)],
             'email' => ['nullable', 'email', 'max:255', Rule::unique('employees', 'email')->ignore($this->route('employee')?->id)],
             'phone' => ['nullable', 'string', 'max:40'],
             'status' => ['required', Rule::enum(EmployeeStatus::class)],

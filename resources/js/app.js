@@ -10,6 +10,7 @@ const tooltipTargets = document.querySelectorAll('[data-tooltip]');
 const importOpenButtons = document.querySelectorAll('[data-import-open]');
 const importModals = document.querySelectorAll('[data-import-modal]');
 const sessionModals = document.querySelectorAll('[data-session-modal]');
+const permissionForms = document.querySelectorAll('[data-permission-form]');
 const confirmModal = document.querySelector('[data-confirm-modal]');
 const formControls = document.querySelectorAll(
     '.form-field input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), .form-field select, .form-field textarea'
@@ -1006,4 +1007,47 @@ profileImageInput?.addEventListener('change', () => {
     image.onload = () => URL.revokeObjectURL(image.src);
 
     profileImagePreview.replaceChildren(image);
+});
+
+permissionForms.forEach((form) => {
+    const permissionBoxes = Array.from(form.querySelectorAll('input[name="permissions[]"]'));
+    const groupToggles = Array.from(form.querySelectorAll('[data-permission-group-toggle]'));
+
+    const updateGroupToggles = () => {
+        groupToggles.forEach((toggle) => {
+            const group = toggle.dataset.permissionGroupToggle;
+            const boxes = permissionBoxes.filter((box) => box.dataset.permissionGroup === group);
+            const checked = boxes.filter((box) => box.checked).length;
+
+            toggle.checked = boxes.length > 0 && checked === boxes.length;
+            toggle.indeterminate = checked > 0 && checked < boxes.length;
+        });
+    };
+
+    form.querySelectorAll('[data-permission-select]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const shouldCheck = button.dataset.permissionSelect === 'all';
+
+            permissionBoxes.forEach((box) => {
+                box.checked = shouldCheck;
+            });
+
+            updateGroupToggles();
+        });
+    });
+
+    groupToggles.forEach((toggle) => {
+        toggle.addEventListener('change', () => {
+            permissionBoxes
+                .filter((box) => box.dataset.permissionGroup === toggle.dataset.permissionGroupToggle)
+                .forEach((box) => {
+                    box.checked = toggle.checked;
+                });
+
+            updateGroupToggles();
+        });
+    });
+
+    permissionBoxes.forEach((box) => box.addEventListener('change', updateGroupToggles));
+    updateGroupToggles();
 });

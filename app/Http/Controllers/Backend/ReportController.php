@@ -23,11 +23,12 @@ class ReportController extends Controller
     public function export(string $type, ReportExportService $export)
     {
         $rows = match ($type) {
-            'employees' => \App\Models\Employee::query()->get()->map(fn ($employee): array => [
+            'employees' => \App\Models\Employee::query()->with('role')->get()->map(fn ($employee): array => [
                 'Code' => $employee->employee_code,
                 'Name English' => $employee->name_en,
                 'Name Arabic' => $employee->name_ar,
                 'Department' => $employee->department,
+                'Role' => $employee->role?->name ?? $employee->designation,
                 'Status' => $employee->status?->label(),
             ])->all(),
             'handovers' => AssetAssignment::query()->with(['employee', 'asset'])->get()->map(fn ($assignment): array => [

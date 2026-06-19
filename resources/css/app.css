@@ -32,6 +32,9 @@
     --sidebar-heading: #94a3b8;
     --sidebar-border: #e2e8f0;
     --shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+    --dashboard-primary-tint: color-mix(in srgb, var(--primary) 22%, transparent);
+    --dashboard-primary-mid: color-mix(in srgb, var(--primary) 74%, #ffffff);
+    --dashboard-primary-deep: color-mix(in srgb, var(--primary) 76%, #111827);
 }
 
 @property --button-angle {
@@ -2737,8 +2740,8 @@ footer,
 
 .trend-good,
 .status-paid {
-    background: color-mix(in srgb, #22c55e 14%, var(--surface-soft));
-    color: #15803d;
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface-soft));
+    color: color-mix(in srgb, var(--primary) 78%, var(--text));
 }
 
 .trend-warn,
@@ -2782,8 +2785,8 @@ footer,
     border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border));
     border-radius: 16px;
     background:
-        radial-gradient(circle at 8% -18%, rgba(34, 197, 94, 0.12), transparent 34%),
-        radial-gradient(circle at 102% 4%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 34%),
+        radial-gradient(circle at 8% -18%, var(--dashboard-primary-tint), transparent 34%),
+        radial-gradient(circle at 102% 4%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 34%),
         linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, #ffffff), color-mix(in srgb, var(--surface-soft) 52%, var(--surface)));
     box-shadow:
         0 24px 58px rgba(15, 23, 42, 0.1),
@@ -2981,7 +2984,7 @@ footer,
 
 :root[data-theme='dark'] .asset-status-panel {
     background:
-        radial-gradient(circle at 8% -18%, rgba(34, 197, 94, 0.1), transparent 34%),
+        radial-gradient(circle at 8% -18%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 34%),
         radial-gradient(circle at 102% 4%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 34%),
         linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, #ffffff 3%), color-mix(in srgb, var(--surface-soft) 58%, var(--surface)));
     box-shadow:
@@ -3101,7 +3104,7 @@ footer,
     display: block;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 48%, #22c55e));
+    background: linear-gradient(90deg, var(--dashboard-primary-mid), var(--dashboard-primary-deep));
 }
 
 .ghost-button {
@@ -4849,8 +4852,8 @@ footer,
 .status-good,
 .status-new,
 .status-assigned {
-    background: color-mix(in srgb, #22c55e 14%, var(--surface-soft));
-    color: #15803d;
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface-soft));
+    color: color-mix(in srgb, var(--primary) 78%, var(--text));
 }
 
 .status-leave,
@@ -4964,7 +4967,7 @@ footer,
     display: block;
     width: min(52px, 70%);
     border-radius: 8px 8px 3px 3px;
-    background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 42%, #22c55e));
+    background: linear-gradient(180deg, var(--dashboard-primary-mid), var(--dashboard-primary-deep));
 }
 
 .bar-chart span,
@@ -5545,6 +5548,132 @@ footer,
 .generated-code-modal .form-actions {
     margin: 0;
     padding: var(--ui-space-5) var(--ui-space-6) var(--ui-space-6);
+}
+
+.role-permission-panel .settings-form {
+    gap: var(--ui-space-5);
+}
+
+.role-permission-panel .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.role-permission-panel .form-field-wide {
+    grid-column: 1 / -1;
+}
+
+.permission-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ui-space-2);
+    border-top: 1px solid var(--border);
+    padding-top: var(--ui-space-4);
+}
+
+.permission-group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--ui-space-4);
+    min-width: 0;
+}
+
+.permission-group-card {
+    display: grid;
+    align-content: start;
+    gap: var(--ui-space-3);
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--ui-radius);
+    background: var(--surface);
+    box-shadow: var(--ui-shadow-card);
+    padding: var(--ui-space-4);
+}
+
+.permission-group-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    min-width: 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--ui-space-3);
+}
+
+.permission-group-heading small {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.permission-group-toggle {
+    min-width: 0;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.permission-group-toggle span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.permission-checkbox-list {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.permission-check {
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+    border-radius: var(--ui-radius-sm);
+    padding: 8px;
+}
+
+.permission-check:hover {
+    background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+
+.permission-check input {
+    flex: 0 0 auto;
+    margin-top: 2px;
+}
+
+.permission-check span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.permission-check strong {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.permission-check small,
+.form-error {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+    .role-permission-panel .form-grid,
+    .permission-group-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .permission-toolbar {
+        justify-content: flex-start;
+    }
 }
 
 .btn.action-icon-btn,
