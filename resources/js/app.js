@@ -12,6 +12,12 @@ const importModals = document.querySelectorAll('[data-import-modal]');
 const sessionModals = document.querySelectorAll('[data-session-modal]');
 const permissionForms = document.querySelectorAll('[data-permission-form]');
 const confirmModal = document.querySelector('[data-confirm-modal]');
+const globalSearch = document.querySelector('[data-global-search]');
+const globalSearchInput = document.querySelector('[data-global-search-input]');
+const globalSearchPanel = document.querySelector('[data-global-search-panel]');
+const globalSearchItems = Array.from(document.querySelectorAll('[data-global-search-item]'));
+const globalSearchEmpty = document.querySelector('[data-global-search-empty]');
+const lockedHandoverEditButtons = document.querySelectorAll('[data-handover-edit-locked]');
 const formControls = document.querySelectorAll(
     '.form-field input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), .form-field select, .form-field textarea'
 );
@@ -68,6 +74,63 @@ const clearFieldValidation = (control) => {
         message.hidden = true;
     });
 };
+
+const setGlobalSearchOpen = (isOpen) => {
+    if (!globalSearchPanel || !globalSearch) {
+        return;
+    }
+
+    globalSearchPanel.hidden = !isOpen;
+    globalSearch.classList.toggle('is-open', isOpen);
+};
+
+const filterGlobalSearch = () => {
+    if (!globalSearchInput || !globalSearchEmpty) {
+        return;
+    }
+
+    const query = globalSearchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    globalSearchItems.forEach((item) => {
+        const label = (item.dataset.label || item.textContent || '').toLowerCase();
+        const isVisible = query === '' || label.includes(query);
+
+        item.hidden = !isVisible;
+
+        if (isVisible) {
+            visibleCount++;
+        }
+    });
+
+    globalSearchEmpty.hidden = visibleCount > 0;
+};
+
+globalSearchInput?.addEventListener('focus', () => {
+    filterGlobalSearch();
+    setGlobalSearchOpen(true);
+});
+
+globalSearchInput?.addEventListener('input', () => {
+    filterGlobalSearch();
+    setGlobalSearchOpen(true);
+});
+
+globalSearchInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        const firstMatch = globalSearchItems.find((item) => !item.hidden);
+
+        if (firstMatch) {
+            event.preventDefault();
+            firstMatch.click();
+        }
+    }
+
+    if (event.key === 'Escape') {
+        setGlobalSearchOpen(false);
+        globalSearchInput.blur();
+    }
+});
 
 formControls.forEach((control) => {
     const field = control.closest('.form-field');
@@ -581,6 +644,16 @@ if (confirmModal) {
 }
 
 document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        globalSearchInput?.focus();
+        globalSearchInput?.select();
+        filterGlobalSearch();
+        setGlobalSearchOpen(true);
+
+        return;
+    }
+
     if (event.key !== 'Escape') {
         return;
     }
@@ -588,6 +661,13 @@ document.addEventListener('keydown', (event) => {
     importModals.forEach(closeModal);
     sessionModals.forEach(closeModal);
     closeModal(confirmModal);
+    setGlobalSearchOpen(false);
+});
+
+document.addEventListener('click', (event) => {
+    if (globalSearch && !globalSearch.contains(event.target)) {
+        setGlobalSearchOpen(false);
+    }
 });
 
 forms.forEach((form) => {
@@ -804,7 +884,7 @@ if (shell) {
 
 }
 
-toasts.forEach((toast) => {
+const bindToast = (toast) => {
     const close = () => {
         toast.classList.add('is-hiding');
         window.setTimeout(() => toast.remove(), 220);
@@ -812,6 +892,49 @@ toasts.forEach((toast) => {
 
     toast.querySelector('[data-toast-close]')?.addEventListener('click', close);
     window.setTimeout(close, 4500);
+};
+
+const showToast = (message, type = 'warning') => {
+    let stack = document.querySelector('[data-toast-stack]');
+
+    if (!stack) {
+        stack = document.createElement('div');
+        stack.className = 'toast-stack';
+        stack.dataset.toastStack = '';
+        stack.setAttribute('aria-live', 'polite');
+        stack.setAttribute('aria-atomic', 'true');
+        document.body.appendChild(stack);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.dataset.toast = '';
+    toast.innerHTML = `
+        <span class="toast-mark">!</span>
+        <div class="toast-copy">
+            <strong>${type.charAt(0).toUpperCase()}${type.slice(1)}</strong>
+            <p></p>
+        </div>
+        <button type="button" class="toast-close action-icon-btn action-icon-neutral" data-toast-close aria-label="Close notification">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+            </svg>
+        </button>
+    `;
+    toast.querySelector('p').textContent = message;
+    stack.appendChild(toast);
+    bindToast(toast);
+};
+
+toasts.forEach((toast) => {
+    bindToast(toast);
+});
+
+lockedHandoverEditButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        showToast(button.dataset.toastMessage || 'This handover cannot be edited.', 'warning');
+    });
 });
 
 if (clientTable) {

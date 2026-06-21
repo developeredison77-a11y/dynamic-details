@@ -62,6 +62,13 @@ class AssetAssignment extends Model
 
     public function scopeAssigned(Builder $query): Builder
     {
-        return $query->where('status', AssetAssignmentStatus::Assigned);
+        return $query->where('asset_assignments.status', AssetAssignmentStatus::Assigned);
+    }
+
+    public function canBeEdited(): bool
+    {
+        return $this->status === AssetAssignmentStatus::Assigned
+            && $this->handover_date !== null
+            && $this->handover_date->isAfter(now(config('app.timezone', 'Asia/Kolkata'))->startOfDay());
     }
 }

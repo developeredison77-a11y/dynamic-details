@@ -73,14 +73,18 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/asset-handovers', [AssetHandoverController::class, 'index'])->middleware('permission:asset-handovers.view')->name('asset-handovers.index');
     Route::get('/asset-handovers/create', [AssetHandoverController::class, 'create'])->middleware('permission:asset-handovers.create')->name('asset-handovers.create');
     Route::post('/asset-handovers', [AssetHandoverController::class, 'store'])->middleware('permission:asset-handovers.create')->name('asset-handovers.store');
+    Route::get('/asset-handovers/{assetHandover}/edit', [AssetHandoverController::class, 'edit'])->middleware('permission:asset-handovers.update,asset-handovers.create')->name('asset-handovers.edit');
+    Route::put('/asset-handovers/{assetHandover}', [AssetHandoverController::class, 'update'])->middleware('permission:asset-handovers.update,asset-handovers.create')->name('asset-handovers.update');
     Route::get('/asset-handovers/{assetHandover}', [AssetHandoverController::class, 'show'])->middleware('permission:asset-handovers.view')->name('asset-handovers.show');
     Route::get('/asset-handovers/{assetHandover}/print', [AssetHandoverController::class, 'print'])->middleware('permission:asset-handovers.view')->name('asset-handovers.print');
     Route::get('/asset-returns', [AssetReturnController::class, 'index'])->middleware('permission:asset-returns.view')->name('asset-returns.index');
     Route::post('/asset-returns/{assignment}', [AssetReturnController::class, 'store'])->middleware('permission:asset-returns.create')->name('asset-returns.store');
+    Route::post('/asset-returns/{assetReturn}/signed', [AssetReturnController::class, 'uploadSigned'])->middleware('permission:asset-returns.create')->name('asset-returns.signed');
     Route::get('/asset-returns/{assetReturn}/print', [AssetReturnController::class, 'print'])->middleware('permission:asset-returns.view')->name('asset-returns.print');
     Route::get('/declarations', [DeclarationController::class, 'index'])->middleware('permission:declarations.view')->name('declarations.index');
     Route::post('/declarations/{assignment}', [DeclarationController::class, 'store'])->middleware('permission:declarations.create')->name('declarations.store');
     Route::get('/declarations/{declaration}', [DeclarationController::class, 'show'])->middleware('permission:declarations.view')->name('declarations.show');
+    Route::post('/declarations/{declaration}/signed', [DeclarationController::class, 'uploadSigned'])->middleware('permission:declarations.create')->name('declarations.signed');
     Route::get('/declarations/{declaration}/print', [DeclarationController::class, 'print'])->middleware('permission:declarations.view')->name('declarations.print');
     Route::get('/imports', [ImportController::class, 'index'])->middleware('permission:imports.view')->name('imports.index');
     Route::get('/imports/employees', [ImportController::class, 'employeeIndex'])->middleware('permission:employees.import')->name('imports.employees.index');
@@ -90,6 +94,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/imports/assets', [ImportController::class, 'assets'])->middleware('permission:assets.import')->name('imports.assets');
     Route::get('/reports', [ReportController::class, 'index'])->middleware('permission:reports.view')->name('reports.index');
     Route::get('/reports/export/{type}', [ReportController::class, 'export'])->middleware('permission:reports.export')->name('reports.export');
+    Route::get('/reports/pdf/{type}', [ReportController::class, 'pdf'])->middleware('permission:reports.export')->name('reports.pdf');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/settings', [SettingsController::class, 'edit'])->middleware('permission:settings.view')->name('settings.edit');

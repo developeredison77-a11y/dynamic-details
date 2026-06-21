@@ -9,6 +9,7 @@ use App\Http\Requests\AssetRequest;
 use App\Models\Asset;
 use App\Models\AssetBrand;
 use App\Models\AssetCategory;
+use App\Services\AssetLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -25,7 +26,11 @@ class AssetController extends Controller
                 ->with([
                     'brand:id,name',
                     'category:id,name',
-                    'activeAssignment:id,asset_id,employee_id',
+                    'activeAssignment' => fn ($query) => $query->select([
+                        'asset_assignments.id',
+                        'asset_assignments.asset_id',
+                        'asset_assignments.employee_id',
+                    ]),
                     'activeAssignment.employee:id,name_en',
                 ])
                 ->search($request->string('search')->toString())
@@ -58,9 +63,9 @@ class AssetController extends Controller
         return view('assets.form', $this->formData($asset));
     }
 
-    public function update(AssetRequest $request, Asset $asset): RedirectResponse
+    public function update(AssetRequest $request, Asset $asset, AssetLifecycleService $service): RedirectResponse
     {
-        $asset->update($request->validated());
+        $service->updateAsset($asset, $request->validated(), $request->user()?->id);
 
         return redirect()->route('assets.index')->with('success', 'Asset updated successfully.');
     }

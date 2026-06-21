@@ -44,6 +44,7 @@ class AccessControlSeeder extends Seeder
         'Asset Operations' => [
             ['key' => 'asset-handovers.view', 'name' => 'View Handovers'],
             ['key' => 'asset-handovers.create', 'name' => 'Create Handovers'],
+            ['key' => 'asset-handovers.update', 'name' => 'Update Handovers'],
             ['key' => 'asset-returns.view', 'name' => 'View Returns'],
             ['key' => 'asset-returns.create', 'name' => 'Create Returns'],
             ['key' => 'declarations.view', 'name' => 'View Declarations'],
@@ -122,6 +123,7 @@ class AccessControlSeeder extends Seeder
                 'asset-categories.manage',
                 'asset-handovers.view',
                 'asset-handovers.create',
+                'asset-handovers.update',
                 'asset-returns.view',
                 'asset-returns.create',
                 'declarations.view',
@@ -141,6 +143,7 @@ class AccessControlSeeder extends Seeder
                 'assets.update',
                 'asset-handovers.view',
                 'asset-handovers.create',
+                'asset-handovers.update',
                 'asset-returns.view',
                 'reports.view',
             ])

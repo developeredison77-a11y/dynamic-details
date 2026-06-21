@@ -167,15 +167,10 @@
                     </x-dashboard.nav-group>
                 @endif
 
-                @if ($user?->canAccess('imports.view') || $user?->canAccess('reports.view'))
-                    <x-dashboard.nav-group icon="pages" label="Data & Reports" :active="request()->routeIs('imports.*', 'reports.*')">
-                        @if ($user?->canAccess('imports.view'))
-                            <x-dashboard.sub-link :href="route('imports.index')" :active="request()->routeIs('imports.index')">Imports</x-dashboard.sub-link>
-                        @endif
-                        @if ($user?->canAccess('reports.view'))
-                            <x-dashboard.sub-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">Reports</x-dashboard.sub-link>
-                        @endif
-                    </x-dashboard.nav-group>
+                @if ($user?->canAccess('reports.view'))
+                    <x-dashboard.nav-link :href="route('reports.index')" icon="pages" :active="request()->routeIs('reports.*')">
+                        Reports
+                    </x-dashboard.nav-link>
                 @endif
 
                 @if ($user?->canAccess('roles.view'))
@@ -201,10 +196,57 @@
                         <x-dashboard.icon name="menu" />
                     </button>
                     <span class="topbar-divider" aria-hidden="true"></span>
-                    <label class="topbar-search">
+                    <label class="topbar-search" data-global-search>
                         <x-dashboard.icon name="search" />
-                        <input type="search" placeholder="Search..." aria-label="Search">
-                        <kbd>Ctrl K</kbd>
+                        <input type="search" placeholder="Search modules..." aria-label="Search modules" autocomplete="off" data-global-search-input>
+                        <kbd>Ctrl+K</kbd>
+                        <div class="global-search-panel" data-global-search-panel hidden>
+                            <div class="global-search-list" data-global-search-list>
+                                @if ($user?->canAccess('dashboard.view'))
+                                    <a href="{{ route('dashboard') }}" data-global-search-item data-label="Dashboard Overview Home">Dashboard</a>
+                                @endif
+                                @if ($user?->canAccess('employees.view'))
+                                    <a href="{{ route('employees.index') }}" data-global-search-item data-label="Employees Employee Master Staff">Employees</a>
+                                @endif
+                                @if ($user?->canAccess('employees.create'))
+                                    <a href="{{ route('employees.create') }}" data-global-search-item data-label="Add Employee Create Employee">Add Employee</a>
+                                @endif
+                                @if ($user?->canAccess('roles.view'))
+                                    <a href="{{ route('roles.index') }}" data-global-search-item data-label="Roles Permissions Access Control">Roles & Permissions</a>
+                                @endif
+                                @if ($user?->canAccess('assets.view'))
+                                    <a href="{{ route('assets.index') }}" data-global-search-item data-label="Assets Asset Master Inventory">Assets</a>
+                                @endif
+                                @if ($user?->canAccess('assets.create'))
+                                    <a href="{{ route('assets.create') }}" data-global-search-item data-label="Add Asset Create Asset">Add Asset</a>
+                                @endif
+                                @if ($user?->canAccess('asset-brands.manage'))
+                                    <a href="{{ route('asset-brands.index') }}" data-global-search-item data-label="Brands Asset Brands">Brands</a>
+                                @endif
+                                @if ($user?->canAccess('asset-categories.manage'))
+                                    <a href="{{ route('asset-categories.index') }}" data-global-search-item data-label="Categories Asset Categories">Categories</a>
+                                @endif
+                                @if ($user?->canAccess('asset-handovers.view'))
+                                    <a href="{{ route('asset-handovers.index') }}" data-global-search-item data-label="Handovers Asset Handovers">Handovers</a>
+                                @endif
+                                @if ($user?->canAccess('asset-returns.view'))
+                                    <a href="{{ route('asset-returns.index') }}" data-global-search-item data-label="Returns Asset Returns">Returns</a>
+                                @endif
+                                @if ($user?->canAccess('declarations.view'))
+                                    <a href="{{ route('declarations.index') }}" data-global-search-item data-label="Declarations Forms">Declarations</a>
+                                @endif
+                                @if ($user?->canAccess('imports.view'))
+                                    <a href="{{ route('imports.index') }}" data-global-search-item data-label="Imports Upload Data">Imports</a>
+                                @endif
+                                @if ($user?->canAccess('reports.view'))
+                                    <a href="{{ route('reports.index') }}" data-global-search-item data-label="Reports Exports">Reports</a>
+                                @endif
+                                @if ($user?->canAccess('settings.view'))
+                                    <a href="{{ route('settings.edit') }}" data-global-search-item data-label="Settings Theme Branding">Settings</a>
+                                @endif
+                            </div>
+                            <div class="global-search-empty" data-global-search-empty hidden>No matching modules</div>
+                        </div>
                     </label>
                 </div>
 

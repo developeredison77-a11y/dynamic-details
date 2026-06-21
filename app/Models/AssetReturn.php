@@ -7,7 +7,18 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['asset_assignment_id', 'asset_id', 'employee_id', 'received_by', 'returned_at', 'condition', 'notes'])]
+#[Fillable([
+    'asset_assignment_id',
+    'asset_id',
+    'employee_id',
+    'received_by',
+    'returned_at',
+    'condition',
+    'notes',
+    'signed_file_path',
+    'signed_file_name',
+    'signed_uploaded_at',
+])]
 class AssetReturn extends Model
 {
     protected function casts(): array
@@ -15,6 +26,7 @@ class AssetReturn extends Model
         return [
             'returned_at' => 'date',
             'condition' => AssetCondition::class,
+            'signed_uploaded_at' => 'datetime',
         ];
     }
 

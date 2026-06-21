@@ -75,6 +75,6 @@ class AssetCategoryController extends Controller
             ->withCount('assets')
             ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
             ->when(in_array($status, ['active', 'inactive'], true), fn ($query) => $query->where('is_active', $status === 'active'))
-            ->orderBy('name');
+            ->orderBy('id', 'DESC');
     }
 }
