@@ -688,6 +688,11 @@ forms.forEach((form) => {
             return;
         }
 
+        if (form.dataset.submitLoader === 'false') {
+            submitButton.disabled = true;
+            return;
+        }
+
         submitButton.disabled = true;
         submitButton.classList.add('is-loading');
         submitButton.setAttribute('aria-busy', 'true');

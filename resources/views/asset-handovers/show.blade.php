@@ -34,8 +34,7 @@
                         <button type="button" class="btn btn-secondary action-icon-btn action-icon-neutral" aria-label="Why edit is locked" data-tooltip="Why locked?" data-handover-edit-locked data-toast-message="This handover can be edited only before the handover date starts."><x-dashboard.icon name="edit" /></button>
                     @endif
                 @endif
-                <form method="POST" action="{{ route('declarations.store', $assignment) }}">@csrf<button class="btn btn-secondary action-icon-btn action-icon-neutral" type="submit" aria-label="Generate Declaration" data-tooltip="Generate Declaration"><x-dashboard.icon name="file-plus" /></button></form>
-                <a class="btn btn-primary action-icon-btn action-icon-neutral" href="{{ route('asset-handovers.print', $assignment) }}" target="_blank" aria-label="Print PDF" data-tooltip="Print PDF"><x-dashboard.icon name="printer" /></a>
+                <form method="POST" action="{{ route('declarations.store', $assignment) }}" data-submit-loader="false">@csrf<button class="btn btn-secondary action-icon-btn action-icon-neutral" type="submit" aria-label="Generate Declaration" data-tooltip="Generate Declaration"><x-dashboard.icon name="file-plus" /></button></form>
             </div>
         </div>
 
