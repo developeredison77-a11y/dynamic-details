@@ -19,7 +19,7 @@
                     @endforeach
                 </div>
             @endif
-            <div class="import-help"><span>Required: name_en, email. Use role name or slug for role assignment. Employee codes are generated automatically.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'employees') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
+            <div class="import-help"><span>Required: name_en, email. Optional: eid. Use role name or slug for role assignment. Employee codes are generated automatically.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'employees') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
             <div class="form-actions"><button class="btn btn-primary" type="submit">Import Employees</button></div>
         </form>
     </section>

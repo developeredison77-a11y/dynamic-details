@@ -29,6 +29,7 @@ class DeclarationController extends Controller
                         $query->where('declaration_number', 'like', "%{$term}%")
                             ->orWhereHas('assignment.employee', function ($query) use ($term): void {
                                 $query->where('employee_code', 'like', "%{$term}%")
+                                    ->orWhere('eid', 'like', "%{$term}%")
                                     ->orWhere('name_en', 'like', "%{$term}%");
                             })
                             ->orWhereHas('assignment.asset', function ($query) use ($term): void {
@@ -41,11 +42,12 @@ class DeclarationController extends Controller
                 ->paginate($handoverPerPage, ['*'], 'handover_page')
                 ->withQueryString(),
             'returnDeclarations' => AssetReturn::query()
-                ->with(['employee:id,employee_code,name_en', 'asset:id,asset_tag,name'])
+                ->with(['employee:id,employee_code,eid,name_en', 'asset:id,asset_tag,name'])
                 ->when($request->string('return_search')->toString(), function ($query, string $term): void {
                     $query->where(function ($query) use ($term): void {
                         $query->whereHas('employee', function ($query) use ($term): void {
                             $query->where('employee_code', 'like', "%{$term}%")
+                                ->orWhere('eid', 'like', "%{$term}%")
                                 ->orWhere('name_en', 'like', "%{$term}%");
                         })
                             ->orWhereHas('asset', function ($query) use ($term): void {

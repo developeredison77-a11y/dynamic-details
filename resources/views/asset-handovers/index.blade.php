@@ -45,7 +45,7 @@
                 <tbody>
                     @forelse($assignments as $assignment)
                         <tr>
-                            <td>{{ $assignment->employee?->name_en }}<br><small>{{ $assignment->employee?->employee_code }}</small></td>
+                            <td>{{ $assignment->employee?->name_en }}<br><small>{{ $assignment->employee?->employee_code }}{{ $assignment->employee?->eid ? ' / EID: '.$assignment->employee?->eid : '' }}</small></td>
                             <td>{{ $assignment->asset?->asset_tag }}<br><small>{{ $assignment->asset?->name }}</small></td>
                             <td>{{ $assignment->handover_date?->format('M d, Y') }}</td>
                             <td>{{ $assignment->expected_return_date?->format('M d, Y') ?: '-' }}</td>

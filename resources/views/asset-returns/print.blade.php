@@ -85,6 +85,7 @@
                     <h2>{{ $return->employee?->name_en }}</h2>
                     <dl>
                         <div><dt>Code</dt><dd>{{ $return->employee?->employee_code }}</dd></div>
+                        <div><dt>EID</dt><dd>{{ $return->employee?->eid ?: '-' }}</dd></div>
                     </dl>
                 </article>
 

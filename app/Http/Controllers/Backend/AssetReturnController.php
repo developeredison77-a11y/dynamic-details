@@ -26,13 +26,14 @@ class AssetReturnController extends Controller
             'assignments' => AssetAssignment::query()
                 ->assigned()
                 ->with([
-                    'employee:id,employee_code,name_en',
+                    'employee:id,employee_code,eid,name_en',
                     'asset:id,asset_tag,name',
                 ])
                 ->when($request->string('return_search')->toString(), function ($query, string $term): void {
                     $query->where(function ($query) use ($term): void {
                         $query->whereHas('employee', function ($query) use ($term): void {
                             $query->where('employee_code', 'like', "%{$term}%")
+                                ->orWhere('eid', 'like', "%{$term}%")
                                 ->orWhere('name_en', 'like', "%{$term}%");
                         })
                             ->orWhereHas('asset', function ($query) use ($term): void {
@@ -46,13 +47,14 @@ class AssetReturnController extends Controller
                 ->withQueryString(),
             'returns' => AssetReturn::query()
                 ->with([
-                    'employee:id,employee_code,name_en',
+                    'employee:id,employee_code,eid,name_en',
                     'asset:id,asset_tag,name',
                 ])
                 ->when($request->string('history_search')->toString(), function ($query, string $term): void {
                     $query->where(function ($query) use ($term): void {
                         $query->whereHas('employee', function ($query) use ($term): void {
                             $query->where('employee_code', 'like', "%{$term}%")
+                                ->orWhere('eid', 'like', "%{$term}%")
                                 ->orWhere('name_en', 'like', "%{$term}%");
                         })
                             ->orWhereHas('asset', function ($query) use ($term): void {
@@ -105,7 +107,7 @@ class AssetReturnController extends Controller
     public function print(AssetReturn $assetReturn): View
     {
         return view('asset-returns.print', ['return' => $assetReturn->load([
-            'employee:id,employee_code,name_en',
+            'employee:id,employee_code,eid,name_en',
             'asset:id,asset_brand_id,asset_category_id,asset_tag,name,serial_number',
             'asset.brand:id,name',
             'asset.category:id,name',

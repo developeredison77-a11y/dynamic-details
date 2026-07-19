@@ -382,7 +382,7 @@
                         </tr>
                         <tr>
                             <td class="info-label" colspan="2">EID:</td>
-                            <td class="info-value" colspan="3">{{ $employee?->employee_code ?: '-' }}</td>
+                            <td class="info-value" colspan="3">{{ $employee?->eid ?: ($employee?->employee_code ?: '-') }}</td>
                         </tr>
                         <tr>
                             <td class="info-label" colspan="2">Date:</td>

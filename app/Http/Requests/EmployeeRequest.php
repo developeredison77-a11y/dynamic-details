@@ -18,6 +18,7 @@ class EmployeeRequest extends FormRequest
         return [
             'name_en' => ['required', 'string', 'max:255'],
             'name_ar' => ['nullable', 'string', 'max:255'],
+            'eid' => ['nullable', 'string', 'max:40', Rule::unique('employees', 'eid')->ignore($this->route('employee')?->id)],
             'department' => ['nullable', 'string', 'max:120'],
             'role_id' => ['nullable', 'integer', Rule::exists('roles', 'id')->where('is_active', true)],
             'email' => ['nullable', 'email', 'max:255', Rule::unique('employees', 'email')->ignore($this->route('employee')?->id)],

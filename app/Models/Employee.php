@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'employee_code',
+    'eid',
     'name_en',
     'name_ar',
     'department',
@@ -77,6 +78,7 @@ class Employee extends Model
         return $query->when($term, function (Builder $query, string $term): void {
             $query->where(function (Builder $query) use ($term): void {
                 $query->where('employee_code', 'like', "%{$term}%")
+                    ->orWhere('eid', 'like', "%{$term}%")
                     ->orWhere('name_en', 'like', "%{$term}%")
                     ->orWhere('name_ar', 'like', "%{$term}%")
                     ->orWhere('email', 'like', "%{$term}%")

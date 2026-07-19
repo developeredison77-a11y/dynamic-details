@@ -96,6 +96,7 @@ class ReportController extends Controller
         return match ($type) {
             'employees' => Employee::query()->with('role')->get()->map(fn ($employee): array => [
                 'Code' => $employee->employee_code,
+                'EID' => $employee->eid,
                 'Name English' => $employee->name_en,
                 'Name Arabic' => $employee->name_ar,
                 'Department' => $employee->department,
@@ -104,6 +105,7 @@ class ReportController extends Controller
             ])->all(),
             'handovers' => AssetAssignment::query()->with(['employee', 'asset'])->get()->map(fn ($assignment): array => [
                 'Employee' => $assignment->employee?->name_en,
+                'Employee EID' => $assignment->employee?->eid,
                 'Asset' => $assignment->asset?->asset_tag,
                 'Status' => $assignment->status?->label(),
                 'Handover Date' => $assignment->handover_date?->format('Y-m-d'),
@@ -112,6 +114,7 @@ class ReportController extends Controller
             'returns' => AssetReturn::query()->with(['employee', 'asset'])->get()->map(fn ($return): array => [
                 'Employee' => $return->employee?->name_en,
                 'Employee Code' => $return->employee?->employee_code,
+                'Employee EID' => $return->employee?->eid,
                 'Asset' => $return->asset?->asset_tag,
                 'Returned At' => $return->returned_at?->format('Y-m-d'),
                 'Condition' => $return->condition?->label(),
@@ -120,6 +123,7 @@ class ReportController extends Controller
             'declarations' => AssetDeclaration::query()->with(['assignment.employee', 'assignment.asset'])->get()->map(fn ($declaration): array => [
                 'Declaration No' => $declaration->declaration_number,
                 'Employee' => $declaration->assignment?->employee?->name_en,
+                'Employee EID' => $declaration->assignment?->employee?->eid,
                 'Asset' => $declaration->assignment?->asset?->asset_tag,
                 'Issued At' => $declaration->issued_at?->format('Y-m-d'),
                 'Signed Copy' => $declaration->signed_file_path ? 'Uploaded' : 'Pending',

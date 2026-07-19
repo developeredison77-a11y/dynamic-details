@@ -109,6 +109,7 @@ class BulkDummyDataSeeder extends Seeder
                 ['email' => "employee{$index}@adms.test"],
                 [
                     'employee_code' => 'DUMMY'.str_pad((string) $index, 5, '0', STR_PAD_LEFT),
+                    'eid' => '784-1995-'.str_pad((string) $index, 7, '0', STR_PAD_LEFT).'-'.($index % 10),
                     'name_en' => "Demo Employee {$index}",
                     'name_ar' => "Demo Employee Arabic {$index}",
                     'department' => $departments[($index - 1) % count($departments)],

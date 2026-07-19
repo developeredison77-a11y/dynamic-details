@@ -43,7 +43,7 @@
                 <tbody>
                     @forelse ($employees as $employee)
                         <tr>
-                            <td><div class="client-person"><span>{{ strtoupper(substr($employee->name_en, 0, 2)) }}</span><div><strong>{{ $employee->name_en }}</strong><small>{{ $employee->employee_code }}</small></div></div></td>
+                            <td><div class="client-person"><span>{{ strtoupper(substr($employee->name_en, 0, 2)) }}</span><div><strong>{{ $employee->name_en }}</strong><small>{{ $employee->employee_code }}{{ $employee->eid ? ' / EID: '.$employee->eid : '' }}</small></div></div></td>
                             <td dir="rtl">{{ $employee->name_ar ?: '-' }}</td>
                             <td>{{ $employee->department ?: '-' }}</td>
                             <td>{{ $employee->role?->name ?? $employee->designation ?? '-' }}</td>

@@ -46,7 +46,7 @@
                     @forelse($assignments as $assignment)
                         <tr>
                             <td><div class="client-person"><span>{{ strtoupper(substr($assignment->asset?->asset_tag ?? 'RT', 0, 2)) }}</span><div><strong>{{ $assignment->asset?->asset_tag }}</strong><small>{{ $assignment->asset?->name ?? '-' }}</small></div></div></td>
-                            <td>{{ $assignment->employee?->name_en }}<br><small>{{ $assignment->employee?->employee_code }}</small></td>
+                            <td>{{ $assignment->employee?->name_en }}<br><small>{{ $assignment->employee?->employee_code }}{{ $assignment->employee?->eid ? ' / EID: '.$assignment->employee?->eid : '' }}</small></td>
                             <td>{{ $assignment->handover_date?->format('M d, Y') ?? '-' }}</td>
                             <td>{{ $assignment->expected_return_date?->format('M d, Y') ?? '-' }}</td>
                             <td><span class="status-badge status-{{ $assignment->status?->value }}">{{ $assignment->status?->label() }}</span></td>
@@ -120,7 +120,7 @@
                     @forelse($returns as $return)
                         <tr>
                             <td><div class="client-person"><span>{{ strtoupper(substr($return->asset?->asset_tag ?? 'RT', 0, 2)) }}</span><div><strong>{{ $return->asset?->asset_tag }}</strong><small>{{ $return->asset?->name ?? '-' }}</small></div></div></td>
-                            <td>{{ $return->employee?->name_en }}<br><small>{{ $return->employee?->employee_code }}</small></td>
+                            <td>{{ $return->employee?->name_en }}<br><small>{{ $return->employee?->employee_code }}{{ $return->employee?->eid ? ' / EID: '.$return->employee?->eid : '' }}</small></td>
                             <td>{{ $return->returned_at?->format('M d, Y') }}</td>
                             <td><span class="status-badge status-{{ $return->condition?->value }}">{{ $return->condition?->label() }}</span></td>
                             <td>
@@ -208,7 +208,7 @@
                     <form class="return-card" method="POST" action="{{ route('asset-returns.store', $assignment) }}">
                         @csrf
                         <strong>{{ $assignment->asset?->asset_tag }} - {{ $assignment->asset?->name }}</strong>
-                        <span>{{ $assignment->employee?->employee_code }} - {{ $assignment->employee?->name_en }}</span>
+                        <span>{{ $assignment->employee?->employee_code }}{{ $assignment->employee?->eid ? ' / EID: '.$assignment->employee?->eid : '' }} - {{ $assignment->employee?->name_en }}</span>
                         <div class="form-grid single">
                             <label class="form-field"><span>Returned At</span><input type="date" name="returned_at" value="{{ now(config('app.timezone', 'Asia/Kolkata'))->format('Y-m-d') }}"></label>
                             <label class="form-field"><span>Condition</span><select name="condition">@foreach($conditions as $condition)<option value="{{ $condition->value }}">{{ $condition->label() }}</option>@endforeach</select></label>

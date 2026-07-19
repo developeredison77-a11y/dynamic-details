@@ -15,6 +15,7 @@
                     <span>Employee Code</span>
                     <strong>{{ $employee->employee_code }}</strong>
                 </div>
+                <label class="form-field"><span>Employee ID (EID)</span><input name="eid" value="{{ old('eid', $employee->eid) }}" placeholder="784-1995-4375063-4">@error('eid')<small>{{ $message }}</small>@enderror</label>
                 <label class="form-field"><span>Name English</span><input name="name_en" value="{{ old('name_en', $employee->name_en) }}">@error('name_en')<small>{{ $message }}</small>@enderror</label>
                 <label class="form-field"><span>Name Arabic</span><input name="name_ar" dir="rtl" value="{{ old('name_ar', $employee->name_ar) }}">@error('name_ar')<small>{{ $message }}</small>@enderror</label>
                 <label class="form-field"><span>Email</span><input name="email" type="email" value="{{ old('email', $employee->email) }}">@error('email')<small>{{ $message }}</small>@enderror</label>

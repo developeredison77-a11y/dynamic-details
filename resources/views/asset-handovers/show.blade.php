@@ -67,6 +67,7 @@
                 </div>
                 <dl>
                     <div><dt>Code</dt><dd>{{ $assignment->employee?->employee_code }}</dd></div>
+                    <div><dt>EID</dt><dd>{{ $assignment->employee?->eid ?: '-' }}</dd></div>
                     <div><dt>Arabic Name</dt><dd>{{ $assignment->employee?->name_ar ?: '-' }}</dd></div>
                     <div><dt>Created By</dt><dd>{{ $assignment->creator?->name ?? '-' }}</dd></div>
                 </dl>
