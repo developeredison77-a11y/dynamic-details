@@ -68,7 +68,7 @@
                     <h2>{{ $assignment->employee?->name_en }}</h2>
                     <dl>
                         <div><dt>Code</dt><dd>{{ $assignment->employee?->employee_code }}</dd></div>
-                        <div><dt>EID</dt><dd>{{ $assignment->employee?->eid ?: '-' }}</dd></div>
+                        <div><dt>Emirates ID</dt><dd>{{ $assignment->employee?->eid ?: '-' }}</dd></div>
                         <div><dt>Arabic Name</dt><dd dir="rtl">{{ $assignment->employee?->name_ar ?: '-' }}</dd></div>
                     </dl>
                 </article>

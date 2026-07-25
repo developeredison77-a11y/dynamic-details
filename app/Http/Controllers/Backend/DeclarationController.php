@@ -77,7 +77,7 @@ class DeclarationController extends Controller
 
     public function show(AssetDeclaration $declaration): View
     {
-        return view('declarations.show', ['declaration' => $declaration->load(['assignment.employee', 'assignment.asset.brand', 'assignment.asset.category'])]);
+        return view('declarations.show', ['declaration' => $declaration->load(['assignment.employee', 'assignment.creator:id,name', 'assignment.asset.brand', 'assignment.asset.category'])]);
     }
 
     public function uploadSigned(Request $request, AssetDeclaration $declaration): RedirectResponse
@@ -104,6 +104,6 @@ class DeclarationController extends Controller
 
     public function print(AssetDeclaration $declaration): View
     {
-        return view('declarations.print', ['declaration' => $declaration->load(['assignment.employee', 'assignment.asset.brand', 'assignment.asset.category'])]);
+        return view('declarations.print', ['declaration' => $declaration->load(['assignment.employee', 'assignment.creator:id,name', 'assignment.asset.brand', 'assignment.asset.category'])]);
     }
 }

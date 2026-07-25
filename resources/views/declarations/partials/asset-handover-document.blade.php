@@ -24,6 +24,9 @@
     $equipmentRowCount = max(4, $equipmentRows->count());
     $additionalInfo = trim((string) ($assignment?->handover_notes ?? ''));
     $acknowledgement = trim((string) ($declaration->terms ?? ''));
+    $handoverToName = $employee?->name_en ?: '-';
+    $handoverByName = $assignment?->creator?->name ?: 'IT Department';
+    $handoverSignatureDate = $formDate?->format($dateFormat) ?? '-';
 @endphp
 
 <!doctype html>
@@ -249,6 +252,14 @@
             height: 45pt;
         }
 
+        .credentials-detail {
+            font-size: 6.8pt;
+            font-weight: 800;
+            line-height: 1.2;
+            padding: 2pt !important;
+            text-align: left;
+        }
+
         .additional-bar {
             height: 30pt;
         }
@@ -381,7 +392,7 @@
                             <td class="info-value" colspan="3">{{ $employee?->name_en ?: '-' }}</td>
                         </tr>
                         <tr>
-                            <td class="info-label" colspan="2">EID:</td>
+                            <td class="info-label" colspan="2">Emirates ID:</td>
                             <td class="info-value" colspan="3">{{ $employee?->eid ?: ($employee?->employee_code ?: '-') }}</td>
                         </tr>
                         <tr>
@@ -422,7 +433,7 @@
                         </tr>
                         <tr>
                             <td class="credentials-space"></td>
-                            <td class="credentials-space" colspan="7"></td>
+                            <td class="credentials-space credentials-detail" colspan="7">No software or user credentials handed over.</td>
                         </tr>
                         <tr>
                             <th class="section-bar-large additional-bar" colspan="8">Adiitional Info Handed Over</th>
@@ -444,9 +455,9 @@
                         <tr class="signature-row">
                             <td></td>
                             <td class="signature-label">Handed over to User :</td>
-                            <td colspan="3"></td>
+                            <td colspan="3">{{ $handoverToName }}</td>
                             <td colspan="2"></td>
-                            <td></td>
+                            <td>{{ $handoverSignatureDate }}</td>
                         </tr>
                         <tr class="signature-row">
                             <td></td>
@@ -458,9 +469,9 @@
                         <tr class="signature-row">
                             <td></td>
                             <td class="signature-label">Handed over by IT :</td>
-                            <td colspan="3"></td>
+                            <td colspan="3">{{ $handoverByName }}</td>
                             <td colspan="2"></td>
-                            <td></td>
+                            <td>{{ $handoverSignatureDate }}</td>
                         </tr>
                         <tr class="signature-row">
                             <td></td>

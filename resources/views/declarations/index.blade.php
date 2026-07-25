@@ -46,7 +46,7 @@
                     @forelse($declarations as $declaration)
                         <tr>
                             <td><strong>{{ $declaration->declaration_number }}</strong></td>
-                            <td>{{ $declaration->assignment?->employee?->name_en }}<br><small>{{ $declaration->assignment?->employee?->employee_code }}{{ $declaration->assignment?->employee?->eid ? ' / EID: '.$declaration->assignment?->employee?->eid : '' }}</small></td>
+                            <td>{{ $declaration->assignment?->employee?->name_en }}<br><small>{{ $declaration->assignment?->employee?->employee_code }}{{ $declaration->assignment?->employee?->eid ? ' / Emirates ID: '.$declaration->assignment?->employee?->eid : '' }}</small></td>
                             <td>{{ $declaration->assignment?->asset?->asset_tag }}<br><small>{{ $declaration->assignment?->asset?->name }}</small></td>
                             <td>{{ $declaration->issued_at?->format('M d, Y') }}</td>
                             <td>{{ $declaration->signed_file_path ? 'Uploaded' : 'Pending' }}</td>
@@ -125,7 +125,7 @@
                     @forelse($returnDeclarations as $return)
                         <tr>
                             <td><strong>#{{ $return->id }}</strong><br><small>{{ $return->condition?->label() }}</small></td>
-                            <td>{{ $return->employee?->name_en }}<br><small>{{ $return->employee?->employee_code }}{{ $return->employee?->eid ? ' / EID: '.$return->employee?->eid : '' }}</small></td>
+                            <td>{{ $return->employee?->name_en }}<br><small>{{ $return->employee?->employee_code }}{{ $return->employee?->eid ? ' / Emirates ID: '.$return->employee?->eid : '' }}</small></td>
                             <td>{{ $return->asset?->asset_tag }}<br><small>{{ $return->asset?->name }}</small></td>
                             <td>{{ $return->returned_at?->format('M d, Y') }}</td>
                             <td>{{ $return->signed_file_path ? 'Uploaded' : 'Pending' }}</td>

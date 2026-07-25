@@ -153,16 +153,13 @@
                     </x-dashboard.nav-group>
                 @endif
 
-                @if ($user?->canAccess('asset-handovers.view') || $user?->canAccess('asset-returns.view') || $user?->canAccess('declarations.view'))
-                    <x-dashboard.nav-group icon="dashboard" label="Asset Operations" :active="request()->routeIs('asset-handovers.*', 'asset-returns.*', 'declarations.*')">
+                @if ($user?->canAccess('asset-handovers.view') || $user?->canAccess('asset-returns.view'))
+                    <x-dashboard.nav-group icon="dashboard" label="Asset Operations" :active="request()->routeIs('asset-handovers.*', 'asset-returns.*')">
                         @if ($user?->canAccess('asset-handovers.view'))
                             <x-dashboard.sub-link :href="route('asset-handovers.index')" :active="request()->routeIs('asset-handovers.*')">Handovers</x-dashboard.sub-link>
                         @endif
                         @if ($user?->canAccess('asset-returns.view'))
                             <x-dashboard.sub-link :href="route('asset-returns.index')" :active="request()->routeIs('asset-returns.*')">Returns</x-dashboard.sub-link>
-                        @endif
-                        @if ($user?->canAccess('declarations.view'))
-                            <x-dashboard.sub-link :href="route('declarations.index')" :active="request()->routeIs('declarations.*')">Declarations</x-dashboard.sub-link>
                         @endif
                     </x-dashboard.nav-group>
                 @endif

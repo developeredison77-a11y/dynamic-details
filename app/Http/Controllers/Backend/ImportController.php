@@ -98,7 +98,7 @@ class ImportController extends Controller
             'employees' => [
                 'name_en',
                 'name_ar',
-                'eid',
+                'emirates_id',
                 'email',
                 'department',
                 'role',
