@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+    RewriteRule ^build/(.*)$ public/build/$1 [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
