@@ -1,21 +1,22 @@
 <?php
 
-use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Backend\AssetBrandController;
 use App\Http\Controllers\Backend\AssetCategoryController;
 use App\Http\Controllers\Backend\AssetController;
 use App\Http\Controllers\Backend\AssetHandoverController;
 use App\Http\Controllers\Backend\AssetReturnController;
 use App\Http\Controllers\Backend\ClientController;
+use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DeclarationController;
 use App\Http\Controllers\Backend\EmployeeController;
+use App\Http\Controllers\Backend\EmployeeDocumentController;
 use App\Http\Controllers\Backend\ImportController;
 use App\Http\Controllers\Backend\ProfileController;
 use App\Http\Controllers\Backend\ReportController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingsController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,13 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/employees', [EmployeeController::class, 'index'])->middleware('permission:employees.view')->name('employees.index');
     Route::get('/employees/create', [EmployeeController::class, 'create'])->middleware('permission:employees.create')->name('employees.create');
     Route::post('/employees', [EmployeeController::class, 'store'])->middleware('permission:employees.create')->name('employees.store');
+    Route::get('/employees/{employee}/handover-report', [EmployeeDocumentController::class, 'handoverReport'])->middleware('permission:employees.view')->name('employees.handover-report');
+    Route::get('/employees/{employee}/handover-report/print', [EmployeeDocumentController::class, 'handoverReportPrint'])->middleware('permission:employees.view')->name('employees.handover-report.print');
+    Route::get('/employees/{employee}/declaration-form', [EmployeeDocumentController::class, 'declarationForm'])->middleware('permission:employees.view')->name('employees.declaration-form');
+    Route::get('/employees/{employee}/declaration-form/print', [EmployeeDocumentController::class, 'declarationFormPrint'])->middleware('permission:employees.view')->name('employees.declaration-form.print');
+    Route::post('/employees/{employee}/declaration-document', [EmployeeDocumentController::class, 'uploadDeclarationDocument'])->middleware('permission:employees.update')->name('employees.declaration-document.upload');
+    Route::get('/employees/{employee}/declaration-document/view', [EmployeeDocumentController::class, 'viewDeclarationDocument'])->middleware('permission:employees.view')->name('employees.declaration-document.view');
+    Route::get('/employees/{employee}/declaration-document/download', [EmployeeDocumentController::class, 'downloadDeclarationDocument'])->middleware('permission:employees.view')->name('employees.declaration-document.download');
     Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])->middleware('permission:employees.update')->name('employees.edit');
     Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->middleware('permission:employees.update')->name('employees.update');
     Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->middleware('permission:employees.delete')->name('employees.destroy');

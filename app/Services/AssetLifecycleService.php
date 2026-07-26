@@ -13,14 +13,14 @@ use Illuminate\Support\Facades\DB;
 class AssetLifecycleService
 {
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function handover(array $data, ?int $userId): AssetAssignment
     {
         return DB::transaction(function () use ($data, $userId): AssetAssignment {
             $asset = Asset::query()->lockForUpdate()->findOrFail($data['asset_id']);
 
-            if ($asset->status !== AssetStatus::Available && $asset->status !== AssetStatus::Returned) {
+            if (! $this->assetCanBeHandedOver($asset)) {
                 throw new \DomainException('This asset is not available for handover.');
             }
 
@@ -41,28 +41,41 @@ class AssetLifecycleService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function updateHandover(AssetAssignment $assignment, array $data): AssetAssignment
     {
         return DB::transaction(function () use ($assignment, $data): AssetAssignment {
-            $assignment = AssetAssignment::query()->lockForUpdate()->with('asset')->findOrFail($assignment->id);
+            $assignment = AssetAssignment::query()
+                ->lockForUpdate()
+                ->with(['asset', 'returnRecord'])
+                ->findOrFail($assignment->id);
 
             if (! $assignment->canBeEdited()) {
                 throw new \DomainException('This handover can be edited only before the handover date starts.');
             }
 
             $nextAssetId = (int) $data['asset_id'];
+            $isAssigned = $assignment->status === AssetAssignmentStatus::Assigned;
+            $isReturned = $assignment->status === AssetAssignmentStatus::Returned;
 
-            if ($assignment->asset_id !== $nextAssetId) {
+            if ($isAssigned && $assignment->asset_id !== $nextAssetId) {
                 $asset = Asset::query()->lockForUpdate()->findOrFail($nextAssetId);
 
-                if ($asset->status !== AssetStatus::Available && $asset->status !== AssetStatus::Returned) {
+                if (! $this->assetCanBeHandedOver($asset)) {
                     throw new \DomainException('The selected asset is not available for handover.');
                 }
 
                 $assignment->asset?->update(['status' => AssetStatus::Available]);
                 $asset->update(['status' => AssetStatus::Assigned]);
+            }
+
+            if ($isReturned && $assignment->asset_id !== $nextAssetId) {
+                Asset::query()->lockForUpdate()->findOrFail($nextAssetId);
+
+                if ($this->assetHasAssignedHandover($nextAssetId)) {
+                    throw new \DomainException('The selected asset is currently assigned and cannot be used for a returned handover record.');
+                }
             }
 
             $assignment->update([
@@ -73,12 +86,19 @@ class AssetLifecycleService
                 'handover_notes' => $data['handover_notes'] ?? null,
             ]);
 
+            if ($isReturned) {
+                $assignment->returnRecord?->update([
+                    'employee_id' => $data['employee_id'],
+                    'asset_id' => $nextAssetId,
+                ]);
+            }
+
             return $assignment->load(['employee', 'asset.brand', 'asset.category']);
         });
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function updateAsset(Asset $asset, array $data, ?int $userId): Asset
     {
@@ -139,8 +159,22 @@ class AssetLifecycleService
         return now(config('app.timezone', 'Asia/Kolkata'))->toDateString();
     }
 
+    private function assetHasAssignedHandover(int $assetId): bool
+    {
+        return AssetAssignment::query()
+            ->where('asset_id', $assetId)
+            ->assigned()
+            ->exists();
+    }
+
+    private function assetCanBeHandedOver(Asset $asset): bool
+    {
+        return in_array($asset->status, [AssetStatus::Available, AssetStatus::Returned], true)
+            && ! $this->assetHasAssignedHandover($asset->id);
+    }
+
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function returnAsset(AssetAssignment $assignment, array $data, ?int $userId): AssetReturn
     {

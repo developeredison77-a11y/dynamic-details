@@ -67,8 +67,18 @@ class AssetAssignment extends Model
 
     public function canBeEdited(): bool
     {
-        return $this->status === AssetAssignmentStatus::Assigned
-            && $this->handover_date !== null
-            && $this->handover_date->isAfter(now(config('app.timezone', 'Asia/Kolkata'))->startOfDay());
+        if ($this->status === AssetAssignmentStatus::Assigned) {
+            return $this->handover_date !== null
+                && $this->handover_date->isAfter(now(config('app.timezone', 'Asia/Kolkata'))->startOfDay());
+        }
+
+        if ($this->status !== AssetAssignmentStatus::Returned || ! $this->asset_id) {
+            return false;
+        }
+
+        return ! self::query()
+            ->where('asset_id', $this->asset_id)
+            ->assigned()
+            ->exists();
     }
 }

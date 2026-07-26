@@ -16,6 +16,8 @@
         'tag' => '<path d="M3 4h9l9 9-8 8-9-9V4Zm2 2v5.2l8 8 5.2-5.2-8-8H5Zm3.5 4A1.5 1.5 0 1 0 8.5 7a1.5 1.5 0 0 0 0 3Z"/>',
         'folder' => '<path d="M3 5h7l2 2h9v14H3V5Zm2 4v10h16V9H5Z"/>',
         'file-plus' => '<path d="M6 2h9l5 5v15H6V2Zm8 1.5V8h4.5L14 3.5ZM11 11h2v3h3v2h-3v3h-2v-3H8v-2h3v-3Z"/>',
+        'file-text' => '<path d="M6 2h9l5 5v15H6V2Zm8 1.5V8h4.5L14 3.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Zm0-8h4v2H8V8Z"/>',
+        'clipboard-list' => '<path d="M9 2h6a2 2 0 0 1 2 2h3v18H4V4h3a2 2 0 0 1 2-2Zm0 2v2h6V4H9ZM6 6v14h12V6h-1v2H7V6H6Zm3 6h6v2H9v-2Zm0 4h6v2H9v-2Zm-2-4h1v2H7v-2Zm0 4h1v2H7v-2Z"/>',
         'rotate-ccw' => '<path d="M7 7.8V4H5v7h7V9H8.5A6 6 0 1 1 6 14H4a8 8 0 1 0 3-6.2Z"/>',
         'funnel' => '<path d="M3 5h18l-7 8v6l-4 2v-8L3 5Zm4.4 2 4.6 5.3 4.6-5.3H7.4Z"/>',
         'x' => '<path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/>',

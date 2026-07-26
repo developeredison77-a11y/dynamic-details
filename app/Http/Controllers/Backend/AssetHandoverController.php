@@ -59,7 +59,7 @@ class AssetHandoverController extends Controller
 
     public function create(): View
     {
-        return view('asset-handovers.create', $this->formData(new AssetAssignment()));
+        return view('asset-handovers.create', $this->formData(new AssetAssignment));
     }
 
     public function store(AssetHandoverRequest $request, AssetLifecycleService $service): RedirectResponse
@@ -128,7 +128,7 @@ class AssetHandoverController extends Controller
                 ->get(['id', 'employee_code', 'eid', 'name_en']),
             'assets' => Asset::query()
                 ->where(function ($query) use ($assignment): void {
-                    $query->available();
+                    $query->assignableForHandover();
 
                     if ($assignment->exists) {
                         $query->orWhere('assets.id', $assignment->asset_id);

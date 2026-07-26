@@ -6611,6 +6611,10 @@ h6 {
     gap: var(--ui-space-2);
 }
 
+.dashboard-page-actions .employee-create-btn {
+    margin-left: auto;
+}
+
 .dashboard-breadcrumbs a,
 .dashboard-breadcrumbs span {
     font-size: 12px;
@@ -7246,6 +7250,10 @@ h6 {
     .dashboard-page-actions .btn,
     .dashboard-page-actions .listing-create-btn {
         width: 100%;
+    }
+
+    .dashboard-page-actions .employee-create-btn {
+        margin-left: 0;
     }
 
     .dashboard-topbar {

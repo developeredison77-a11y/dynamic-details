@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -71,6 +72,11 @@ class Employee extends Model
     public function activeAssignments(): HasMany
     {
         return $this->assignments()->assigned();
+    }
+
+    public function declarationDocument(): HasOne
+    {
+        return $this->hasOne(EmployeeDeclarationDocument::class);
     }
 
     public function scopeSearch(Builder $query, ?string $term): Builder

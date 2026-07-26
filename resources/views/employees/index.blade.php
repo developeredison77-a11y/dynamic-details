@@ -5,7 +5,7 @@
 @section('eyebrow', 'Employees')
 @section('page-actions')
     @if (auth()->user()?->canAccess('employees.create'))
-        <a href="{{ route('employees.create') }}" class="btn btn-primary listing-create-btn">
+        <a href="{{ route('employees.create') }}" class="btn btn-primary listing-create-btn employee-create-btn">
             <x-dashboard.icon name="plus" />
             <span>Create</span>
         </a>
@@ -15,6 +15,8 @@
 @section('content')
     @php
         $hasFilters = request()->filled('search') || request()->filled('status') || request()->filled('role_id');
+        $canViewEmployeeDocuments = auth()->user()?->canAccess('employees.view');
+        $canUploadEmployeeDeclarationForms = auth()->user()?->canAccess('employees.update');
         $canUpdateEmployees = auth()->user()?->canAccess('employees.update');
         $canDeleteEmployees = auth()->user()?->canAccess('employees.delete');
     @endphp
@@ -39,9 +41,10 @@
         </form>
         <div class="responsive-table">
             <table class="advanced-table">
-                <thead><tr><th>Employee</th><th>Arabic Name</th><th>Department</th><th>Role</th><th>Status</th><th>Assets</th><th>Action</th></tr></thead>
+                <thead><tr><th>Employee</th><th>Arabic Name</th><th>Department</th><th>Role</th><th>Status</th><th>Assets</th><th>Filled Form</th><th>Action</th></tr></thead>
                 <tbody>
                     @forelse ($employees as $employee)
+                        @php($declarationDocument = $employee->declarationDocument)
                         <tr>
                             <td><div class="client-person"><span>{{ strtoupper(substr($employee->name_en, 0, 2)) }}</span><div><strong>{{ $employee->name_en }}</strong><small>{{ $employee->eid ?: '-' }}</small></div></div></td>
                             <td dir="rtl">{{ $employee->name_ar ?: '-' }}</td>
@@ -50,7 +53,41 @@
                             <td><span class="status-badge status-{{ $employee->status->value }}">{{ $employee->status->label() }}</span></td>
                             <td>{{ $employee->active_assignments_count }}</td>
                             <td>
+                                @if ($declarationDocument)
+                                    <span class="status-badge status-active">Uploaded</span><br>
+                                    <small>{{ $declarationDocument->uploaded_at?->format('M d, Y') }}</small>
+                                @else
+                                    <span class="status-badge status-leave">Pending</span>
+                                @endif
+                            </td>
+                            <td>
                                 <div class="table-action-row">
+                                    @if ($canViewEmployeeDocuments)
+                                        <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-view" href="{{ route('employees.handover-report', $employee) }}" target="_blank" aria-label="View handover report for {{ $employee->name_en }}" data-tooltip="Handover Report">
+                                            <x-dashboard.icon name="clipboard-list" />
+                                        </a>
+                                        <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-neutral" href="{{ route('employees.declaration-form.print', $employee) }}" target="_blank" aria-label="Download declaration form for {{ $employee->name_en }}" data-tooltip="Download Declaration Form">
+                                            <x-dashboard.icon name="file-text" />
+                                        </a>
+                                    @endif
+                                    @if ($canUploadEmployeeDeclarationForms)
+                                        <form method="POST" action="{{ route('employees.declaration-document.upload', $employee) }}" enctype="multipart/form-data" class="signed-return-upload-form" data-submit-loader="false">
+                                            @csrf
+                                            <input type="hidden" name="upload_employee_id" value="{{ $employee->id }}">
+                                            <label class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-edit" aria-label="{{ $declarationDocument ? 'Replace filled declaration form for '.$employee->name_en : 'Upload filled declaration form for '.$employee->name_en }}" data-tooltip="{{ $declarationDocument ? 'Replace Filled Form' : 'Upload Filled Form' }}">
+                                                <input type="file" name="filled_declaration_file" accept=".pdf,.jpg,.jpeg,.png,.webp" required onchange="this.form.submit()">
+                                                <x-dashboard.icon name="upload" />
+                                            </label>
+                                        </form>
+                                    @endif
+                                    @if ($canViewEmployeeDocuments && $declarationDocument)
+                                        <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-view" href="{{ route('employees.declaration-document.view', $employee) }}" target="_blank" aria-label="View uploaded declaration form for {{ $employee->name_en }}" data-tooltip="View Filled Form">
+                                            <x-dashboard.icon name="eye" />
+                                        </a>
+                                        <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-neutral" href="{{ route('employees.declaration-document.download', $employee) }}" aria-label="Download uploaded declaration form for {{ $employee->name_en }}" data-tooltip="Download Filled Form">
+                                            <x-dashboard.icon name="download" />
+                                        </a>
+                                    @endif
                                     @if ($canUpdateEmployees)
                                         <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-edit" href="{{ route('employees.edit', $employee) }}" aria-label="Edit {{ $employee->name_en }}" data-tooltip="Edit">
                                             <x-dashboard.icon name="edit" />
@@ -66,10 +103,14 @@
                                         </form>
                                     @endif
                                 </div>
+                                @if ((string) old('upload_employee_id') === (string) $employee->id)
+                                    @error('filled_declaration_file')<small class="field-error">{{ $message }}</small>@enderror
+                                    @error('upload_employee_id')<small class="field-error">{{ $message }}</small>@enderror
+                                @endif
                             </td>
                         </tr>
                     @empty
-                        <tr><td class="table-empty" colspan="7">No employees found.</td></tr>
+                        <tr><td class="table-empty" colspan="8">No employees found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

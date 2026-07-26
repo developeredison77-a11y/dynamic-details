@@ -20,7 +20,10 @@ class EmployeeController extends Controller
 
         return view('employees.index', [
             'employees' => Employee::query()
-                ->with('role')
+                ->with([
+                    'role:id,name',
+                    'declarationDocument:id,employee_id,original_name,mime_type,file_size,uploaded_at',
+                ])
                 ->withCount(['activeAssignments'])
                 ->search($request->string('search')->toString())
                 ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))

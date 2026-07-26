@@ -61,6 +61,16 @@ class Asset extends Model
         return $query->where('status', AssetStatus::Available);
     }
 
+    public function scopeAssignableForHandover(Builder $query): Builder
+    {
+        return $query
+            ->whereIn('status', [
+                AssetStatus::Available->value,
+                AssetStatus::Returned->value,
+            ])
+            ->whereDoesntHave('assignments', fn (Builder $query): Builder => $query->assigned());
+    }
+
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
         return $query->when($term, function (Builder $query, string $term): void {
