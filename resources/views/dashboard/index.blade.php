@@ -6,10 +6,10 @@
 
 @php
     $metrics = [
-        ['label' => 'Total Assets', 'value' => $assetStats['total'], 'note' => 'All registered company assets', 'tone' => 'good', 'icon' => 'pages', 'href' => route('assets.index'), 'permission' => 'assets.view'],
-        ['label' => 'Total Employees', 'value' => $employeeTotal, 'note' => 'All employee records', 'tone' => 'info', 'icon' => 'users', 'href' => route('employees.index'), 'permission' => 'employees.view'],
-        ['label' => 'Total Brands', 'value' => $brandTotal, 'note' => 'Asset brand master records', 'tone' => 'warn', 'icon' => 'tag', 'href' => route('asset-brands.index'), 'permission' => 'asset-brands.manage'],
-        ['label' => 'Total Categories', 'value' => $categoryTotal, 'note' => 'Asset category master records', 'tone' => 'good', 'icon' => 'folder', 'href' => route('asset-categories.index'), 'permission' => 'asset-categories.manage'],
+        ['label' => 'Total Assets', 'value' => $assetStats['total'], 'note' => 'All registered company assets', 'tone' => 'good', 'color' => 'assets', 'icon' => 'pages', 'href' => route('assets.index'), 'permission' => 'assets.view'],
+        ['label' => 'Total Employees', 'value' => $employeeTotal, 'note' => 'All employee records', 'tone' => 'info', 'color' => 'employees', 'icon' => 'users', 'href' => route('employees.index'), 'permission' => 'employees.view'],
+        ['label' => 'Total Brands', 'value' => $brandTotal, 'note' => 'Asset brand master records', 'tone' => 'warn', 'color' => 'brands', 'icon' => 'tag', 'href' => route('asset-brands.index'), 'permission' => 'asset-brands.manage'],
+        ['label' => 'Total Categories', 'value' => $categoryTotal, 'note' => 'Asset category master records', 'tone' => 'good', 'color' => 'categories', 'icon' => 'folder', 'href' => route('asset-categories.index'), 'permission' => 'asset-categories.manage'],
     ];
     $maxHandover = max(1, $handoverTrend->max('value') ?: 1);
     $maxReturn = max(1, $returnTrend->max('value') ?: 1);
@@ -33,7 +33,7 @@
         @foreach ($metrics as $metric)
             @php($canOpenMetric = auth()->user()?->canAccess($metric['permission']))
             @if ($canOpenMetric)
-                <a class="analytics-card analytics-card-link" href="{{ $metric['href'] }}">
+                <a class="analytics-card analytics-card-highlight analytics-card-{{ $metric['color'] }} analytics-card-link" href="{{ $metric['href'] }}">
                     <div class="analytics-card-top">
                         <span class="metric-icon"><x-dashboard.icon :name="$metric['icon']" /></span>
                         <em class="trend-pill trend-{{ $metric['tone'] }}">{{ $metric['value'] }}</em>
@@ -47,7 +47,7 @@
                     </div>
                 </a>
             @else
-                <div class="analytics-card">
+                <div class="analytics-card analytics-card-highlight analytics-card-{{ $metric['color'] }}">
                     <div class="analytics-card-top">
                         <span class="metric-icon"><x-dashboard.icon :name="$metric['icon']" /></span>
                         <em class="trend-pill trend-{{ $metric['tone'] }}">{{ $metric['value'] }}</em>

@@ -2728,6 +2728,52 @@ footer,
     transform: translateY(-2px);
 }
 
+.analytics-card-highlight {
+    --metric-accent: var(--primary);
+    --metric-accent-deep: color-mix(in srgb, var(--metric-accent) 72%, #111827);
+    border-color: color-mix(in srgb, var(--metric-accent) 24%, var(--border));
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--metric-accent) 18%, var(--surface)) 0%, var(--surface) 62%),
+        linear-gradient(180deg, color-mix(in srgb, var(--metric-accent) 10%, transparent), transparent);
+    box-shadow: 0 18px 38px color-mix(in srgb, var(--metric-accent) 16%, transparent);
+}
+
+.analytics-card-highlight::before {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top right, color-mix(in srgb, var(--metric-accent) 28%, transparent), transparent 34%),
+        linear-gradient(90deg, var(--metric-accent) 0 5px, transparent 5px);
+    content: '';
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.analytics-card-highlight > * {
+    position: relative;
+}
+
+.analytics-card-assets {
+    --metric-accent: #2563eb;
+}
+
+.analytics-card-employees {
+    --metric-accent: #0d9488;
+}
+
+.analytics-card-brands {
+    --metric-accent: #f59e0b;
+}
+
+.analytics-card-categories {
+    --metric-accent: #16a34a;
+}
+
+.analytics-card-highlight.analytics-card-link:hover {
+    border-color: color-mix(in srgb, var(--metric-accent) 44%, var(--border));
+    box-shadow: 0 22px 42px color-mix(in srgb, var(--metric-accent) 20%, transparent);
+}
+
 .analytics-card-top {
     display: flex;
     align-items: center;
@@ -2752,6 +2798,13 @@ footer,
     color: var(--primary);
 }
 
+.analytics-card-highlight .metric-icon {
+    border-color: color-mix(in srgb, var(--metric-accent) 28%, #ffffff);
+    background: color-mix(in srgb, var(--metric-accent) 15%, #ffffff);
+    color: var(--metric-accent-deep);
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--metric-accent) 18%, transparent);
+}
+
 .metric-icon svg {
     width: 20px;
     height: 20px;
@@ -2767,6 +2820,15 @@ footer,
     font-weight: 600;
 }
 
+.analytics-card-highlight .analytics-card-main span,
+.analytics-card-highlight .analytics-card-footer small {
+    color: color-mix(in srgb, var(--metric-accent-deep) 64%, var(--muted));
+}
+
+.analytics-card-highlight strong {
+    color: color-mix(in srgb, var(--metric-accent-deep) 76%, var(--text));
+}
+
 .analytics-card strong {
     font-size: 32px;
     font-weight: 600;
@@ -2779,6 +2841,15 @@ footer,
     align-items: center;
     border-top: 1px solid var(--border);
     padding-top: 14px;
+}
+
+.analytics-card-highlight .analytics-card-footer {
+    border-top-color: color-mix(in srgb, var(--metric-accent) 22%, var(--border));
+}
+
+.analytics-card-highlight .trend-pill {
+    background: color-mix(in srgb, var(--metric-accent) 16%, #ffffff);
+    color: var(--metric-accent-deep);
 }
 
 .trend-pill,
@@ -6974,6 +7045,20 @@ h6 {
 
 .advanced-table tbody tr:hover {
     background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+}
+
+.advanced-table thead th {
+    border-bottom-color: color-mix(in srgb, var(--primary) 82%, #111827);
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.advanced-table thead th:first-child {
+    border-top-left-radius: var(--ui-radius);
+}
+
+.advanced-table thead th:last-child {
+    border-top-right-radius: var(--ui-radius);
 }
 
 .advanced-table td.table-empty,

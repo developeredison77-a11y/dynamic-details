@@ -16,6 +16,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(AccessControlSeeder::class);
         $this->call(AdminUserSeeder::class);
-        $this->call(BulkDummyDataSeeder::class);
+        // $this->call(BulkDummyDataSeeder::class);
     }
 }
