@@ -150,7 +150,7 @@
         }
 
         .body-row {
-            height: 430pt;
+            height: 392pt;
         }
 
         .declaration-copy {
@@ -159,10 +159,11 @@
             font-size: 12.4pt;
             font-weight: 500;
             height: 100%;
-            justify-content: space-between;
+            justify-content: flex-start;
+            gap: 11pt;
             line-height: 1.25;
             overflow: hidden;
-            padding: 17pt 2.5pt 11pt;
+            padding: 14pt 5pt 10pt;
         }
 
         .declaration-copy p {
@@ -181,14 +182,14 @@
         }
 
         .signature-row {
-            height: 118pt;
+            height: 96pt;
         }
 
         .signature-cell {
             font-size: 10.2pt;
             font-weight: 800;
             line-height: 1.1;
-            padding: 46pt 2pt 0 !important;
+            padding: 30pt 5pt 0 !important;
         }
 
         .signature-cell-ar {
