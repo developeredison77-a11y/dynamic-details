@@ -8,7 +8,6 @@ use App\Models\Asset;
 use App\Models\AssetAssignment;
 use App\Models\AssetBrand;
 use App\Models\AssetCategory;
-use App\Models\AssetReturn;
 use App\Models\Employee;
 use App\Models\Setting;
 use Illuminate\Support\Carbon;
@@ -50,17 +49,14 @@ class DashboardController extends Controller
                 'color' => $statusColors[$status->value] ?? '#64748b',
             ];
         });
+        $activeUnits = $totalAssets - (int) ($assetStatusCounts[AssetStatus::Retired->value] ?? 0);
+        $spareUnits = (int) ($assetStatusCounts[AssetStatus::Available->value] ?? 0);
+        $assetLastUpdate = Asset::query()->max('updated_at');
         $handoverMonthSql = sprintf($monthExpression, 'handover_date');
-        $returnMonthSql = sprintf($monthExpression, 'returned_at');
         $handoverTrendCounts = AssetAssignment::query()
             ->whereBetween('handover_date', [$trendStart, $trendEnd])
             ->selectRaw($handoverMonthSql . ' as month, count(*) as aggregate')
             ->groupByRaw($handoverMonthSql)
-            ->pluck('aggregate', 'month');
-        $returnTrendCounts = AssetReturn::query()
-            ->whereBetween('returned_at', [$trendStart, $trendEnd])
-            ->selectRaw($returnMonthSql . ' as month, count(*) as aggregate')
-            ->groupByRaw($returnMonthSql)
             ->pluck('aggregate', 'month');
 
         return view('dashboard.index', [
@@ -69,16 +65,17 @@ class DashboardController extends Controller
                 'total' => $totalAssets,
             ],
             'assetStatusStats' => $assetStatusStats,
+            'assetStatusSummary' => [
+                'activeUnits' => $activeUnits,
+                'spareUnits' => $spareUnits,
+                'lastUpdate' => $assetLastUpdate ? Carbon::parse($assetLastUpdate) : null,
+            ],
             'employeeTotal' => Employee::query()->count(),
             'brandTotal' => AssetBrand::query()->count(),
             'categoryTotal' => AssetCategory::query()->count(),
             'handoverTrend' => $months->map(fn (Carbon $month): array => [
                 'label' => $month->format('M'),
                 'value' => (int) ($handoverTrendCounts[$month->format('Y-m')] ?? 0),
-            ]),
-            'returnTrend' => $months->map(fn (Carbon $month): array => [
-                'label' => $month->format('M'),
-                'value' => (int) ($returnTrendCounts[$month->format('Y-m')] ?? 0),
             ]),
         ]);
     }
