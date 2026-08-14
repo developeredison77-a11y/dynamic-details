@@ -1,17 +1,17 @@
 @php
     $autoPrint = $autoPrint ?? false;
     $showToolbar = $showToolbar ?? false;
-    $companyName = $appSettings['site_name'] ?? config('app.name', 'AL Saud Investment');
+    $companyName = $employee->entity ?: ($appSettings['site_name'] ?? config('app.name', 'AL Saud Investment'));
     $employeeName = $employee->name_en ?: '______________________________';
     $employeeArabicName = $employee->name_ar ?: $employeeName;
-    $designation = $employee->role?->name ?? $employee->designation ?? '______________________________';
+    $designation = $employee->employeeJob?->name ?? $employee->designation ?? $employee->role?->name ?? '______________________________';
     $eid = $employee->eid ?: '______________________________';
     $declarationDate = $assetSummary['date'] ?? '____/____/______';
     $assetEnglish = $assetSummary['english'] ?? 'the following company asset(s): ______________________________';
     $assetArabic = $assetSummary['arabic'] ?? 'أصول الشركة التالية: ______________________________';
 
     $englishParagraphs = [
-        "I, {$employeeName} the undersigned, holder of Emirates ID No ({$eid}) in my capacity as a staff member of {$companyName}, with job title {$designation}, I hereby acknowledge that I had received from the company, {$assetEnglish} at date {$declarationDate}",
+        "I, {$employeeName} the undersigned, holder of Emirates ID No ({$eid}) in my capacity as a member of {$companyName}, with job title {$designation}, I hereby acknowledge that I had received from the company, {$assetEnglish} at date {$declarationDate}",
         'for the purpose of carrying out the tasks that I was assigned, I undertake to preserve it and acknowledge that it is in my possession and my full civil and criminal responsibility from the above-mentioned date.',
         'I undertake to not to use it in a way that offends the company and its reputation, and hand it over to the company whenever I am requested to do so, in accordance with the rules in force within the company',
     ];

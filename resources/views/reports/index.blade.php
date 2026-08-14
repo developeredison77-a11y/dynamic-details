@@ -99,9 +99,9 @@
     <section class="report-two-column">
         <article class="dashboard-panel report-section-panel">
             <div class="panel-heading"><div><p>Employees</p><h2>Recent Records</h2></div>@if ($canExport)<a class="btn btn-secondary" href="{{ route('reports.pdf', 'employees') }}" target="_blank">PDF</a>@endif</div>
-            <div class="responsive-table"><table class="advanced-table"><thead><tr><th>Employee</th><th>Role</th><th>Status</th></tr></thead><tbody>
+            <div class="responsive-table"><table class="advanced-table"><thead><tr><th>Employee</th><th>Job Title</th><th>Status</th></tr></thead><tbody>
                 @forelse($employees as $employee)
-                    <tr><td><strong>{{ $employee->name_en }}</strong><br><small>{{ $employee->employee_code }}{{ $employee->eid ? ' / Emirates ID: '.$employee->eid : '' }}</small></td><td>{{ $employee->role?->name ?? $employee->designation ?? '-' }}</td><td><span class="status-badge status-{{ $employee->status?->value }}">{{ $employee->status?->label() }}</span></td></tr>
+                    <tr><td><strong>{{ $employee->name_en }}</strong><br><small>{{ $employee->employee_code }}{{ $employee->eid ? ' / Emirates ID: '.$employee->eid : '' }}</small></td><td>{{ $employee->employeeJob?->name ?? $employee->designation ?? $employee->role?->name ?? '-' }}</td><td><span class="status-badge status-{{ $employee->status?->value }}">{{ $employee->status?->label() }}</span></td></tr>
                 @empty
                     <tr><td class="table-empty" colspan="3">No employee data found.</td></tr>
                 @endforelse

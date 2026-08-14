@@ -6,7 +6,10 @@ use App\Enums\EmployeeStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeRequest;
 use App\Models\Employee;
+use App\Models\EmployeeDepartment;
+use App\Models\EmployeeJob;
 use App\Models\Role;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,6 +25,8 @@ class EmployeeController extends Controller
             'employees' => Employee::query()
                 ->with([
                     'role:id,name',
+                    'employeeDepartment:id,name',
+                    'employeeJob:id,name',
                     'declarationDocument:id,employee_id,original_name,mime_type,file_size,uploaded_at',
                 ])
                 ->withCount(['activeAssignments'])
@@ -33,6 +38,8 @@ class EmployeeController extends Controller
                 ->withQueryString(),
             'statuses' => EmployeeStatus::cases(),
             'roles' => Role::query()->active()->orderBy('name')->get(['id', 'name']),
+            'departments' => EmployeeDepartment::query()->active()->orderBy('name')->get(['id', 'name']),
+            'jobs' => EmployeeJob::query()->active()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -53,6 +60,8 @@ class EmployeeController extends Controller
             'employee' => $employee,
             'statuses' => EmployeeStatus::cases(),
             'roles' => Role::query()->active()->orderBy('name')->get(['id', 'name']),
+            'departments' => EmployeeDepartment::query()->active()->orderBy('name')->get(['id', 'name']),
+            'jobs' => EmployeeJob::query()->active()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -74,12 +83,37 @@ class EmployeeController extends Controller
             ->with('generated_employee_code', $employee->employee_code);
     }
 
+    public function show(Employee $employee): View
+    {
+        $employee->load([
+            'role:id,name',
+            'employeeDepartment:id,name',
+            'employeeJob:id,name',
+            'declarationDocument:id,employee_id,original_name,mime_type,file_size,uploaded_at',
+        ])->loadCount([
+            'assignments',
+            'activeAssignments',
+            'assignments as returned_assignments_count' => fn (Builder $query) => $query->where('status', 'returned'),
+        ]);
+
+        return view('employees.show', [
+            'employee' => $employee,
+            'assignments' => $employee->assignments()
+                ->with(['asset:id,asset_tag,name,model,status,condition,asset_category_id,asset_brand_id', 'asset.category:id,name', 'asset.brand:id,name'])
+                ->latest()
+                ->limit(8)
+                ->get(),
+        ]);
+    }
+
     public function edit(Employee $employee): View
     {
         return view('employees.form', [
             'employee' => $employee,
             'statuses' => EmployeeStatus::cases(),
             'roles' => Role::query()->active()->orderBy('name')->get(['id', 'name']),
+            'departments' => EmployeeDepartment::query()->active()->orderBy('name')->get(['id', 'name']),
+            'jobs' => EmployeeJob::query()->active()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -106,10 +140,14 @@ class EmployeeController extends Controller
     private function employeeData(EmployeeRequest $request): array
     {
         $data = $request->validated();
-        $role = filled($data['role_id'] ?? null)
-            ? Role::query()->find($data['role_id'])
+        $department = filled($data['employee_department_id'] ?? null)
+            ? EmployeeDepartment::query()->find($data['employee_department_id'])
             : null;
-        $data['designation'] = $role?->name;
+        $job = filled($data['employee_job_id'] ?? null)
+            ? EmployeeJob::query()->find($data['employee_job_id'])
+            : null;
+        $data['department'] = $department?->name;
+        $data['designation'] = $job?->name;
 
         return $data;
     }

@@ -14,10 +14,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable([
     'employee_code',
     'eid',
+    'nationality',
+    'entity',
     'name_en',
     'name_ar',
     'department',
+    'employee_department_id',
     'designation',
+    'employee_job_id',
     'role_id',
     'email',
     'phone',
@@ -69,6 +73,16 @@ class Employee extends Model
         return $this->belongsTo(Role::class);
     }
 
+    public function employeeDepartment(): BelongsTo
+    {
+        return $this->belongsTo(EmployeeDepartment::class);
+    }
+
+    public function employeeJob(): BelongsTo
+    {
+        return $this->belongsTo(EmployeeJob::class);
+    }
+
     public function activeAssignments(): HasMany
     {
         return $this->assignments()->assigned();
@@ -88,8 +102,12 @@ class Employee extends Model
                     ->orWhere('name_en', 'like', "%{$term}%")
                     ->orWhere('name_ar', 'like', "%{$term}%")
                     ->orWhere('email', 'like', "%{$term}%")
+                    ->orWhere('nationality', 'like', "%{$term}%")
+                    ->orWhere('entity', 'like', "%{$term}%")
                     ->orWhere('department', 'like', "%{$term}%")
                     ->orWhere('designation', 'like', "%{$term}%")
+                    ->orWhereHas('employeeDepartment', fn (Builder $query) => $query->where('name', 'like', "%{$term}%"))
+                    ->orWhereHas('employeeJob', fn (Builder $query) => $query->where('name', 'like', "%{$term}%"))
                     ->orWhereHas('role', fn (Builder $query) => $query->where('name', 'like', "%{$term}%"));
             });
         });

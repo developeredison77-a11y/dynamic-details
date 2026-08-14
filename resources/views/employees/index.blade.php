@@ -20,7 +20,7 @@
         $canUpdateEmployees = auth()->user()?->canAccess('employees.update');
         $canDeleteEmployees = auth()->user()?->canAccess('employees.delete');
     @endphp
-    <section class="dashboard-panel client-listing-panel {{ $hasFilters ? 'is-open' : '' }}" data-listing-filter>
+    <section class="dashboard-panel client-listing-panel employee-listing-panel {{ $hasFilters ? 'is-open' : '' }}" data-listing-filter>
         <div class="panel-heading">
             <label class="client-search listing-global-search"><x-dashboard.icon name="search" /><input form="employee-filter-form" value="{{ request('search') }}" placeholder="Search all columns..." data-auto-filter-control data-filter-proxy="search"></label>
             <div class="button-row">
@@ -39,17 +39,20 @@
                 <select name="role_id" aria-label="Filter by role"><option value="">All Roles</option>@foreach ($roles as $role)<option value="{{ $role->id }}" @selected((string) request('role_id') === (string) $role->id)>{{ $role->name }}</option>@endforeach</select>
                 <select name="status" aria-label="Filter by status"><option value="">All Status</option>@foreach ($statuses as $status)<option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>@endforeach</select>
         </form>
-        <div class="responsive-table">
-            <table class="advanced-table">
-                <thead><tr><th>Employee</th><th>Arabic Name</th><th>Department</th><th>Role</th><th>Status</th><th>Assets</th><th>Filled Form</th><th>Action</th></tr></thead>
+        <div class="responsive-table employee-table-scroll">
+            <table class="advanced-table employee-table">
+                <thead><tr><th>Employee</th><th>Arabic Name</th><th>Entity</th><th>Nationality</th><th>Department</th><th>Job Title</th><th>Role</th><th>Status</th><th>Assets</th><th>Filled Form</th><th>Action</th></tr></thead>
                 <tbody>
                     @forelse ($employees as $employee)
                         @php($declarationDocument = $employee->declarationDocument)
                         <tr>
-                            <td><div class="client-person"><span>{{ strtoupper(substr($employee->name_en, 0, 2)) }}</span><div><strong>{{ $employee->name_en }}</strong><small>{{ $employee->eid ?: '-' }}</small></div></div></td>
+                            <td><a class="client-person employee-name-link" href="{{ route('employees.show', $employee) }}" aria-label="View details for {{ $employee->name_en }}"><span>{{ strtoupper(substr($employee->name_en, 0, 2)) }}</span><div><strong>{{ $employee->name_en }}</strong><small>{{ $employee->eid ?: '-' }}</small></div></a></td>
                             <td dir="rtl">{{ $employee->name_ar ?: '-' }}</td>
-                            <td>{{ $employee->department ?: '-' }}</td>
-                            <td>{{ $employee->role?->name ?? $employee->designation ?? '-' }}</td>
+                            <td>{{ $employee->entity ?: '-' }}</td>
+                            <td>{{ $employee->nationality ?: '-' }}</td>
+                            <td>{{ $employee->employeeDepartment?->name ?? $employee->department ?? '-' }}</td>
+                            <td>{{ $employee->employeeJob?->name ?? $employee->designation ?? '-' }}</td>
+                            <td>{{ $employee->role?->name ?? '-' }}</td>
                             <td><span class="status-badge status-{{ $employee->status->value }}">{{ $employee->status->label() }}</span></td>
                             <td>{{ $employee->active_assignments_count }}</td>
                             <td>
@@ -57,7 +60,7 @@
                                     <span class="status-badge status-active">Uploaded</span><br>
                                     <small>{{ $declarationDocument->uploaded_at?->format('M d, Y') }}</small>
                                 @else
-                                    <span class="status-badge status-leave">Pending</span>
+                                    <span class="status-badge status-pending">Pending</span>
                                 @endif
                             </td>
                             <td>
@@ -110,7 +113,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td class="table-empty" colspan="8">No employees found.</td></tr>
+                        <tr><td class="table-empty" colspan="11">No employees found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

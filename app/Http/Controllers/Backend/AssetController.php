@@ -12,7 +12,11 @@ use App\Models\AssetCategory;
 use App\Services\AssetLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class AssetController extends Controller
 {
@@ -53,7 +57,7 @@ class AssetController extends Controller
 
     public function store(AssetRequest $request): RedirectResponse
     {
-        Asset::query()->create($request->validated());
+        Asset::query()->create($this->assetData($request));
 
         return redirect()->route('assets.index')->with('success', 'Asset created successfully.');
     }
@@ -65,9 +69,29 @@ class AssetController extends Controller
 
     public function update(AssetRequest $request, Asset $asset, AssetLifecycleService $service): RedirectResponse
     {
-        $service->updateAsset($asset, $request->validated(), $request->user()?->id);
+        $oldInvoicePath = $asset->invoice_file_path;
+
+        $service->updateAsset($asset, $this->assetData($request, $asset), $request->user()?->id);
+
+        if ($oldInvoicePath && $request->hasFile('invoice_attachment')) {
+            Storage::disk('local')->delete($oldInvoicePath);
+        }
 
         return redirect()->route('assets.index')->with('success', 'Asset updated successfully.');
+    }
+
+    public function viewInvoice(Asset $asset): BinaryFileResponse
+    {
+        abort_unless($asset->invoice_file_path && Storage::disk('local')->exists($asset->invoice_file_path), 404);
+
+        return response()->file(Storage::disk('local')->path($asset->invoice_file_path), [
+            'Content-Type' => $asset->invoice_mime_type ?: 'application/octet-stream',
+            'Content-Disposition' => HeaderUtils::makeDisposition(
+                HeaderUtils::DISPOSITION_INLINE,
+                $asset->invoice_original_name ?: 'asset-invoice',
+                Str::ascii($asset->invoice_original_name ?: 'asset-invoice') ?: 'asset-invoice'
+            ),
+        ]);
     }
 
     public function destroy(Asset $asset): RedirectResponse
@@ -76,7 +100,12 @@ class AssetController extends Controller
             return back()->with('warning', 'Assets with handover history cannot be deleted. Retire the asset instead.');
         }
 
+        $invoicePath = $asset->invoice_file_path;
         $asset->delete();
+
+        if ($invoicePath) {
+            Storage::disk('local')->delete($invoicePath);
+        }
 
         return redirect()->route('assets.index')->with('success', 'Asset deleted successfully.');
     }
@@ -90,5 +119,29 @@ class AssetController extends Controller
             'statuses' => AssetStatus::cases(),
             'conditions' => AssetCondition::cases(),
         ];
+    }
+
+    private function assetData(AssetRequest $request, ?Asset $asset = null): array
+    {
+        $data = $request->validated();
+        unset($data['invoice_attachment']);
+
+        $file = $request->file('invoice_attachment');
+
+        if ($file) {
+            $path = $file->store('asset-invoices', 'local');
+
+            $data['invoice_file_path'] = $path;
+            $data['invoice_original_name'] = $file->getClientOriginalName();
+            $data['invoice_mime_type'] = $file->getMimeType() ?: $file->getClientMimeType() ?: 'application/octet-stream';
+            $data['invoice_file_size'] = $file->getSize() ?: 0;
+        } elseif ($asset) {
+            $data['invoice_file_path'] = $asset->invoice_file_path;
+            $data['invoice_original_name'] = $asset->invoice_original_name;
+            $data['invoice_mime_type'] = $asset->invoice_mime_type;
+            $data['invoice_file_size'] = $asset->invoice_file_size;
+        }
+
+        return $data;
     }
 }

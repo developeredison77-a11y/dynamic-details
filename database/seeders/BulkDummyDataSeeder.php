@@ -14,6 +14,8 @@ use App\Models\AssetCategory;
 use App\Models\AssetDeclaration;
 use App\Models\AssetReturn;
 use App\Models\Employee;
+use App\Models\EmployeeDepartment;
+use App\Models\EmployeeJob;
 use App\Models\ImportBatch;
 use App\Models\Role;
 use App\Models\User;
@@ -99,21 +101,35 @@ class BulkDummyDataSeeder extends Seeder
     private function employees($roles)
     {
         $departments = ['Administration', 'Finance', 'Human Resources', 'IT', 'Operations', 'Procurement', 'Sales', 'Support'];
+        $jobs = ['Administrator', 'Accountant', 'HR Officer', 'IT Officer', 'Operations Executive', 'Procurement Officer', 'Sales Executive', 'Support Specialist'];
         $statuses = [EmployeeStatus::Active, EmployeeStatus::Active, EmployeeStatus::Active, EmployeeStatus::Leave, EmployeeStatus::Resigned];
 
-        return collect(range(1, 20))->map(function (int $index) use ($roles, $departments, $statuses): Employee {
+        $departmentMasters = collect($departments)->mapWithKeys(fn (string $name): array => [
+            $name => EmployeeDepartment::query()->updateOrCreate(['name' => $name], ['is_active' => true]),
+        ]);
+        $jobMasters = collect($jobs)->mapWithKeys(fn (string $name): array => [
+            $name => EmployeeJob::query()->updateOrCreate(['name' => $name], ['is_active' => true]),
+        ]);
+
+        return collect(range(1, 20))->map(function (int $index) use ($roles, $departments, $jobs, $departmentMasters, $jobMasters, $statuses): Employee {
             $role = $roles->values()->get(($index - 1) % max(1, $roles->count()));
             $status = $statuses[($index - 1) % count($statuses)];
+            $department = $departments[($index - 1) % count($departments)];
+            $job = $jobs[($index - 1) % count($jobs)];
 
             return Employee::query()->updateOrCreate(
                 ['email' => "employee{$index}@adms.test"],
                 [
                     'employee_code' => 'DUMMY'.str_pad((string) $index, 5, '0', STR_PAD_LEFT),
                     'eid' => '784-1995-'.str_pad((string) $index, 7, '0', STR_PAD_LEFT).'-'.($index % 10),
+                    'nationality' => 'UAE',
+                    'entity' => 'ADMS',
                     'name_en' => "Demo Employee {$index}",
                     'name_ar' => "Demo Employee Arabic {$index}",
-                    'department' => $departments[($index - 1) % count($departments)],
-                    'designation' => $role?->name,
+                    'department' => $department,
+                    'employee_department_id' => $departmentMasters[$department]?->id,
+                    'designation' => $job,
+                    'employee_job_id' => $jobMasters[$job]?->id,
                     'role_id' => $role?->id,
                     'phone' => '+97150000'.str_pad((string) $index, 4, '0', STR_PAD_LEFT),
                     'status' => $status,

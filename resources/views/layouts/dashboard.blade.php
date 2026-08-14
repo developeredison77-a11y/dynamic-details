@@ -20,6 +20,16 @@
             ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Employee Master'],
         ],
+        request()->routeIs('employee-jobs.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Employee Master', 'url' => route('employees.index')],
+            ['label' => 'Jobs'],
+        ],
+        request()->routeIs('employee-departments.*') => [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Employee Master', 'url' => route('employees.index')],
+            ['label' => 'Departments'],
+        ],
         request()->routeIs('roles.*') => [
             ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Access Control'],
@@ -119,8 +129,8 @@
                     </x-dashboard.nav-link>
                 @endif
 
-                @if ($user?->canAccess('employees.view') || $user?->canAccess('employees.create') || $user?->canAccess('employees.import'))
-                    <x-dashboard.nav-group icon="users" label="Employee Master" :active="request()->routeIs('employees.*', 'imports.employees.index')">
+                @if ($user?->canAccess('employees.view') || $user?->canAccess('employees.create') || $user?->canAccess('employees.import') || $user?->canAccess('employee-jobs.manage') || $user?->canAccess('employee-departments.manage'))
+                    <x-dashboard.nav-group icon="users" label="Employee Master" :active="request()->routeIs('employees.*', 'imports.employees.index', 'employee-jobs.*', 'employee-departments.*')">
                         @if ($user?->canAccess('employees.view'))
                             <x-dashboard.sub-link :href="route('employees.index')" :active="request()->routeIs('employees.index')">All Employees</x-dashboard.sub-link>
                         @endif
@@ -129,6 +139,12 @@
                         @endif
                         @if ($user?->canAccess('employees.import'))
                             <x-dashboard.sub-link :href="route('imports.employees.index')" :active="request()->routeIs('imports.employees.index')">Import Employees</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('employee-jobs.manage'))
+                            <x-dashboard.sub-link :href="route('employee-jobs.index')" :active="request()->routeIs('employee-jobs.*')">Jobs</x-dashboard.sub-link>
+                        @endif
+                        @if ($user?->canAccess('employee-departments.manage'))
+                            <x-dashboard.sub-link :href="route('employee-departments.index')" :active="request()->routeIs('employee-departments.*')">Departments</x-dashboard.sub-link>
                         @endif
                     </x-dashboard.nav-group>
                 @endif

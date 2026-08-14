@@ -339,7 +339,7 @@
                         </tr>
                         <tr>
                             <td class="info-label" colspan="2">Department:</td>
-                            <td class="info-value" colspan="3">{{ $employee->department ?: '-' }}</td>
+                            <td class="info-value" colspan="3">{{ $employee->employeeDepartment?->name ?? $employee->department ?? '-' }}</td>
                         </tr>
                         <tr>
                             <td class="info-label" colspan="2">Employee Name:</td>

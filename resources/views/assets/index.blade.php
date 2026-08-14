@@ -46,6 +46,11 @@
                             <td>{{ $asset->activeAssignment?->employee?->name_en ?? '-' }}</td>
                             <td>
                                 <div class="table-action-row">
+                                    @if ($asset->invoice_file_path)
+                                        <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-view" href="{{ route('assets.invoice.view', $asset) }}" target="_blank" aria-label="View invoice for {{ $asset->name }}" data-tooltip="View Invoice">
+                                            <x-dashboard.icon name="eye" />
+                                        </a>
+                                    @endif
                                     <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-edit" href="{{ route('assets.edit', $asset) }}" aria-label="Edit {{ $asset->name }}" data-tooltip="Edit">
                                         <x-dashboard.icon name="edit" />
                                     </a>

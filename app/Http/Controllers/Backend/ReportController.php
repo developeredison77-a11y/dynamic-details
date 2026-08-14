@@ -65,7 +65,7 @@ class ReportController extends Controller
             'assetsByStatus' => $assetsByStatus,
             'employeesByStatus' => $employeesByStatus,
             'assets' => Asset::query()->with(['brand', 'category', 'activeAssignment.employee'])->latest()->limit(12)->get(),
-            'employees' => Employee::query()->with('role')->latest()->limit(12)->get(),
+            'employees' => Employee::query()->with(['role', 'employeeJob'])->latest()->limit(12)->get(),
             'handovers' => AssetAssignment::query()->with(['employee', 'asset'])->latest()->limit(12)->get(),
             'returns' => AssetReturn::query()->with(['employee', 'asset'])->latest()->limit(12)->get(),
             'declarations' => AssetDeclaration::query()->with(['assignment.employee', 'assignment.asset'])->latest()->limit(12)->get(),
@@ -94,13 +94,16 @@ class ReportController extends Controller
     private function rowsFor(string $type): array
     {
         return match ($type) {
-            'employees' => Employee::query()->with('role')->get()->map(fn ($employee): array => [
+            'employees' => Employee::query()->with(['role', 'employeeDepartment', 'employeeJob'])->get()->map(fn ($employee): array => [
                 'Code' => $employee->employee_code,
                 'Emirates ID' => $employee->eid,
                 'Name English' => $employee->name_en,
                 'Name Arabic' => $employee->name_ar,
-                'Department' => $employee->department,
-                'Role' => $employee->role?->name ?? $employee->designation,
+                'Nationality' => $employee->nationality,
+                'Entity' => $employee->entity,
+                'Department' => $employee->employeeDepartment?->name ?? $employee->department,
+                'Job Title' => $employee->employeeJob?->name ?? $employee->designation,
+                'Role' => $employee->role?->name,
                 'Status' => $employee->status?->label(),
             ])->all(),
             'handovers' => AssetAssignment::query()->with(['employee', 'asset'])->get()->map(fn ($assignment): array => [

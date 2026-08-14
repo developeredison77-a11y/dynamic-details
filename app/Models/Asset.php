@@ -23,6 +23,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'purchased_at',
     'purchase_value',
     'notes',
+    'invoice_file_path',
+    'invoice_original_name',
+    'invoice_mime_type',
+    'invoice_file_size',
 ])]
 class Asset extends Model
 {

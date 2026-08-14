@@ -1,0 +1,9 @@
+name_en,name_ar,eid_no,nationality,entity,email,employee_department_id,department,employee_job_id,job_title,role,phone,status
+Sample Employee 1,Sample Employee Arabic 1,784-1991-1000001-1,India,ADMS,sample.employee1@adms.test,,Administration,,Administrator,Admin,+971501001001,active
+Sample Employee 2,Sample Employee Arabic 2,784-1992-1000002-2,UAE,ADMS,sample.employee2@adms.test,,Finance,,Accountant,Asset Custodian,+971501001002,active
+Sample Employee 3,Sample Employee Arabic 3,784-1993-1000003-3,Philippines,ADMS,sample.employee3@adms.test,,Human Resources,,HR Officer,HR Officer,+971501001003,active
+Sample Employee 4,Sample Employee Arabic 4,784-1994-1000004-4,Egypt,ADMS,sample.employee4@adms.test,,IT,,IT Officer,IT Officer,+971501001004,active
+Sample Employee 5,Sample Employee Arabic 5,784-1995-1000005-5,Nepal,ADMS,sample.employee5@adms.test,,Operations,,Operations Executive,Manager,+971501001005,active
+Sample Employee 6,Sample Employee Arabic 6,784-1996-1000006-6,Pakistan,ADMS,sample.employee6@adms.test,,Procurement,,Procurement Officer,Staff,+971501001006,active
+Sample Employee 7,Sample Employee Arabic 7,784-1997-1000007-7,Sri Lanka,ADMS,sample.employee7@adms.test,,Sales,,Sales Executive,Staff,+971501001007,active
+Sample Employee 8,Sample Employee Arabic 8,784-1998-1000008-8,Bangladesh,ADMS,sample.employee8@adms.test,,Support,,Support Specialist,Staff,+971501001008,active

@@ -30,6 +30,14 @@ class AssetRequest extends FormRequest
             'purchased_at' => ['nullable', 'date'],
             'purchase_value' => ['nullable', 'numeric', 'min:0', 'max:999999999.99'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'invoice_attachment' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg,webp', 'max:5120'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'invoice_attachment' => 'invoice attachment',
         ];
     }
 }

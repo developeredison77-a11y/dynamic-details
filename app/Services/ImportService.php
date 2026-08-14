@@ -8,6 +8,8 @@ use App\Enums\EmployeeStatus;
 use App\Enums\ImportType;
 use App\Models\Asset;
 use App\Models\Employee;
+use App\Models\EmployeeDepartment;
+use App\Models\EmployeeJob;
 use App\Models\ImportBatch;
 use App\Models\Role;
 use App\Support\AdmsSpreadsheet;
@@ -28,19 +30,24 @@ class ImportService
             ->map(fn ($email): string => strtolower(trim((string) $email)))
             ->countBy();
         $emiratesIdCounts = collect($rows)
-            ->map(fn (array $row): string => $this->normalizedImportValue($row['emirates_id'] ?? $row['eid'] ?? null))
+            ->map(fn (array $row): string => $this->normalizedImportValue($row['eid_no'] ?? $row['emirates_id'] ?? $row['eid'] ?? null))
             ->filter(fn (string $value): bool => $value !== '')
             ->countBy();
 
         foreach ($rows as $index => $row) {
-            $row['eid'] = $row['eid'] ?? $row['emirates_id'] ?? null;
+            $row['eid'] = $row['eid'] ?? $row['eid_no'] ?? $row['emirates_id'] ?? null;
 
             $validator = Validator::make($row, [
                 'name_en' => ['required', 'string', 'max:255'],
                 'name_ar' => ['nullable', 'string', 'max:255'],
                 'eid' => ['nullable', 'string', 'max:40', Rule::unique('employees', 'eid')],
+                'nationality' => ['required', 'string', 'max:120'],
+                'entity' => ['required', 'string', 'max:120'],
                 'email' => ['required', 'email', 'max:255', Rule::unique('employees', 'email')],
+                'employee_department_id' => ['nullable', 'integer', Rule::exists('employee_departments', 'id')->where('is_active', true)->whereNull('deleted_at')],
                 'department' => ['nullable', 'string', 'max:120'],
+                'employee_job_id' => ['nullable', 'integer', Rule::exists('employee_jobs', 'id')->where('is_active', true)->whereNull('deleted_at')],
+                'job_title' => ['nullable', 'string', 'max:120'],
                 'role_id' => ['nullable', 'integer', Rule::exists('roles', 'id')->where('is_active', true)],
                 'role' => ['nullable', 'string', 'max:120'],
                 'designation' => ['nullable', 'string', 'max:120'],
@@ -52,6 +59,8 @@ class ImportService
                 $email = strtolower(trim((string) ($row['email'] ?? '')));
                 $eid = $this->normalizedImportValue($row['eid'] ?? null);
                 $roleName = trim((string) ($row['role'] ?? $row['designation'] ?? ''));
+                $departmentName = trim((string) ($row['department'] ?? ''));
+                $jobName = trim((string) ($row['job_title'] ?? ''));
 
                 if ($email !== '' && ($emailCounts[$email] ?? 0) > 1) {
                     $validator->errors()->add('email', 'The email must not be duplicated in the uploaded file.');
@@ -66,6 +75,26 @@ class ImportService
                 })->exists()) {
                     $validator->errors()->add('role', 'The selected role does not exist or is inactive.');
                 }
+
+                if (blank($row['role_id'] ?? null) && $roleName === '') {
+                    $validator->errors()->add('role', 'The role field is required.');
+                }
+
+                if (blank($row['employee_department_id'] ?? null) && $departmentName === '') {
+                    $validator->errors()->add('department', 'The department field is required.');
+                }
+
+                if (blank($row['employee_department_id'] ?? null) && $departmentName !== '' && ! EmployeeDepartment::query()->active()->where('name', $departmentName)->exists()) {
+                    $validator->errors()->add('department', 'The selected department does not exist or is inactive.');
+                }
+
+                if (blank($row['employee_job_id'] ?? null) && $jobName === '') {
+                    $validator->errors()->add('job_title', 'The job title field is required.');
+                }
+
+                if (blank($row['employee_job_id'] ?? null) && $jobName !== '' && ! EmployeeJob::query()->active()->where('name', $jobName)->exists()) {
+                    $validator->errors()->add('job_title', 'The selected job title does not exist or is inactive.');
+                }
             });
 
             if ($validator->fails()) {
@@ -76,13 +105,24 @@ class ImportService
             $data = $validator->validated();
             $data['status'] = ($data['status'] ?? null) ?: EmployeeStatus::Active->value;
             $role = $this->employeeRole($data);
+            $department = $this->employeeDepartment($data);
+            $job = $this->employeeJob($data);
 
             if ($role) {
                 $data['role_id'] = $role->id;
-                $data['designation'] = $role->name;
             }
 
-            unset($data['role']);
+            if ($department) {
+                $data['employee_department_id'] = $department->id;
+                $data['department'] = $department->name;
+            }
+
+            if ($job) {
+                $data['employee_job_id'] = $job->id;
+                $data['designation'] = $job->name;
+            }
+
+            unset($data['role'], $data['job_title']);
 
             Employee::query()->create($data);
             $success++;
@@ -187,6 +227,42 @@ class ImportService
         return Role::query()
             ->active()
             ->where(fn ($query) => $query->where('name', $roleName)->orWhere('slug', $roleName))
+            ->first();
+    }
+
+    private function employeeDepartment(array $data): ?EmployeeDepartment
+    {
+        if (filled($data['employee_department_id'] ?? null)) {
+            return EmployeeDepartment::query()->active()->find($data['employee_department_id']);
+        }
+
+        $departmentName = trim((string) ($data['department'] ?? ''));
+
+        if ($departmentName === '') {
+            return null;
+        }
+
+        return EmployeeDepartment::query()
+            ->active()
+            ->where('name', $departmentName)
+            ->first();
+    }
+
+    private function employeeJob(array $data): ?EmployeeJob
+    {
+        if (filled($data['employee_job_id'] ?? null)) {
+            return EmployeeJob::query()->active()->find($data['employee_job_id']);
+        }
+
+        $jobName = trim((string) ($data['job_title'] ?? ''));
+
+        if ($jobName === '') {
+            return null;
+        }
+
+        return EmployeeJob::query()
+            ->active()
+            ->where('name', $jobName)
             ->first();
     }
 

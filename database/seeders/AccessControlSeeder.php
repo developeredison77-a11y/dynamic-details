@@ -24,6 +24,8 @@ class AccessControlSeeder extends Seeder
             ['key' => 'employees.update', 'name' => 'Update Employees'],
             ['key' => 'employees.delete', 'name' => 'Delete Employees'],
             ['key' => 'employees.import', 'name' => 'Import Employees'],
+            ['key' => 'employee-jobs.manage', 'name' => 'Manage Employee Jobs'],
+            ['key' => 'employee-departments.manage', 'name' => 'Manage Employee Departments'],
         ],
         'Roles & Permissions' => [
             ['key' => 'roles.view', 'name' => 'View Roles'],
@@ -104,6 +106,8 @@ class AccessControlSeeder extends Seeder
                 'employees.create',
                 'employees.update',
                 'employees.import',
+                'employee-jobs.manage',
+                'employee-departments.manage',
                 'roles.view',
                 'assets.view',
                 'reports.view',

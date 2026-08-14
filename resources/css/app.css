@@ -6686,6 +6686,37 @@ h6 {
     margin-left: auto;
 }
 
+.employee-listing-panel {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.employee-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.employee-table {
+    width: max-content;
+    min-width: 1320px;
+}
+
+.employee-table th,
+.employee-table td {
+    white-space: nowrap;
+}
+
+.employee-table .client-person {
+    min-width: 230px;
+}
+
+.employee-table .table-action-row {
+    min-width: max-content;
+}
+
 .dashboard-breadcrumbs a,
 .dashboard-breadcrumbs span {
     font-size: 12px;
@@ -7433,5 +7464,254 @@ h6 {
 
     .dashboard-panel:not(.client-listing-panel) > .table-footer {
         padding: var(--ui-space-4);
+    }
+}
+
+/* Shared listing color system */
+.status-badge.status-active,
+.status-badge.status-available,
+.status-badge.status-returned,
+.status-badge.status-good,
+.status-badge.status-new,
+.status-badge.status-assigned,
+.status-badge.status-uploaded,
+.status-badge.status-paid {
+    background: color-mix(in srgb, #16a34a 14%, var(--surface-soft));
+    color: #15803d;
+}
+
+.status-badge.status-pending,
+.status-badge.status-review,
+.status-badge.status-leave,
+.status-badge.status-maintenance,
+.status-badge.status-fair {
+    background: color-mix(in srgb, #f59e0b 18%, var(--surface-soft));
+    color: #b45309;
+}
+
+.status-badge.status-expired,
+.status-badge.status-overdue,
+.status-badge.status-resigned,
+.status-badge.status-retired,
+.status-badge.status-damaged,
+.status-badge.status-cancelled,
+.status-badge.status-rejected {
+    background: color-mix(in srgb, #ef4444 16%, var(--surface-soft));
+    color: #b91c1c;
+}
+
+.status-badge.status-inactive,
+.status-badge.status-draft,
+.status-badge.status-closed {
+    background: color-mix(in srgb, #64748b 14%, var(--surface-soft));
+    color: #475569;
+}
+
+.status-badge.status-assigned,
+.status-badge.status-processing,
+.status-badge.status-in-progress {
+    background: color-mix(in srgb, #2563eb 14%, var(--surface-soft));
+    color: #1d4ed8;
+}
+
+.advanced-table .table-action-btn.action-icon-btn.action-icon-view,
+.advanced-table .btn-sm.action-icon-btn.table-action-btn.action-icon-view {
+    --action-color: #0d9488;
+    color: #0d9488;
+}
+
+.advanced-table .table-action-btn.action-icon-btn.action-icon-edit,
+.advanced-table .btn-sm.action-icon-btn.table-action-btn.action-icon-edit {
+    --action-color: #2563eb;
+    color: #2563eb;
+}
+
+.advanced-table .table-action-btn.action-icon-btn.action-icon-neutral,
+.advanced-table .btn-sm.action-icon-btn.table-action-btn.action-icon-neutral {
+    --action-color: #475569;
+    color: #475569;
+}
+
+.advanced-table .table-action-btn.action-icon-btn.action-icon-delete,
+.advanced-table .btn-sm.action-icon-btn.table-action-btn.action-icon-delete,
+.advanced-table .btn-danger.table-action-btn.action-icon-btn {
+    --action-color: #dc2626;
+    color: #dc2626;
+}
+
+.advanced-table .table-action-btn.action-icon-btn:hover:not(:disabled),
+.advanced-table .table-action-btn.action-icon-btn:focus-visible {
+    color: var(--action-color);
+}
+
+.asset-invoice-dropzone {
+    position: relative;
+    cursor: pointer;
+}
+
+.asset-invoice-dropzone input[type='file'] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.asset-invoice-dropzone-body {
+    display: grid;
+    min-height: 150px;
+    place-items: center;
+    gap: 8px;
+    border: 1px dashed color-mix(in srgb, var(--primary) 38%, var(--border));
+    border-radius: var(--ui-radius);
+    padding: var(--ui-space-5);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, #ffffff 46%, transparent), transparent),
+        color-mix(in srgb, var(--primary) 5%, var(--surface));
+    color: var(--text);
+    text-align: center;
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.asset-invoice-dropzone-body svg {
+    width: 30px;
+    height: 30px;
+    color: var(--primary);
+}
+
+.asset-invoice-dropzone-body strong {
+    max-width: min(520px, 100%);
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.asset-invoice-dropzone-body small {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.asset-invoice-dropzone:hover .asset-invoice-dropzone-body,
+.asset-invoice-dropzone:focus-within .asset-invoice-dropzone-body {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.employee-name-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.employee-name-link strong {
+    color: color-mix(in srgb, var(--primary) 82%, var(--text));
+    text-decoration: none;
+    transition: color 160ms ease;
+}
+
+.employee-name-link:hover strong,
+.employee-name-link:focus-visible strong {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.employee-name-link:focus-visible {
+    border-radius: var(--ui-radius);
+    outline: 3px solid color-mix(in srgb, var(--primary) 22%, transparent);
+    outline-offset: 3px;
+}
+
+.employee-detail-panel {
+    overflow: hidden;
+}
+
+.employee-detail-hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--ui-space-5);
+    padding: clamp(22px, 3vw, 34px);
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, transparent), transparent 44%),
+        color-mix(in srgb, var(--surface) 94%, var(--primary) 6%);
+}
+
+.employee-detail-avatar {
+    display: grid;
+    width: 74px;
+    height: 74px;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+    color: var(--primary);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 70%, transparent);
+}
+
+.employee-detail-identity {
+    min-width: 0;
+}
+
+.employee-detail-identity h2 {
+    overflow-wrap: anywhere;
+}
+
+.employee-status-strip {
+    border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+.employee-detail-layout {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.employee-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 16px;
+    padding: 0 clamp(18px, 2.2vw, 26px) clamp(18px, 2.2vw, 26px);
+}
+
+.employee-notes-card p {
+    margin: 0;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.employee-document-card .status-badge {
+    vertical-align: middle;
+}
+
+.employee-assets-panel .advanced-table {
+    min-width: 980px;
+}
+
+@media (max-width: 1100px) {
+    .employee-detail-layout,
+    .employee-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .employee-detail-hero {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+
+    .employee-detail-avatar {
+        width: 62px;
+        height: 62px;
+        font-size: 19px;
+    }
+
+    .employee-detail-hero .handover-actions {
+        justify-content: flex-start;
     }
 }
