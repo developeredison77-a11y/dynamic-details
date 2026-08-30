@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Enums\AssetStatus;
 use App\Models\Asset;
-use App\Models\AssetAssignment;
 use App\Models\AssetBrand;
 use App\Models\AssetCategory;
 use App\Models\Employee;
@@ -18,65 +16,73 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        $months = collect(range(5, 0))->map(fn (int $offset): Carbon => now()->subMonths($offset)->startOfMonth());
-        $trendStart = $months->first();
-        $trendEnd = $months->last()->copy()->endOfMonth();
-        $monthExpression = match (DB::connection()->getDriverName()) {
-            'sqlite' => "strftime('%%Y-%%m', %s)",
-            'pgsql' => "to_char(%s, 'YYYY-MM')",
-            default => "DATE_FORMAT(%s, '%%Y-%%m')",
-        };
-        $statusColors = [
-            AssetStatus::Available->value => '#22c55e',
-            AssetStatus::Assigned->value => '#f59e0b',
-            AssetStatus::Returned->value => '#38bdf8',
-            AssetStatus::Maintenance->value => '#ef4444',
-            AssetStatus::Retired->value => '#64748b',
+        $categoryColors = [
+            '#f5a800',
+            '#0f5bd8',
+            '#06870a',
+            '#d80000',
+            '#7b10bf',
+            '#22c55e',
+            '#38bdf8',
+            '#64748b',
+            '#db2777',
+            '#14b8a6',
+            '#ea580c',
+            '#4f46e5',
+            '#84cc16',
+            '#0891b2',
+            '#be123c',
+            '#9333ea',
         ];
-        $assetStatusCounts = Asset::query()
-            ->selectRaw('status, count(*) as aggregate')
-            ->groupBy('status')
-            ->pluck('aggregate', 'status');
-        $totalAssets = (int) $assetStatusCounts->sum();
-        $assetStatusStats = collect(AssetStatus::cases())->map(function (AssetStatus $status) use ($assetStatusCounts, $statusColors, $totalAssets): array {
-            $count = (int) ($assetStatusCounts[$status->value] ?? 0);
+        $categoryColor = static function (int $index) use ($categoryColors): string {
+            if (isset($categoryColors[$index])) {
+                return $categoryColors[$index];
+            }
 
-            return [
-                'name' => $status->label(),
-                'value' => $status->value,
-                'count' => $count,
-                'percentage' => $totalAssets > 0 ? round(($count / $totalAssets) * 100, 1) : 0,
-                'color' => $statusColors[$status->value] ?? '#64748b',
-            ];
-        });
-        $activeUnits = $totalAssets - (int) ($assetStatusCounts[AssetStatus::Retired->value] ?? 0);
-        $spareUnits = (int) ($assetStatusCounts[AssetStatus::Available->value] ?? 0);
+            $hue = fmod(37 + ($index * 137.508), 360);
+
+            return 'hsl(' . round($hue, 3) . ' 78% 44%)';
+        };
+        $totalAssets = Asset::query()->count();
         $assetLastUpdate = Asset::query()->max('updated_at');
-        $handoverMonthSql = sprintf($monthExpression, 'handover_date');
-        $handoverTrendCounts = AssetAssignment::query()
-            ->whereBetween('handover_date', [$trendStart, $trendEnd])
-            ->selectRaw($handoverMonthSql . ' as month, count(*) as aggregate')
-            ->groupByRaw($handoverMonthSql)
-            ->pluck('aggregate', 'month');
+        $assetCategoryStats = AssetCategory::query()
+            ->leftJoin('assets', 'assets.asset_category_id', '=', 'asset_categories.id')
+            ->select('asset_categories.id', 'asset_categories.name', DB::raw('COUNT(assets.id) as asset_count'))
+            ->groupBy('asset_categories.id', 'asset_categories.name')
+            ->orderByDesc('asset_count')
+            ->orderBy('asset_categories.name')
+            ->get()
+            ->filter(fn (AssetCategory $category): bool => (int) $category->asset_count > 0)
+            ->values()
+            ->map(fn (AssetCategory $category, int $index): array => [
+                'name' => $category->name,
+                'value' => (string) $category->id,
+                'count' => (int) $category->asset_count,
+                'percentage' => $totalAssets > 0 ? round(((int) $category->asset_count / $totalAssets) * 100, 1) : 0,
+                'color' => $categoryColor($index),
+            ]);
+        $hardwareDistribution = $assetCategoryStats
+            ->map(fn (array $category): array => [
+                'label' => $category['name'],
+                'value' => $category['count'],
+                'color' => $category['color'],
+            ]);
 
         return view('dashboard.index', [
             'settings' => Setting::allSettings(),
             'assetStats' => [
                 'total' => $totalAssets,
             ],
-            'assetStatusStats' => $assetStatusStats,
+            'assetStatusStats' => $assetCategoryStats,
             'assetStatusSummary' => [
-                'activeUnits' => $activeUnits,
-                'spareUnits' => $spareUnits,
+                'categoryCount' => $assetCategoryStats->count(),
+                'topCategory' => $assetCategoryStats->first()['name'] ?? '-',
                 'lastUpdate' => $assetLastUpdate ? Carbon::parse($assetLastUpdate) : null,
             ],
             'employeeTotal' => Employee::query()->count(),
             'brandTotal' => AssetBrand::query()->count(),
             'categoryTotal' => AssetCategory::query()->count(),
-            'handoverTrend' => $months->map(fn (Carbon $month): array => [
-                'label' => $month->format('M'),
-                'value' => (int) ($handoverTrendCounts[$month->format('Y-m')] ?? 0),
-            ]),
+            'hardwareDistribution' => $hardwareDistribution,
         ]);
     }
 }

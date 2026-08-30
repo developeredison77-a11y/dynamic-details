@@ -40,12 +40,16 @@
             </select>
         </form>
         <div class="responsive-table">
-            <table class="advanced-table">
-                <thead><tr><th>Employee</th><th>Asset</th><th>Handover Date</th><th>Expected Return</th><th>Status</th><th>Action</th></tr></thead>
+            <table class="advanced-table handover-listing-table">
+                <thead><tr><th>SR#</th><th>Employee</th><th>EID No.</th><th>Asset</th><th>Handover Date</th><th>Expected Return</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody>
                     @forelse($assignments as $assignment)
                         <tr>
-                            <td>{{ $assignment->employee?->name_en }}<br><small>{{ $assignment->employee?->employee_code }}{{ $assignment->employee?->eid ? ' / Emirates ID: '.$assignment->employee?->eid : '' }}</small></td>
+                            <td>{{ $assignment->employee?->employee_code ?? '-' }}</td>
+                            <td>
+                                <span class="handover-employee-name">{{ $assignment->employee?->name_en ?? '-' }}</span>
+                            </td>
+                            <td>{{ $assignment->employee?->eid ?: '-' }}</td>
                             <td>{{ $assignment->asset?->asset_tag }}<br><small>{{ $assignment->asset?->name }}</small></td>
                             <td>{{ $assignment->handover_date?->format('M d, Y') }}</td>
                             <td>{{ $assignment->expected_return_date?->format('M d, Y') ?: '-' }}</td>
@@ -70,7 +74,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td class="table-empty" colspan="6">No handovers recorded.</td></tr>
+                        <tr><td class="table-empty" colspan="8">No handovers recorded.</td></tr>
                     @endforelse
                 </tbody>
             </table>

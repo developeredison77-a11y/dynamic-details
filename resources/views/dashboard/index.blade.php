@@ -11,7 +11,10 @@
         ['label' => 'Total Brands', 'value' => $brandTotal, 'note' => 'Asset brand master records', 'tone' => 'warn', 'color' => 'brands', 'icon' => 'tag', 'href' => route('asset-brands.index'), 'permission' => 'asset-brands.manage'],
         ['label' => 'Total Categories', 'value' => $categoryTotal, 'note' => 'Asset category master records', 'tone' => 'good', 'color' => 'categories', 'icon' => 'folder', 'href' => route('asset-categories.index'), 'permission' => 'asset-categories.manage'],
     ];
-    $maxHandover = max(1, $handoverTrend->max('value') ?: 1);
+    $hardwareDistributionMaxRaw = max(1, (int) ($hardwareDistribution->max('value') ?: 1));
+    $hardwareDistributionStep = max(1, (int) ceil($hardwareDistributionMaxRaw / 5));
+    $hardwareDistributionAxisMax = $hardwareDistributionStep * 5;
+    $hardwareDistributionTicks = collect(range(0, 5))->map(fn (int $tick): int => $hardwareDistributionStep * $tick);
     $statusTotal = $assetStats['total'];
     $assetStatusChartRows = $assetStatusStats
         ->filter(fn (array $row): bool => $row['count'] > 0)
@@ -19,6 +22,7 @@
         ->values();
     $formatChartNumber = static fn (float $value): string => rtrim(rtrim(number_format($value, 3, '.', ''), '0'), '.');
     $formatPercentage = static fn (float $value): string => number_format($value, $value == floor($value) ? 0 : 1);
+    $fitChartLabel = static fn (string $value, int $limit = 18): string => \Illuminate\Support\Str::limit($value, $limit, '...');
     $chartCenterX = 280.0;
     $chartCenterY = 142.0;
     $chartOuterRx = 136.0;
@@ -50,7 +54,7 @@
     $chartCursor = -90.0;
     $assetStatusSvgSegments = $statusTotal > 0
         ? $assetStatusChartRows
-            ->map(function (array $row) use (&$chartCursor, $statusTotal, $chartSectorPath, $chartDepth, $chartPoint, $chartOuterRx, $chartOuterRy, $chartInnerRx, $chartInnerRy, $formatChartNumber, $formatPercentage): array {
+            ->map(function (array $row) use (&$chartCursor, $statusTotal, $chartSectorPath, $chartDepth, $chartPoint, $chartOuterRx, $chartOuterRy, $chartInnerRx, $chartInnerRy, $formatChartNumber, $formatPercentage, $fitChartLabel): array {
                 $sliceDegrees = ($row['count'] / $statusTotal) * 360;
                 $start = $chartCursor;
                 $end = $chartCursor + $sliceDegrees;
@@ -69,21 +73,19 @@
                 [$calloutStartX, $calloutStartY] = $chartPoint($midpoint, $chartOuterRx + 3, $chartOuterRy + 3);
                 [$calloutBendX, $calloutBendY] = $chartPoint($midpoint, $chartOuterRx + 24, $chartOuterRy + 18);
                 $calloutEndX = (float) $calloutBendX + ($isRightSide ? 44 : -44);
+                $calloutEndX = $isRightSide ? min($calloutEndX, 416.0) : max($calloutEndX, 144.0);
                 $calloutEndY = (float) $calloutBendY;
-                [$sliceTextX, $sliceTextY] = $chartPoint($midpoint, ($chartOuterRx + $chartInnerRx) / 2, ($chartOuterRy + $chartInnerRy) / 2);
 
                 return [
                     ...$row,
                     'topPath' => $chartSectorPath($visualStart, $visualEnd),
                     'depthPath' => $chartSectorPath($visualStart, $visualEnd, $chartDepth),
-                    'calloutPath' => 'M ' . $calloutStartX . ' ' . $calloutStartY . ' L ' . $calloutBendX . ' ' . $calloutBendY . ' L ' . $formatChartNumber($calloutEndX) . ' ' . $formatChartNumber($calloutEndY),
+                    'calloutPath' => 'M ' . $formatChartNumber($calloutEndX) . ' ' . $formatChartNumber($calloutEndY) . ' L ' . $calloutBendX . ' ' . $calloutBendY . ' L ' . $calloutStartX . ' ' . $calloutStartY,
                     'labelX' => $formatChartNumber($calloutEndX + ($isRightSide ? 6 : -6)),
                     'labelY' => $formatChartNumber($calloutEndY),
                     'labelAnchor' => $isRightSide ? 'start' : 'end',
-                    'sliceTextX' => $sliceTextX,
-                    'sliceTextY' => $sliceTextY,
+                    'calloutLabel' => $fitChartLabel($row['name']),
                     'percentageLabel' => $formatPercentage($row['percentage']),
-                    'showSliceValue' => $row['percentage'] >= 7,
                 ];
             })
         : collect();
@@ -92,7 +94,9 @@
 @section('content')
     <section class="analytics-grid">
         @foreach ($metrics as $metric)
-            @php($canOpenMetric = auth()->user()?->canAccess($metric['permission']))
+            @php
+                $canOpenMetric = auth()->user()?->canAccess($metric['permission']);
+            @endphp
             @if ($canOpenMetric)
                 <a class="analytics-card analytics-card-highlight analytics-card-{{ $metric['color'] }} analytics-card-link" href="{{ $metric['href'] }}">
                     <div class="analytics-card-top">
@@ -126,12 +130,40 @@
     </section>
 
     <section class="dashboard-analytics-layout dashboard-top-insights-layout">
-        <article class="dashboard-panel chart-panel">
-            <div class="panel-heading analytics-heading"><div><p>Trend</p><h2>Monthly Handover Chart</h2></div></div>
-            <div class="bar-chart">
-                @foreach ($handoverTrend as $row)
-                    <div><i style="height: {{ max(8, ($row['value'] / $maxHandover) * 140) }}px"></i><span>{{ $row['label'] }}</span><strong>{{ $row['value'] }}</strong></div>
-                @endforeach
+        <article class="dashboard-panel chart-panel hardware-distribution-panel">
+            <div class="hardware-distribution-frame">
+                <h2>Hardware Asset Distribution</h2>
+
+                @if ($hardwareDistribution->isNotEmpty())
+                    <div class="hardware-distribution-chart" style="--hardware-axis-max: {{ $hardwareDistributionAxisMax }}; --hardware-row-count: {{ max(1, $hardwareDistribution->count()) }};">
+                        <div class="hardware-distribution-plot">
+                            <div class="hardware-distribution-grid" aria-hidden="true">
+                                @foreach ($hardwareDistributionTicks as $tick)
+                                    <span style="--tick-position: {{ $loop->index * 20 }}%;"><i></i><em>{{ $tick }}</em></span>
+                                @endforeach
+                            </div>
+
+                            <div class="hardware-distribution-rows">
+                                @foreach ($hardwareDistribution as $row)
+                                    @php
+                                        $barWidth = $hardwareDistributionAxisMax > 0 ? min(100, ($row['value'] / $hardwareDistributionAxisMax) * 100) : 0;
+                                    @endphp
+                                    <div class="hardware-distribution-row" style="--hardware-bar-color: {{ $row['color'] }}; --hardware-bar-width: {{ $barWidth }}%;">
+                                        <span class="hardware-distribution-label" title="{{ $row['label'] }}">{{ $row['label'] }}</span>
+                                        <span class="hardware-distribution-bar">
+                                            <i></i>
+                                            <strong>{{ $row['value'] }}</strong>
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="hardware-distribution-axis-label">Unit Count <span aria-hidden="true">-&gt;</span></div>
+                    </div>
+                @else
+                    <div class="hardware-distribution-empty">Hardware asset distribution will appear once asset categories are added.</div>
+                @endif
             </div>
         </article>
 
@@ -207,15 +239,15 @@
                 <div class="asset-status-summary-card">
                     <span class="asset-status-summary-icon is-green"><x-dashboard.icon name="user-check" /></span>
                     <div>
-                        <span>Active Units</span>
-                        <strong>{{ $assetStatusSummary['activeUnits'] }}</strong>
+                        <span>Categories</span>
+                        <strong>{{ $assetStatusSummary['categoryCount'] }}</strong>
                     </div>
                 </div>
                 <div class="asset-status-summary-card">
                     <span class="asset-status-summary-icon is-red"><x-dashboard.icon name="settings" /></span>
                     <div>
-                        <span>Spares</span>
-                        <strong>{{ $assetStatusSummary['spareUnits'] }}</strong>
+                        <span>Top Category</span>
+                        <strong>{{ $assetStatusSummary['topCategory'] }}</strong>
                     </div>
                 </div>
                 <div class="asset-status-summary-card">
@@ -229,7 +261,7 @@
 
             <div class="asset-status-modern-body">
                 <div class="asset-status-donut-card">
-                    <div class="asset-status-3d-wrap" role="img" aria-label="Asset status distribution chart: {{ $statusTotal }} total assets">
+                    <div class="asset-status-3d-wrap" role="img" aria-label="Asset category distribution chart: {{ $statusTotal }} total assets">
                         <svg class="asset-status-3d-chart" viewBox="0 0 560 300" aria-hidden="true" focusable="false">
                             <defs>
                                 <radialGradient id="assetStatusGloss" cx="36%" cy="18%" r="70%">
@@ -255,18 +287,11 @@
                             <ellipse class="asset-status-3d-gloss" cx="280" cy="142" rx="136" ry="86" />
 
                             @foreach ($assetStatusSvgSegments as $segment)
-                                @if ($segment['showSliceValue'])
-                                    <text class="asset-status-3d-slice-value" x="{{ $segment['sliceTextX'] }}" y="{{ $segment['sliceTextY'] }}" text-anchor="middle">
-                                        <tspan x="{{ $segment['sliceTextX'] }}" dy="-5">{{ $segment['percentageLabel'] }}%</tspan>
-                                        <tspan x="{{ $segment['sliceTextX'] }}" dy="17">{{ $segment['count'] }}</tspan>
-                                    </text>
-                                @endif
-                            @endforeach
-
-                            @foreach ($assetStatusSvgSegments as $segment)
-                                <path class="asset-status-3d-callout-line" d="{{ $segment['calloutPath'] }}" style="--slice-color: {{ $segment['color'] }};" />
+                                <path class="asset-status-3d-callout-line" d="{{ $segment['calloutPath'] }}" />
                                 <text class="asset-status-3d-callout" x="{{ $segment['labelX'] }}" y="{{ $segment['labelY'] }}" text-anchor="{{ $segment['labelAnchor'] }}">
-                                    {{ $segment['name'] }}
+                                    <title>{{ $segment['name'] }} - {{ $segment['percentageLabel'] }}%</title>
+                                    <tspan x="{{ $segment['labelX'] }}" dy="-4">{{ $segment['calloutLabel'] }}</tspan>
+                                    <tspan class="asset-status-3d-callout-meta" x="{{ $segment['labelX'] }}" dy="15">{{ $segment['percentageLabel'] }}%</tspan>
                                 </text>
                             @endforeach
 
@@ -278,15 +303,15 @@
                     </div>
                 </div>
 
-                <div class="asset-status-breakdown asset-status-percentage-panel" aria-label="Asset status percentages">
+                <div class="asset-status-breakdown asset-status-percentage-panel" aria-label="Asset category percentages">
                     <div class="asset-status-percentage-heading">
-                        <span>Status Share</span>
+                        <span>Category Share</span>
                         <strong>{{ $statusTotal }} Assets</strong>
                     </div>
                     @foreach ($assetStatusStats as $row)
                         <div class="asset-status-progress-row" style="--status-color: {{ $row['color'] }}; --status-progress: {{ $row['percentage'] }}%;">
                             <div class="asset-status-progress-head">
-                                <span><i></i>{{ $row['name'] }}</span>
+                                <span title="{{ $row['name'] }}"><i></i>{{ $row['name'] }}</span>
                                 <strong>{{ $row['count'] }}</strong>
                                 <em>{{ number_format($row['percentage'], $row['percentage'] == floor($row['percentage']) ? 0 : 1) }}%</em>
                             </div>
@@ -297,7 +322,7 @@
             </div>
 
             @if ($statusTotal === 0)
-                <div class="asset-status-empty">Asset status distribution will appear once assets are added.</div>
+                <div class="asset-status-empty">Asset category distribution will appear once assets are added.</div>
             @endif
         </article>
     </section>
