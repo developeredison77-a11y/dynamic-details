@@ -21,7 +21,10 @@ class ImportService
 {
     public function employees(UploadedFile $file, ?int $userId): ImportBatch
     {
-        $rows = AdmsSpreadsheet::rows($file);
+        $rows = array_map(
+            fn (array $row): array => $this->normalizeEmployeeImportRow($row),
+            AdmsSpreadsheet::rows($file)
+        );
         $errors = [];
         $success = 0;
         $emailCounts = collect($rows)
@@ -35,7 +38,11 @@ class ImportService
             ->countBy();
 
         foreach ($rows as $index => $row) {
-            $row['eid'] = $row['eid'] ?? $row['eid_no'] ?? $row['emirates_id'] ?? null;
+            if (blank($row['eid'] ?? null)) {
+                $row['eid'] = $row['eid_no'] ?? $row['emirates_id'] ?? $row['id_no'] ?? $row['i_d_no'] ?? null;
+            }
+
+            $usesLegacyLayout = (bool) ($row['_legacy_employee_layout'] ?? false);
 
             $validator = Validator::make($row, [
                 'name_en' => ['required', 'string', 'max:255'],
@@ -43,7 +50,7 @@ class ImportService
                 'eid' => ['nullable', 'string', 'max:40', Rule::unique('employees', 'eid')],
                 'nationality' => ['required', 'string', 'max:120'],
                 'entity' => ['required', 'string', 'max:120'],
-                'email' => ['required', 'email', 'max:255', Rule::unique('employees', 'email')],
+                'email' => ['nullable', 'email', 'max:255', Rule::unique('employees', 'email')],
                 'employee_department_id' => ['nullable', 'integer', Rule::exists('employee_departments', 'id')->where('is_active', true)->whereNull('deleted_at')],
                 'department' => ['nullable', 'string', 'max:120'],
                 'employee_job_id' => ['nullable', 'integer', Rule::exists('employee_jobs', 'id')->where('is_active', true)->whereNull('deleted_at')],
@@ -55,7 +62,7 @@ class ImportService
                 'status' => ['nullable', Rule::enum(EmployeeStatus::class)],
             ]);
 
-            $validator->after(function ($validator) use ($row, $emailCounts, $emiratesIdCounts): void {
+            $validator->after(function ($validator) use ($row, $emailCounts, $emiratesIdCounts, $usesLegacyLayout): void {
                 $email = strtolower(trim((string) ($row['email'] ?? '')));
                 $eid = $this->normalizedImportValue($row['eid'] ?? null);
                 $roleName = trim((string) ($row['role'] ?? $row['designation'] ?? ''));
@@ -84,7 +91,12 @@ class ImportService
                     $validator->errors()->add('department', 'The department field is required.');
                 }
 
-                if (blank($row['employee_department_id'] ?? null) && $departmentName !== '' && ! EmployeeDepartment::query()->active()->where('name', $departmentName)->exists()) {
+                if (
+                    blank($row['employee_department_id'] ?? null)
+                    && $departmentName !== ''
+                    && ! EmployeeDepartment::query()->active()->where('name', $departmentName)->exists()
+                    && ! $this->canCreateLegacyDepartment($departmentName, $usesLegacyLayout)
+                ) {
                     $validator->errors()->add('department', 'The selected department does not exist or is inactive.');
                 }
 
@@ -92,21 +104,27 @@ class ImportService
                     $validator->errors()->add('job_title', 'The job title field is required.');
                 }
 
-                if (blank($row['employee_job_id'] ?? null) && $jobName !== '' && ! EmployeeJob::query()->active()->where('name', $jobName)->exists()) {
+                if (
+                    blank($row['employee_job_id'] ?? null)
+                    && $jobName !== ''
+                    && ! EmployeeJob::query()->active()->where('name', $jobName)->exists()
+                    && ! $this->canCreateLegacyJob($jobName, $usesLegacyLayout)
+                ) {
                     $validator->errors()->add('job_title', 'The selected job title does not exist or is inactive.');
                 }
             });
 
             if ($validator->fails()) {
                 $errors[] = ['row' => $index + 2, 'messages' => $validator->errors()->all()];
+
                 continue;
             }
 
             $data = $validator->validated();
             $data['status'] = ($data['status'] ?? null) ?: EmployeeStatus::Active->value;
             $role = $this->employeeRole($data);
-            $department = $this->employeeDepartment($data);
-            $job = $this->employeeJob($data);
+            $department = $this->employeeDepartment($data) ?? $this->createLegacyDepartment($data, $usesLegacyLayout);
+            $job = $this->employeeJob($data) ?? $this->createLegacyJob($data, $usesLegacyLayout);
 
             if ($role) {
                 $data['role_id'] = $role->id;
@@ -129,6 +147,91 @@ class ImportService
         }
 
         return $this->batch(ImportType::Employees, $file, $rows, $success, $errors, $userId);
+    }
+
+    /**
+     * Normalizes the compact employee workbook used by the existing EMPM file.
+     *
+     * @param  array<string, string|null>  $row
+     * @return array<string, string|null|bool>
+     */
+    private function normalizeEmployeeImportRow(array $row): array
+    {
+        $usesLegacyLayout = array_key_exists('name', $row)
+            || array_key_exists('id_no', $row)
+            || array_key_exists('i_d_no', $row);
+
+        if (! $usesLegacyLayout) {
+            return $row;
+        }
+
+        if (blank($row['name_en'] ?? null)) {
+            $row['name_en'] = $row['name'] ?? null;
+        }
+
+        if (blank($row['eid'] ?? null)) {
+            $row['eid'] = $row['id_no'] ?? $row['i_d_no'] ?? null;
+        }
+
+        if (blank($row['department'] ?? null)) {
+            $row['department'] = $row['entity'] ?? null;
+        }
+
+        if (blank($row['role'] ?? null)) {
+            $row['role'] = 'Staff';
+        }
+
+        $row['_legacy_employee_layout'] = true;
+
+        return $row;
+    }
+
+    private function canCreateLegacyDepartment(string $name, bool $usesLegacyLayout): bool
+    {
+        return $usesLegacyLayout
+            && ! EmployeeDepartment::query()->withTrashed()->where('name', $name)->exists();
+    }
+
+    private function canCreateLegacyJob(string $name, bool $usesLegacyLayout): bool
+    {
+        return $usesLegacyLayout
+            && ! EmployeeJob::query()->withTrashed()->where('name', $name)->exists();
+    }
+
+    private function createLegacyDepartment(array $data, bool $usesLegacyLayout): ?EmployeeDepartment
+    {
+        if (! $usesLegacyLayout || filled($data['employee_department_id'] ?? null)) {
+            return null;
+        }
+
+        $name = trim((string) ($data['department'] ?? ''));
+
+        if ($name === '') {
+            return null;
+        }
+
+        return EmployeeDepartment::query()->firstOrCreate(
+            ['name' => $name],
+            ['is_active' => true]
+        );
+    }
+
+    private function createLegacyJob(array $data, bool $usesLegacyLayout): ?EmployeeJob
+    {
+        if (! $usesLegacyLayout || filled($data['employee_job_id'] ?? null)) {
+            return null;
+        }
+
+        $name = trim((string) ($data['job_title'] ?? ''));
+
+        if ($name === '') {
+            return null;
+        }
+
+        return EmployeeJob::query()->firstOrCreate(
+            ['name' => $name],
+            ['is_active' => true]
+        );
     }
 
     public function assets(UploadedFile $file, ?int $userId): ImportBatch
@@ -172,6 +275,7 @@ class ImportService
 
             if ($validator->fails()) {
                 $errors[] = ['row' => $index + 2, 'messages' => $validator->errors()->all()];
+
                 continue;
             }
 
@@ -196,7 +300,7 @@ class ImportService
     }
 
     /**
-     * @param array<int, array<string, string|null>> $rows
+     * @param  array<int, array<string, string|null>>  $rows
      */
     private function filledValueCounts(array $rows, string $key)
     {
@@ -267,8 +371,8 @@ class ImportService
     }
 
     /**
-     * @param array<int, array<string, string|null>> $rows
-     * @param array<int, array<string, mixed>> $errors
+     * @param  array<int, array<string, string|null>>  $rows
+     * @param  array<int, array<string, mixed>>  $errors
      */
     private function batch(ImportType $type, UploadedFile $file, array $rows, int $success, array $errors, ?int $userId): ImportBatch
     {

@@ -19,7 +19,7 @@
                     @endforeach
                 </div>
             @endif
-            <div class="import-help"><span>Required: name_en, email, nationality, entity, role, department, and job title. Use IDs or exact active names for role, department, and job title. Employee codes are generated automatically.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'employees') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
+            <div class="import-help"><span>Standard imports require name_en, nationality, entity, role, department, and job title; email is optional. You can use IDs or exact active names for role, department, and job title. Legacy EMPM sheets with Name, ID No, Entity, and Job Title are also supported: Entity becomes the department, Staff is assigned as the role, and new departments and job titles are added as active master records. Employee codes are generated automatically.</span><a class="btn btn-outline btn-sm" href="{{ route('imports.template', 'employees') }}"><x-dashboard.icon name="download" /> Download Template</a></div>
             <div class="form-actions"><button class="btn btn-primary" type="submit">Import Employees</button></div>
         </form>
     </section>
