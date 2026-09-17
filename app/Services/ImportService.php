@@ -12,10 +12,12 @@ use App\Models\EmployeeDepartment;
 use App\Models\EmployeeJob;
 use App\Models\ImportBatch;
 use App\Models\Role;
+use App\Models\User;
 use App\Support\AdmsSpreadsheet;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class ImportService
 {
@@ -50,7 +52,14 @@ class ImportService
                 'eid' => ['nullable', 'string', 'max:40', Rule::unique('employees', 'eid')],
                 'nationality' => ['required', 'string', 'max:120'],
                 'entity' => ['required', 'string', 'max:120'],
-                'email' => ['nullable', 'email', 'max:255', Rule::unique('employees', 'email')],
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                    Rule::unique('employees', 'email'),
+                    Rule::unique('users', 'email'),
+                ],
+                'password' => ['required', 'string', Password::defaults()],
                 'employee_department_id' => ['nullable', 'integer', Rule::exists('employee_departments', 'id')->where('is_active', true)->whereNull('deleted_at')],
                 'department' => ['nullable', 'string', 'max:120'],
                 'employee_job_id' => ['nullable', 'integer', Rule::exists('employee_jobs', 'id')->where('is_active', true)->whereNull('deleted_at')],
@@ -122,6 +131,7 @@ class ImportService
 
             $data = $validator->validated();
             $data['status'] = ($data['status'] ?? null) ?: EmployeeStatus::Active->value;
+            $password = $data['password'];
             $role = $this->employeeRole($data);
             $department = $this->employeeDepartment($data) ?? $this->createLegacyDepartment($data, $usesLegacyLayout);
             $job = $this->employeeJob($data) ?? $this->createLegacyJob($data, $usesLegacyLayout);
@@ -140,9 +150,15 @@ class ImportService
                 $data['designation'] = $job->name;
             }
 
-            unset($data['role'], $data['job_title']);
+            unset($data['role'], $data['job_title'], $data['password']);
 
-            Employee::query()->create($data);
+            $employee = Employee::query()->create($data);
+            User::query()->create([
+                'name' => $employee->name_en,
+                'email' => $employee->email,
+                'password' => $password,
+                'role_id' => $role?->id,
+            ]);
             $success++;
         }
 

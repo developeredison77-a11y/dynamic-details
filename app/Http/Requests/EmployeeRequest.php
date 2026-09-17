@@ -3,8 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Enums\EmployeeStatus;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class EmployeeRequest extends FormRequest
 {
@@ -15,6 +17,11 @@ class EmployeeRequest extends FormRequest
 
     public function rules(): array
     {
+        $employee = $this->route('employee');
+        $existingUserId = $employee?->email
+            ? User::query()->where('email', $employee->email)->value('id')
+            : null;
+
         return [
             'name_en' => ['required', 'string', 'max:255'],
             'name_ar' => ['nullable', 'string', 'max:255'],
@@ -24,7 +31,14 @@ class EmployeeRequest extends FormRequest
             'employee_department_id' => ['required', 'integer', Rule::exists('employee_departments', 'id')->where('is_active', true)->whereNull('deleted_at')],
             'employee_job_id' => ['required', 'integer', Rule::exists('employee_jobs', 'id')->where('is_active', true)->whereNull('deleted_at')],
             'role_id' => ['required', 'integer', Rule::exists('roles', 'id')->where('is_active', true)],
-            'email' => ['nullable', 'email', 'max:255', Rule::unique('employees', 'email')->ignore($this->route('employee')?->id)],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('employees', 'email')->ignore($employee?->id),
+                Rule::unique('users', 'email')->ignore($existingUserId),
+            ],
+            'password' => [$this->route('employee') ? 'nullable' : 'required', 'string', 'confirmed', Password::defaults()],
             'phone' => ['nullable', 'string', 'max:40'],
             'status' => ['required', Rule::enum(EmployeeStatus::class)],
             'joined_at' => ['nullable', 'date'],

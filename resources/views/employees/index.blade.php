@@ -69,6 +69,9 @@
                                         <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-view" href="{{ route('employees.handover-report', $employee) }}" target="_blank" aria-label="View handover report for {{ $employee->name_en }}" data-tooltip="Handover Report">
                                             <x-dashboard.icon name="clipboard-list" />
                                         </a>
+                                        <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-neutral" href="{{ route('employees.return-report', $employee) }}" target="_blank" aria-label="View return form for {{ $employee->name_en }}" data-tooltip="Return Form">
+                                            <x-dashboard.icon name="rotate-ccw" />
+                                        </a>
                                         <a class="btn btn-sm btn-outline table-action-btn action-icon-btn action-icon-neutral" href="{{ route('employees.declaration-form.print', $employee) }}" target="_blank" aria-label="Download declaration form for {{ $employee->name_en }}" data-tooltip="Download Declaration Form">
                                             <x-dashboard.icon name="file-text" />
                                         </a>

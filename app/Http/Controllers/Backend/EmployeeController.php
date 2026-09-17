@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\EmployeeDepartment;
 use App\Models\EmployeeJob;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -68,6 +69,8 @@ class EmployeeController extends Controller
     public function store(EmployeeRequest $request): RedirectResponse
     {
         $data = $this->employeeData($request);
+        $password = $data['password'];
+        unset($data['password']);
         $employee = new Employee($data);
         $draftCode = session()->pull('draft_employee_code');
         $employee->employee_code = filled($draftCode)
@@ -76,6 +79,7 @@ class EmployeeController extends Controller
             ? $draftCode
             : Employee::generateEmployeeCode();
         $employee->save();
+        $this->syncEmployeeUser($employee, $password);
 
         return redirect()
             ->route('employees.index')
@@ -120,12 +124,16 @@ class EmployeeController extends Controller
     public function update(EmployeeRequest $request, Employee $employee): RedirectResponse
     {
         $data = $this->employeeData($request);
+        $password = $data['password'] ?? null;
+        $originalEmail = $employee->email;
+        unset($data['password']);
 
         if ($employee->status?->value !== $data['status']) {
             $data['status_changed_at'] = now()->toDateString();
         }
 
         $employee->update($data);
+        $this->syncEmployeeUser($employee, $password, $originalEmail);
 
         return redirect()->route('employees.index')->with('success', 'Employee updated successfully.');
     }
@@ -149,6 +157,34 @@ class EmployeeController extends Controller
         $data['department'] = $department?->name;
         $data['designation'] = $job?->name;
 
+        if (blank($data['password'] ?? null)) {
+            unset($data['password']);
+        }
+
         return $data;
+    }
+
+    private function syncEmployeeUser(Employee $employee, ?string $password, ?string $originalEmail = null): void
+    {
+        $user = User::query()
+            ->when($originalEmail, fn ($query) => $query->where('email', $originalEmail))
+            ->first()
+            ?? User::query()->where('email', $employee->email)->first();
+        $password ??= $employee->password;
+
+        if (! $user && blank($password)) {
+            return;
+        }
+
+        $user ??= new User();
+        $user->name = $employee->name_en;
+        $user->email = $employee->email;
+        $user->role_id = $employee->role_id;
+
+        if (filled($password)) {
+            $user->password = $password;
+        }
+
+        $user->save();
     }
 }

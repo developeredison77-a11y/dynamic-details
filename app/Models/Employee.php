@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EmployeeStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,12 +25,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'employee_job_id',
     'role_id',
     'email',
+    'password',
     'phone',
     'status',
     'joined_at',
     'status_changed_at',
     'notes',
 ])]
+#[Hidden(['password'])]
 class Employee extends Model
 {
     use SoftDeletes;
@@ -60,6 +63,7 @@ class Employee extends Model
             'status' => EmployeeStatus::class,
             'joined_at' => 'date',
             'status_changed_at' => 'date',
+            'password' => 'hashed',
         ];
     }
 

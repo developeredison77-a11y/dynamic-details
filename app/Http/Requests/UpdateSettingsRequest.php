@@ -19,8 +19,8 @@ class UpdateSettingsRequest extends FormRequest
         return [
             'site_name' => ['required', 'string', 'max:120'],
             'theme_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'site_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],
-            'site_favicon' => ['nullable', 'file', 'mimes:ico,png,svg,webp', 'max:512'],
+            'site_logo' => ['nullable', 'file', 'mimetypes:image/*', 'max:2048'],
+            'site_favicon' => ['nullable', 'file', 'mimetypes:image/*', 'max:512'],
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Enums\AssetAssignmentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeDeclarationDocumentRequest;
 use App\Models\AssetAssignment;
@@ -27,6 +28,16 @@ class EmployeeDocumentController extends Controller
     public function handoverReportPrint(Employee $employee): View
     {
         return view('employees.handover-report', $this->handoverReportData($employee, true, false));
+    }
+
+    public function returnReport(Employee $employee): View
+    {
+        return view('employees.handover-report', $this->handoverReportData($employee, false, true, true));
+    }
+
+    public function returnReportPrint(Employee $employee): View
+    {
+        return view('employees.handover-report', $this->handoverReportData($employee, true, false, true));
     }
 
     public function declarationForm(Employee $employee): View
@@ -102,13 +113,15 @@ class EmployeeDocumentController extends Controller
         ]);
     }
 
-    private function handoverReportData(Employee $employee, bool $autoPrint, bool $showToolbar): array
+    private function handoverReportData(Employee $employee, bool $autoPrint, bool $showToolbar, bool $returnReport = false): array
     {
         $employee->loadMissing('role:id,name');
 
         return [
             'employee' => $employee,
-            'assignments' => $employee->assignments()
+            'assignments' => ($returnReport
+                ? $employee->assignments()->where('status', AssetAssignmentStatus::Returned)
+                : $employee->assignments())
                 ->with([
                     'asset:id,asset_brand_id,asset_category_id,asset_tag,name,serial_number,model,status,condition',
                     'asset.brand:id,name',
@@ -121,6 +134,7 @@ class EmployeeDocumentController extends Controller
                 ->get(),
             'autoPrint' => $autoPrint,
             'showToolbar' => $showToolbar,
+            'returnReport' => $returnReport,
         ];
     }
 

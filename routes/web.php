@@ -45,6 +45,8 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/employees', [EmployeeController::class, 'store'])->middleware('permission:employees.create')->name('employees.store');
     Route::get('/employees/{employee}/handover-report', [EmployeeDocumentController::class, 'handoverReport'])->middleware('permission:employees.view')->name('employees.handover-report');
     Route::get('/employees/{employee}/handover-report/print', [EmployeeDocumentController::class, 'handoverReportPrint'])->middleware('permission:employees.view')->name('employees.handover-report.print');
+    Route::get('/employees/{employee}/return-report', [EmployeeDocumentController::class, 'returnReport'])->middleware('permission:employees.view')->name('employees.return-report');
+    Route::get('/employees/{employee}/return-report/print', [EmployeeDocumentController::class, 'returnReportPrint'])->middleware('permission:employees.view')->name('employees.return-report.print');
     Route::get('/employees/{employee}/declaration-form', [EmployeeDocumentController::class, 'declarationForm'])->middleware('permission:employees.view')->name('employees.declaration-form');
     Route::get('/employees/{employee}/declaration-form/print', [EmployeeDocumentController::class, 'declarationFormPrint'])->middleware('permission:employees.view')->name('employees.declaration-form.print');
     Route::post('/employees/{employee}/declaration-document', [EmployeeDocumentController::class, 'uploadDeclarationDocument'])->middleware('permission:employees.update')->name('employees.declaration-document.upload');

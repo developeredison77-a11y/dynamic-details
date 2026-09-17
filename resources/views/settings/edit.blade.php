@@ -32,13 +32,13 @@
 
                 <label class="form-field file-field">
                     <span>Site Logo</span>
-                    <input type="file" name="site_logo" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                    <input type="file" name="site_logo" accept="image/*">
                     @error('site_logo') <small>{{ $message }}</small> @enderror
                 </label>
 
                 <label class="form-field file-field">
                     <span>Site Favicon</span>
-                    <input type="file" name="site_favicon" accept=".ico,image/png,image/webp,image/svg+xml">
+                    <input type="file" name="site_favicon" accept="image/*">
                     @error('site_favicon') <small>{{ $message }}</small> @enderror
                 </label>
             </div>

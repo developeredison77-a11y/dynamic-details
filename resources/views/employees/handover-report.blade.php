@@ -1,6 +1,11 @@
 @php
     $autoPrint = $autoPrint ?? false;
     $showToolbar = $showToolbar ?? false;
+    $returnReport = $returnReport ?? false;
+    $reportName = $returnReport ? 'Employee Return Form' : 'Employee Handover Report';
+    $reportHeading = $returnReport ? 'EMPLOYEE ASSET RETURN REPORT' : 'EMPLOYEE ASSET HANDOVER REPORT';
+    $equipmentHeading = $returnReport ? 'Returned Equipments' : 'Equipments';
+    $additionalHeading = $returnReport ? 'Additional Info Returned' : 'Additional Info Handed Over';
     $companyName = $appSettings['site_name'] ?? config('app.name', 'AL Saud Investment');
     $dateFormat = 'd/m/Y';
     $generatedAt = now(config('app.timezone', 'Asia/Kolkata'));
@@ -33,7 +38,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Employee Handover Report - {{ $employee->name_en }}</title>
+    <title>{{ $reportName }} - {{ $employee->name_en }}</title>
     <style>
         :root {
             color-scheme: light;
@@ -301,12 +306,12 @@
     @if ($showToolbar)
         <div class="document-toolbar no-print">
             <div class="document-toolbar-title">
-                <strong>Employee Handover Report</strong>
+                <strong>{{ $reportName }}</strong>
                 <span>{{ $employee->name_en }} / {{ $employee->employee_code }}</span>
             </div>
             <div class="document-toolbar-actions">
                 <a class="document-btn" href="{{ route('employees.index') }}">Back</a>
-                <a class="document-btn" href="{{ route('employees.handover-report.print', $employee) }}" target="_blank">Print View</a>
+                <a class="document-btn" href="{{ $returnReport ? route('employees.return-report.print', $employee) : route('employees.handover-report.print', $employee) }}" target="_blank">Print View</a>
                 <button class="document-btn document-btn-primary" type="button" onclick="window.print()">Print</button>
             </div>
         </div>
@@ -314,7 +319,7 @@
 
     <div class="document-shell">
         <main class="asset-sheet">
-            <section class="asset-handover-form" aria-label="Employee asset handover report">
+            <section class="asset-handover-form" aria-label="{{ strtolower($reportName) }}">
                 <table>
                     <colgroup>
                         <col style="width: 30pt">
@@ -328,7 +333,7 @@
                     </colgroup>
                     <tbody>
                         <tr>
-                            <th class="title-cell" colspan="5">EMPLOYEE ASSET HANDOVER REPORT</th>
+                            <th class="title-cell" colspan="5">{{ $reportHeading }}</th>
                             <td class="logo-cell" colspan="3" rowspan="6">
                                 <img src="{{ asset('images/asset-handover-logo.png') }}" alt="Company logo">
                             </td>
@@ -357,7 +362,7 @@
                             <td class="top-spacer" colspan="8"></td>
                         </tr>
                         <tr>
-                            <th class="section-bar" colspan="8">Equipments</th>
+                            <th class="section-bar" colspan="8">{{ $equipmentHeading }}</th>
                         </tr>
                         <tr class="equipment-head">
                             <th>Sl No</th>
@@ -390,15 +395,19 @@
                             <td class="credentials-space credentials-detail" colspan="7"></td>
                         </tr>
                         <tr>
-                            <th class="section-bar-large additional-bar" colspan="8">Additional Info Handed Over</th>
+                            <th class="section-bar-large additional-bar" colspan="8">{{ $additionalHeading }}</th>
                         </tr>
                         <tr class="additional-row">
                             <td></td>
                             <td colspan="7">
                                 @if ($assignments->isEmpty())
-                                    No asset handovers or assignments are recorded for this employee.
+                                    No {{ $returnReport ? 'returned assets' : 'asset handovers or assignments' }} are recorded for this employee.
                                 @else
-                                    This report includes only handover records linked to {{ $employee->name_en }}. Active assignments: {{ $activeCount }}. Returned assignments: {{ $returnedCount }}.
+                                    @if ($returnReport)
+                                        This form includes the returned asset assignments linked to {{ $employee->name_en }}. Returned assets: {{ $returnedCount }}.
+                                    @else
+                                        This report includes only handover records linked to {{ $employee->name_en }}. Active assignments: {{ $activeCount }}. Returned assignments: {{ $returnedCount }}.
+                                    @endif
                                 @endif
                             </td>
                         </tr>

@@ -102,6 +102,7 @@ class ImportController extends Controller
                 'nationality',
                 'entity',
                 'email',
+                'password',
                 'employee_department_id',
                 'department',
                 'employee_job_id',
